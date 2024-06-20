@@ -1,65 +1,83 @@
 from argparse import ArgumentParser
-from utils import load_from_pickle,make_subgraph,calculate_cover
+from utils import *
 import pandas as pd
 from collections import defaultdict
 
-from greedy import greedy
+from greedy import greedy,gain_adjustment,get_gains
 
 
 
-def quickfilter(dataset,budget,delta=0.1):
-    graph=load_from_pickle(f'../../data/test/{dataset}')
+def quickfilter(dataset,budgets,delta=0.1):
+    load_graph_file_path=f'../../data/test/{dataset}'
+    graph=load_from_pickle(load_graph_file_path)
 
     # pruning stage
 
-    gains={node:graph.degree(node) for node in graph.nodes()}
+    # gains={node:graph.degree(node) for node in graph.nodes()}
+    df=defaultdict(list)
+    for budget in budgets:
+        gains=get_gains(graph,ground_set=None)
 
-    curr_obj=0
+        curr_obj=0
 
-    pruned_universe=[]
-    uncovered=defaultdict(lambda: True)
-    for node in graph.nodes():
+        pruned_universe=[]
+        uncovered=defaultdict(lambda: True)
+        for node in graph.nodes():
 
-        if gains[node]>=delta/budget*curr_obj:
-            curr_obj+=gains[node]
-            pruned_universe.append(node)
+            if gains[node]>=delta/budget*curr_obj:
+                curr_obj+=gains[node]
+                pruned_universe.append(node)
 
-            # gains adjustment
-            if uncovered[node]:
-                gains[node]-=1
-                uncovered[node]=False
-                for neighbour in graph.neighbors(node):
-                    if gains[neighbour]>0:
-                        gains[neighbour]-=1
+                # gains adjustment
+                gain_adjustment(graph,gains,node,uncovered)
+                
 
-            for neighbour in graph.neighbors(node):
-                if uncovered[neighbour]:
-                    uncovered[neighbour]=False
-                    
-                    if  neighbour in gains:
-                        gains[neighbour]-=1
-                    
-                    for neighbour_of_neighbour in graph.neighbors(neighbour):
+        # print(len(pruned_universe))
+        ground_set_ratio=len(pruned_universe)/graph.number_of_nodes()
+        print('Ratio of Ground Set:',ground_set_ratio)
+        
+        # Subgraph 
+        subgraph =make_subgraph(graph,pruned_universe)
 
-                        gains[neighbour_of_neighbour]-=1
+        Pv=1-subgraph.number_of_nodes()/graph.number_of_nodes()
+        Pe=1-subgraph.number_of_edges()/graph.number_of_edges()
+        print('Pv:',Pv)
+        print('Pe:',Pe)
+        # print('Pv:',1-subgraph.number_of_nodes()/graph.number_of_nodes())
+        # print('Pe:',1-subgraph.number_of_edges()/graph.number_of_edges())
 
-    print(len(pruned_universe))
-    print('Ratio of Ground Set:',len(pruned_universe)/graph.number_of_nodes())
-    
-    # Subgraph
-    subgraph =make_subgraph(graph,pruned_universe)
-    print('Pv:',1-subgraph.number_of_nodes()/graph.number_of_nodes())
-    print('Pe:',1-subgraph.number_of_edges()/graph.number_of_edges())
+        # solution_subgraph = greedy(subgraph,budget)
+        solution_subgraph = greedy(subgraph,budget,pruned_universe)
 
-    solution_subgraph = greedy(subgraph,budget)
+        coverage= calculate_cover(graph,solution_subgraph)
 
-    coverage= calculate_cover(graph,solution_subgraph)
+        # print('if whole subgraph is the ground set,Coverage:',coverage/graph.number_of_nodes())
 
-    print('Coverage:',coverage/graph.number_of_nodes())
+        # solution_subgraph = greedy(subgraph,budget,pruned_universe)
 
+        # coverage= calculate_cover(graph,solution_subgraph)
 
+        df['Dataset'].append(args.dataset)
+        df['Pruned Ground Set (Ratio)'].append(len(pruned_universe)/graph.number_of_nodes())
+        df['Pv'].append(Pv)
+        df['Pe'].append(Pe)
+        df['Budget'].append(budget)
+        df['Dataset Path'].append(load_graph_file_path)
+        
+        
+        df['Solution'].append(solution_subgraph)
+        df['Objective Value'].append(coverage)
+        df['Objective Value (Ratio)'].append(coverage/graph.number_of_nodes())
+        # print('if pruned universeis the ground set,Coverage:',coverage/graph.number_of_nodes())
 
+    df=pd.DataFrame(df)
 
+    print(df)
+
+    save_folder='data/quickfilter'
+    file_path=os.path.join(save_folder,args.dataset)
+    os.makedirs(save_folder,exist_ok=True)
+    save_to_pickle(df,file_path) 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
@@ -71,10 +89,10 @@ if __name__ == "__main__":
         help="Name of the dataset to be used (default: 'Facebook')"
     )
     parser.add_argument(
-        "--budget",
+        "--budgets",
+        nargs='+',
         type=int,
-        default=20,
-        help="Budget"
+        help="Budgets"
     )
     parser.add_argument(
         "--delta",
@@ -86,4 +104,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    quickfilter(dataset=args.dataset,budget=args.budget)
+
+    # for budget in args.budgets:
+
+    quickfilter(dataset=args.dataset,budgets=args.budgets)

@@ -1,20 +1,109 @@
 from argparse import ArgumentParser
-from utils import load_from_pickle,calculate_cover
+from utils import *
 import pandas as pd
 from collections import defaultdict
+import numpy as np
+import os
 
-
-
-
-def greedy(graph,budget):
-
+#TO
+def select_variable(gains):
+    sum_gain = sum(gains.values())
+    if sum_gain==0:
+        return None
+    else:
+        prob_dist=[gains[key]/sum_gain for key in gains]
+        element=np.random.choice([key for key in gains], p=prob_dist)
+        return element
     
 
-    gains={node:graph.degree(node) for node in graph.nodes()}
+def get_gains(graph,ground_set):
+    if ground_set is None:
+
+        gains={node:graph.degree(node)+1 for node in graph.nodes()}
+    else:
+        gains={node:graph.degree(node)+1 for node in ground_set}
+
+    return gains
+
+    
+def gain_adjustment(graph,gains,selected_element,uncovered):
+
+    # print('Gains:',gains[selected_element])
+
+    # uncovered[selected_element]=False
+    # for neighbor in graph.neighbors(selected_element):
+    #     uncovered[neighbor]=False
+
+    # for node in gains:
+    #     gains[node]= 1 if uncovered[node] else 0
+    #     for neighbor in graph.neighbors(node):
+    #         if uncovered[neighbor]:
+    #             gains[node]+=1
+            
+
+    if uncovered[selected_element]:
+        gains[selected_element]-=1
+        uncovered[selected_element]=False
+        for neighbor in graph.neighbors(selected_element):
+            if neighbor in gains and gains[neighbor]>0:
+                gains[neighbor]-=1
+
+    for neighbor in graph.neighbors(selected_element):
+        if uncovered[neighbor]:
+            uncovered[neighbor]=False
+            
+            if neighbor in gains:
+                gains[neighbor]-=1
+            for neighbor_of_neighbor in graph.neighbors(neighbor):
+                if neighbor_of_neighbor  in gains:
+                    gains[neighbor_of_neighbor ]-=1
+
+    # print(selected_element in graph.neighbors(selected_element))
+    # print(gains[selected_element])
+    assert gains[selected_element]==0
+
+
+def prob_greedy(graph,budget,ground_set=None,delta=0):
+
+
+    gains=get_gains(graph,ground_set)
 
     solution=[]
     uncovered=defaultdict(lambda: True)
-    covered=0
+
+
+    for _ in range(budget):
+
+        selected_element=select_variable(gains)
+
+        if selected_element is None or gains[selected_element]<delta:
+            break
+
+        # print(gains[selected_element])
+
+        solution.append(selected_element)
+        gain_adjustment(graph,gains,selected_element,uncovered)
+
+        # gains adjustment
+
+        
+
+    # print('Solution:',solution)
+    # print('Degree:',[ graph.degree(node) for node in solution])
+    # print('Coverage:',covered/graph.number_of_nodes())
+
+    return solution
+
+
+
+def greedy(graph,budget,ground_set=None):
+
+
+    gains=get_gains(graph,ground_set)
+
+
+    solution=[]
+    uncovered=defaultdict(lambda: True)
 
     for _ in range(budget):
 
@@ -27,32 +116,8 @@ def greedy(graph,budget):
         # print(gains[selected_element])
 
         solution.append(selected_element)
-
-        # gains adjustment
-
-        if uncovered[selected_element]:
-            covered+=1
-            gains[selected_element]-=1
-            uncovered[selected_element]=False
-            for neighbour in graph.neighbors(selected_element):
-                if gains[neighbour]>0:
-                    gains[neighbour]-=1
-
-        for neighbour in graph.neighbors(selected_element):
-            if uncovered[neighbour]:
-                uncovered[neighbour]=False
-                
-                if  neighbour in gains:
-                    gains[neighbour]-=1
-                
-                covered+=1
-                for neighbour_of_neighbour in graph.neighbors(neighbour):
-
-                    gains[neighbour_of_neighbour]-=1
-
-    # print('Solution:',solution)
+        gain_adjustment(graph,gains,selected_element,uncovered)
     # print('Degree:',[ graph.degree(node) for node in solution])
-    # print('Coverage:',covered/graph.number_of_nodes())
 
     return solution
 
@@ -68,20 +133,58 @@ if __name__ == "__main__":
         default='Facebook',
         help="Name of the dataset to be used (default: 'Facebook')"
     )
+
     parser.add_argument(
-        "--budget",
+        "--budgets",
+        nargs='+',
         type=int,
-        default=20,
-        help="Budget"
+        help="Budgets"
     )
+    # parser.add_argument(
+    #     "--budget",
+    #     type=int,
+    #     default=20,
+    #     help="Budget"
+    # )
+
+    
+
+    
 
     args = parser.parse_args()
 
-    graph=load_from_pickle(f'../../data/test/{args.dataset}')
+    file_path=f'../../data/test/{args.dataset}'
+    
+    graph=load_from_pickle(file_path)
 
-    solution=greedy(graph=graph,budget=args.budget)
+    
+    df=defaultdict(list)
 
-    print('Greedy Coverage:',calculate_cover(graph,solution)/graph.number_of_nodes())
+    for budget in args.budgets:
+
+        solution=greedy(graph=graph,budget=budget)
+
+        cover=calculate_cover(graph,solution)
+
+        df['Dataset'].append(args.dataset)
+        df['Dataset Path'].append(file_path)
+        df['Budget'].append(budget)
+        df['Solution'].append(solution)
+        df['Objective Value'].append(cover)
+        df['Objective Value (Ratio)'].append(cover/graph.number_of_nodes())
+
+    df=pd.DataFrame(df)
+
+    print(df)
+
+    save_folder='data/greedy'
+    file_path=os.path.join(save_folder,args.dataset)
+    os.makedirs(save_folder,exist_ok=True)
+    save_to_pickle(df,file_path)
+
+
+
+    # print('Greedy Coverage:',calculate_cover(graph,solution)/graph.number_of_nodes())
 
 
 
