@@ -1,13 +1,13 @@
 from argparse import ArgumentParser
-from utils import load_from_pickle,calculate_cover,save_to_pickle
+from utils import load_from_pickle,calculate_cut,save_to_pickle
 import pandas as pd
 from collections import defaultdict
-from greedy import greedy
+from greedy import prob_greedy
 import numpy as np
 import os 
 
 
-def train(dataset,budgets):
+def train(dataset,budgets,m):
 
     load_graph_file_path=f'../../data/train/{args.dataset}'
 
@@ -17,22 +17,17 @@ def train(dataset,budgets):
 
     outdegrees=[(node,graph.degree(node)) for node in graph.nodes()]
     outdegrees=sorted(outdegrees,key=lambda x:x[1],reverse=True)
-
-    print('Ask professor about the rank')
     ranks={}
     for i,(node,_) in enumerate(outdegrees):
         ranks[node] = i+1
+    r=[0]*len(budgets)
+    for _ in range(m):
 
-    greedy_solution=greedy(graph,max_budget)
-
-    r_temp=[ranks[node] for node in greedy_solution]
-    
-
-    r=[None]*len(budgets)
-
-    for i,budget in enumerate(budgets):
-        
-        r[i]=max(r_temp[:budget])
+        greedy_solution=prob_greedy(graph,max_budget)
+        r_temp=[ranks[node] for node in greedy_solution]
+        for i,budget in enumerate(budgets):
+            
+            r[i]=max(r[i],max(r_temp[:budget]))
 
     budgets=np.array(budgets)/graph.number_of_nodes()
     r=np.array(r)/graph.number_of_nodes()
@@ -40,7 +35,7 @@ def train(dataset,budgets):
     print('Budgets:',budgets)
     print('Ranks:',r)
 
-    save_folder='pretrained agents/degree'
+    save_folder='pretrained agents/GCOMB'
     os.makedirs(save_folder,exist_ok=True)
 
     df={
@@ -72,11 +67,26 @@ if __name__ == "__main__":
         type=int,
         help="Budgets"
     )
+
+    parser.add_argument(
+        "--delta",
+        type=float,
+        default=0.1,
+        help="Delta"
+    )
+
+    parser.add_argument(
+        "--m",
+        type=int,
+        default=30,
+        help='--number_of_attempts'
+
+    )
     
 
 
     args = parser.parse_args()
-    train(args.dataset,args.budgets)
+    train(args.dataset,args.budgets,args.m)
 
    
 

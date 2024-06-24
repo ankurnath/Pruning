@@ -58,8 +58,7 @@ def gain_adjustment(graph,gains,selected_element,uncovered):
                 if neighbor_of_neighbor  in gains:
                     gains[neighbor_of_neighbor ]-=1
 
-    # print(selected_element in graph.neighbors(selected_element))
-    # print(gains[selected_element])
+
     assert gains[selected_element]==0
 
 
@@ -78,20 +77,8 @@ def prob_greedy(graph,budget,ground_set=None,delta=0):
 
         if selected_element is None or gains[selected_element]<delta:
             break
-
-        # print(gains[selected_element])
-
         solution.append(selected_element)
         gain_adjustment(graph,gains,selected_element,uncovered)
-
-        # gains adjustment
-
-        
-
-    # print('Solution:',solution)
-    # print('Degree:',[ graph.degree(node) for node in solution])
-    # print('Coverage:',covered/graph.number_of_nodes())
-
     return solution
 
 
@@ -112,12 +99,9 @@ def greedy(graph,budget,ground_set=None):
         if gains[selected_element]==0:
             print('All elements are already covered')
             break
-
-        # print(gains[selected_element])
-
         solution.append(selected_element)
         gain_adjustment(graph,gains,selected_element,uncovered)
-    # print('Degree:',[ graph.degree(node) for node in solution])
+
 
     return solution
 
@@ -140,17 +124,7 @@ if __name__ == "__main__":
         type=int,
         help="Budgets"
     )
-    # parser.add_argument(
-    #     "--budget",
-    #     type=int,
-    #     default=20,
-    #     help="Budget"
-    # )
-
-    
-
-    
-
+  
     args = parser.parse_args()
 
     file_path=f'../../data/test/{args.dataset}'
@@ -166,25 +140,18 @@ if __name__ == "__main__":
 
         cover=calculate_cover(graph,solution)
 
-        df['Dataset'].append(args.dataset)
-        df['Dataset Path'].append(file_path)
         df['Budget'].append(budget)
-        df['Solution'].append(solution)
         df['Objective Value'].append(cover)
         df['Objective Value (Ratio)'].append(cover/graph.number_of_nodes())
-
+        df['Solution'].append(solution)
+        
+        
     df=pd.DataFrame(df)
-
     print(df)
-
-    save_folder='data/greedy'
-    file_path=os.path.join(save_folder,args.dataset)
+    save_folder=f'data/{args.dataset}'
+    file_path=os.path.join(save_folder,'Greedy')
     os.makedirs(save_folder,exist_ok=True)
     save_to_pickle(df,file_path)
-
-
-
-    # print('Greedy Coverage:',calculate_cover(graph,solution)/graph.number_of_nodes())
 
 
 

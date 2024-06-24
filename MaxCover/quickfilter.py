@@ -32,50 +32,44 @@ def quickfilter(dataset,budgets,delta=0.1):
                 gain_adjustment(graph,gains,node,uncovered)
                 
 
-        # print(len(pruned_universe))
-        ground_set_ratio=len(pruned_universe)/graph.number_of_nodes()
-        print('Ratio of Ground Set:',ground_set_ratio)
+        
+        Pg=1-len(pruned_universe)/graph.number_of_nodes()
+        
         
         # Subgraph 
         subgraph =make_subgraph(graph,pruned_universe)
 
+        
         Pv=1-subgraph.number_of_nodes()/graph.number_of_nodes()
         Pe=1-subgraph.number_of_edges()/graph.number_of_edges()
-        print('Pv:',Pv)
-        print('Pe:',Pe)
-        # print('Pv:',1-subgraph.number_of_nodes()/graph.number_of_nodes())
-        # print('Pe:',1-subgraph.number_of_edges()/graph.number_of_edges())
-
-        # solution_subgraph = greedy(subgraph,budget)
+        
         solution_subgraph = greedy(subgraph,budget,pruned_universe)
 
         coverage= calculate_cover(graph,solution_subgraph)
 
-        # print('if whole subgraph is the ground set,Coverage:',coverage/graph.number_of_nodes())
-
-        # solution_subgraph = greedy(subgraph,budget,pruned_universe)
-
-        # coverage= calculate_cover(graph,solution_subgraph)
-
-        df['Dataset'].append(args.dataset)
-        df['Pruned Ground Set (Ratio)'].append(len(pruned_universe)/graph.number_of_nodes())
+        df['Budget'].append(budget)
         df['Pv'].append(Pv)
         df['Pe'].append(Pe)
-        df['Budget'].append(budget)
-        df['Dataset Path'].append(load_graph_file_path)
-        
-        
-        df['Solution'].append(solution_subgraph)
+        df['Pg'].append(Pg)
         df['Objective Value'].append(coverage)
+        df['Solution'].append(solution_subgraph)
         df['Objective Value (Ratio)'].append(coverage/graph.number_of_nodes())
-        # print('if pruned universeis the ground set,Coverage:',coverage/graph.number_of_nodes())
+        
+
+    df['delta']=[delta]*len(df['Budget'])
 
     df=pd.DataFrame(df)
 
+    
+    try:
+        df['Ratio']=df['Objective Value']/load_from_pickle(f'data/{args.dataset}/Greedy')['Objective Value']
+    except:
+        raise ValueError('Greedy value is not found.')
     print(df)
 
-    save_folder='data/quickfilter'
-    file_path=os.path.join(save_folder,args.dataset)
+
+    save_folder=f'data/{args.dataset}'
+    file_path=os.path.join(save_folder,'QuickFilter')
     os.makedirs(save_folder,exist_ok=True)
     save_to_pickle(df,file_path) 
 

@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from utils import load_from_pickle,calculate_cover,save_to_pickle
+from utils import load_from_pickle,calculate_cut,save_to_pickle
 import pandas as pd
 from collections import defaultdict
 from greedy import greedy
@@ -17,8 +17,6 @@ def train(dataset,budgets):
 
     outdegrees=[(node,graph.degree(node)) for node in graph.nodes()]
     outdegrees=sorted(outdegrees,key=lambda x:x[1],reverse=True)
-
-    print('Ask professor about the rank')
     ranks={}
     for i,(node,_) in enumerate(outdegrees):
         ranks[node] = i+1
