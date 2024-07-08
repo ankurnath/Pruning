@@ -138,9 +138,15 @@ if __name__ == "__main__":
 
         solution=greedy(graph=graph,budget=budget)
 
+        subgraph =make_subgraph(graph,solution)
+        Pv=1-subgraph.number_of_nodes()/graph.number_of_nodes()
+        Pe=1-subgraph.number_of_edges()/graph.number_of_edges()
+
         cover=calculate_cover(graph,solution)
 
         df['Budget'].append(budget)
+        df['Pv'].append(Pv)
+        df['Pe'].append(Pe)
         df['Objective Value'].append(cover)
         df['Objective Value (Ratio)'].append(cover/graph.number_of_nodes())
         df['Solution'].append(solution)

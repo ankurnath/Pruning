@@ -18,8 +18,10 @@ def train(dataset,budgets):
     outdegrees=[(node,graph.degree(node)) for node in graph.nodes()]
     outdegrees=sorted(outdegrees,key=lambda x:x[1],reverse=True)
 
-    print('Ask professor about the rank')
-    ranks={}
+    # print('Ask professor about the rank')
+    ranks={outdegrees[0]:1}
+
+    
     for i,(node,_) in enumerate(outdegrees):
         ranks[node] = i+1
 

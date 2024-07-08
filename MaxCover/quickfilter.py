@@ -75,25 +75,28 @@ def quickfilter(dataset,budgets,delta=0.1):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
+    parser.add_argument("--dataset", type=str, default='Facebook', help="Name of the dataset to be used (default: 'Facebook')")
+    parser.add_argument("--budgets", nargs='+', type=int, help="Budgets")
+    parser.add_argument("--delta", type=float, default=0.1, help="Delta")
 
-    parser.add_argument(
-        "--dataset",
-        type=str,
-        default='Facebook',
-        help="Name of the dataset to be used (default: 'Facebook')"
-    )
-    parser.add_argument(
-        "--budgets",
-        nargs='+',
-        type=int,
-        help="Budgets"
-    )
-    parser.add_argument(
-        "--delta",
-        type=float,
-        default=0.1,
-        help="Delta"
-    )
+    # parser.add_argument(
+    #     "--dataset",
+    #     type=str,
+    #     default='Facebook',
+    #     help="Name of the dataset to be used (default: 'Facebook')"
+    # )
+    # parser.add_argument(
+    #     "--budgets",
+    #     nargs='+',
+    #     type=int,
+    #     help="Budgets"
+    # )
+    # parser.add_argument(
+    #     "--delta",
+    #     type=float,
+    #     default=0.1,
+    #     help="Delta"
+    # )
 
 
     args = parser.parse_args()
