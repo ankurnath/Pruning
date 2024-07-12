@@ -21,6 +21,7 @@ def get_gains(graph,ground_set):
 
         gains={node:graph.degree(node)+1 for node in graph.nodes()}
     else:
+        print('A ground set has been given')
         gains={node:graph.degree(node)+1 for node in ground_set}
 
     return gains
@@ -59,7 +60,7 @@ def gain_adjustment(graph,gains,selected_element,uncovered):
                     gains[neighbor_of_neighbor ]-=1
 
 
-    assert gains[selected_element]==0
+    assert gains[selected_element] == 0
 
 
 def prob_greedy(graph,budget,ground_set=None,delta=0):
@@ -84,15 +85,18 @@ def prob_greedy(graph,budget,ground_set=None,delta=0):
 
 
 def greedy(graph,budget,ground_set=None):
-
+    
+    number_of_queries=0
 
     gains=get_gains(graph,ground_set)
+    
 
 
     solution=[]
     uncovered=defaultdict(lambda: True)
 
-    for _ in range(budget):
+    for i in range(budget):
+        number_of_queries+= (len(gains)-i)
 
         selected_element=max(gains, key=gains.get)
 
@@ -102,34 +106,27 @@ def greedy(graph,budget,ground_set=None):
         solution.append(selected_element)
         gain_adjustment(graph,gains,selected_element,uncovered)
 
+    print('Number of queries:',number_of_queries)
 
-    return solution
+
+    return solution,number_of_queries
 
         
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-
-    parser.add_argument(
-        "--dataset",
-        type=str,
-        default='Facebook',
-        help="Name of the dataset to be used (default: 'Facebook')"
-    )
-
-    parser.add_argument(
-        "--budgets",
-        nargs='+',
-        type=int,
-        help="Budgets"
-    )
+    parser.add_argument( "--dataset", type=str, default='Facebook', help="Name of the dataset to be used (default: 'Facebook')" )
+    parser.add_argument( "--budgets", nargs='+', type=int, help="Budgets" )
   
     args = parser.parse_args()
 
-    file_path=f'../../data/test/{args.dataset}'
-    
-    graph=load_from_pickle(file_path)
+    # file_path=f'../../data/test/{args.dataset}'
+
+    # file_path=f'../../data/s/{args.dataset}'
+    # graph=load_from_pickle(file_path)
+    load_graph_file_path=f'../../data/snap_dataset/{args.dataset}.txt'
+    graph=nx.read_edgelist(f'../../data/snap_dataset/{args.dataset}.txt', create_using=nx.Graph(), nodetype=int)
 
     
     df=defaultdict(list)

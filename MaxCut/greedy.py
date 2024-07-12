@@ -86,26 +86,28 @@ def prob_greedy(graph,budget,ground_set=None,delta=0):
 
 def greedy(graph,budget,ground_set=None):
 
-
+    number_of_queries=0
     gains=get_gains(graph,ground_set)
     solution=[]
     spins={node:1 for node in graph.nodes()}
 
-    for _ in range(budget):
-
+    for i in range(budget):
+        number_of_queries += len(gains)
         selected_element=max(gains, key=gains.get)
 
         if gains[selected_element]==0:
-            print('All elements are already covered')
+            print('No more greedy actions are left')
             break
 
         # print(gains[selected_element])
 
         solution.append(selected_element)
         gain_adjustment(graph,gains,selected_element,spins)
+
+    
     # print('Degree:',[ graph.degree(node) for node in solution])
 
-    return solution
+    return solution,number_of_queries
 
         
 
@@ -113,19 +115,8 @@ def greedy(graph,budget,ground_set=None):
 if __name__ == "__main__":
     
     parser = ArgumentParser()
-
-    parser.add_argument(
-        "--dataset",
-        type=str,
-        default='Facebook',
-        help="Name of the dataset to be used (default: 'Facebook')"
-    )
-    parser.add_argument(
-        "--budgets",
-        nargs='+',
-        type=int,
-        help="Budgets"
-    )
+    parser.add_argument( "--dataset", type=str, default='Facebook', help="Name of the dataset to be used (default: 'Facebook')" )
+    parser.add_argument( "--budgets", nargs='+', type=int, help="Budgets" )
 
     args = parser.parse_args()
 

@@ -7,12 +7,19 @@ import numpy as np
 import os 
 
 
-def test(dataset,budgets):
+def test(dataset,budgets,test_on_whole_dataset = False):
 
-    load_graph_file_path=f'../../data/test/{args.dataset}'
 
-    graph=load_from_pickle(load_graph_file_path)
+    if test_on_whole_dataset:
+        load_graph_file_path=f'../../data/snap_dataset/{args.dataset}.txt'
+        graph=nx.read_edgelist(f'../../data/snap_dataset/{args.dataset}.txt', create_using=nx.Graph(), nodetype=int)
+
+    else:
+        load_graph_file_path=f'../../data/test/{args.dataset}'
+
+        graph=load_from_pickle(load_graph_file_path)
     N=graph.number_of_nodes() 
+    print('Number of Nodes in the whole graph',N)
     outdegree = [(node, graph.degree(node)) for node in graph.nodes()]
     outdegree=sorted(outdegree,key=lambda x:x[1],reverse=True)
 
@@ -35,9 +42,19 @@ def test(dataset,budgets):
         Pe=1-subgraph.number_of_edges()/graph.number_of_edges()
         print('Pv:',Pv)
         print('Pe:',Pe)
-        solution_subgraph = greedy(subgraph,budget,pruned_universe)
+        solution_subgraph,number_of_queries_pruned = greedy(subgraph,budget,pruned_universe)
+
+
+        solution_greedy,number_of_queries_greedy = greedy(subgraph,budget)
+
+        
 
         coverage= calculate_cover(graph,solution_subgraph)
+        greedy_coverage= calculate_cover(graph,solution_greedy)
+
+        print('Value Reduced:',(coverage-greedy_coverage)/greedy_coverage*100)
+        print('Queries Reduced:',(number_of_queries_pruned-number_of_queries_greedy)/number_of_queries_greedy*100)
+
         print('Coverage:',coverage/N)
 
         df['Dataset'].append(args.dataset)
@@ -103,7 +120,8 @@ if __name__ == "__main__":
         help="Budgets"
     )
     
+    
 
 
     args = parser.parse_args()
-    test(args.dataset,args.budgets)
+    test(args.dataset,args.budgets,True)

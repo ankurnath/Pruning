@@ -8,8 +8,11 @@ from greedy import greedy,gain_adjustment,get_gains
 
 
 def quickfilter(dataset,budgets,delta=0.1):
-    load_graph_file_path=f'../../data/test/{dataset}'
-    graph=load_from_pickle(load_graph_file_path)
+    # load_graph_file_path=f'../../data/test/{dataset}'
+    # graph=load_from_pickle(load_graph_file_path)
+
+    load_graph_file_path=f'../../data/snap_dataset/{dataset}.txt'
+    graph=nx.read_edgelist(f'../../data/snap_dataset/{dataset}.txt', create_using=nx.Graph(), nodetype=int)
 
     # pruning stage
 
@@ -34,6 +37,8 @@ def quickfilter(dataset,budgets,delta=0.1):
 
         
         Pg=1-len(pruned_universe)/graph.number_of_nodes()
+
+        print('Pruned Universe:',len(pruned_universe))
         
         
         # Subgraph 
