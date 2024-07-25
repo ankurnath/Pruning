@@ -4,7 +4,7 @@ import pandas as pd
 from collections import defaultdict
 import numpy as np
 import os
-
+import matplotlib.pyplot as plt
 #TO
 def select_variable(gains):
     sum_gain = sum(gains.values())
@@ -23,7 +23,7 @@ def get_gains(graph,ground_set):
     else:
         print('A ground set has been given')
         gains={node:graph.degree(node)+1 for node in ground_set}
-
+        # print('Size of ground set',len(gains))
     return gains
 
     
@@ -104,6 +104,7 @@ def greedy(graph,budget,ground_set=None):
             print('All elements are already covered')
             break
         solution.append(selected_element)
+        # print(gains[selected_element])
         gain_adjustment(graph,gains,selected_element,uncovered)
 
     print('Number of queries:',number_of_queries)
@@ -128,33 +129,59 @@ if __name__ == "__main__":
     load_graph_file_path=f'../../data/snap_dataset/{args.dataset}.txt'
     graph=nx.read_edgelist(f'../../data/snap_dataset/{args.dataset}.txt', create_using=nx.Graph(), nodetype=int)
 
+
+    covers = []
+
+    # solution,_ = greedy(graph=graph,budget=graph.number_of_nodes())
+    solution,_ = greedy(graph=graph,budget=100)
+
+    covers = [calculate_cover(graph,solution[:i+1]) for i in range(len(solution))]
+    # cover = 0
+    # for i in range(1,graph.number_of_nodes()+1):
     
-    df=defaultdict(list)
+    #     if cover != graph.number_of_nodes():
+    #         solution,_=greedy(graph=graph,budget=i)
+    #         cover=calculate_cover(graph,solution)
+    #         print(cover)
+    #         covers.append(cover)
+    #     else:
+    #         break
 
-    for budget in args.budgets:
+    plt.figure(dpi=200)
+    plt.plot (range(1,len(covers)+1),covers)
+    plt.xlabel('Budget')
+    plt.ylabel('Cover')
+    plt.title (f'{args.dataset}')
+    plt.show()
+    
+    # df=defaultdict(list)
 
-        solution=greedy(graph=graph,budget=budget)
+    # for budget in args.budgets:
 
-        subgraph =make_subgraph(graph,solution)
-        Pv=1-subgraph.number_of_nodes()/graph.number_of_nodes()
-        Pe=1-subgraph.number_of_edges()/graph.number_of_edges()
+    #     # solution,_=greedy(graph=graph,budget=budget)
 
-        cover=calculate_cover(graph,solution)
+    #     # solution,_ = greedy (graph=graph,budget=graph.number_of_nodes())
 
-        df['Budget'].append(budget)
-        df['Pv'].append(Pv)
-        df['Pe'].append(Pe)
-        df['Objective Value'].append(cover)
-        df['Objective Value (Ratio)'].append(cover/graph.number_of_nodes())
-        df['Solution'].append(solution)
+    #     subgraph =make_subgraph(graph,solution)
+    #     Pv=1-subgraph.number_of_nodes()/graph.number_of_nodes()
+    #     Pe=1-subgraph.number_of_edges()/graph.number_of_edges()
+
+    #     cover=calculate_cover(graph,solution)
+
+    #     df['Budget'].append(budget)
+    #     df['Pv'].append(Pv)
+    #     df['Pe'].append(Pe)
+    #     df['Objective Value'].append(cover)
+    #     df['Objective Value (Ratio)'].append(cover/graph.number_of_nodes())
+    #     df['Solution'].append(solution)
         
         
-    df=pd.DataFrame(df)
-    print(df)
-    save_folder=f'data/{args.dataset}'
-    file_path=os.path.join(save_folder,'Greedy')
-    os.makedirs(save_folder,exist_ok=True)
-    save_to_pickle(df,file_path)
+    # df=pd.DataFrame(df)
+    # print(df)
+    # save_folder=f'data/{args.dataset}'
+    # file_path=os.path.join(save_folder,'Greedy')
+    # os.makedirs(save_folder,exist_ok=True)
+    # save_to_pickle(df,file_path)
 
 
 

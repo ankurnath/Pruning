@@ -42,10 +42,10 @@ def test(dataset,budgets,test_on_whole_dataset = False):
         Pe=1-subgraph.number_of_edges()/graph.number_of_edges()
         print('Pv:',Pv)
         print('Pe:',Pe)
-        solution_subgraph,number_of_queries_pruned = greedy(subgraph,budget,pruned_universe)
+        solution_subgraph,number_of_queries_pruned = greedy(graph,budget,pruned_universe)
 
 
-        solution_greedy,number_of_queries_greedy = greedy(subgraph,budget)
+        solution_greedy,number_of_queries_greedy = greedy(graph,budget)
 
         
 
@@ -106,19 +106,21 @@ def test(dataset,budgets,test_on_whole_dataset = False):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
+    parser.add_argument( "--dataset", type=str, default='Facebook', help="Name of the dataset to be used for training (default: 'Facebook')" )
+    parser.add_argument( "--budgets", nargs='+', type=int, help="Budgets" )
 
-    parser.add_argument(
-        "--dataset",
-        type=str,
-        default='Facebook',
-        help="Name of the dataset to be used for training (default: 'Facebook')"
-    )
-    parser.add_argument(
-        "--budgets",
-        nargs='+',
-        type=int,
-        help="Budgets"
-    )
+    # parser.add_argument(
+    #     "--dataset",
+    #     type=str,
+    #     default='Facebook',
+    #     help="Name of the dataset to be used for training (default: 'Facebook')"
+    # )
+    # parser.add_argument(
+    #     "--budgets",
+    #     nargs='+',
+    #     type=int,
+    #     help="Budgets"
+    # )
     
     
 

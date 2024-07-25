@@ -3,11 +3,11 @@ from utils import *
 import pandas as pd
 from collections import defaultdict
 
-from greedy import greedy,gain_adjustment,get_gains
+from greedy import gain_adjustment,get_gains
+from budgeted_greedy import modified_greedy
 
 
-
-def quickfilter(dataset,budgets,delta=0.1):
+def quickfilter(dataset,budgets,delta=0.1,node_weights=None):
     load_graph_file_path=f'../../data/test/{dataset}'
     graph=load_from_pickle(load_graph_file_path)
 
@@ -18,8 +18,15 @@ def quickfilter(dataset,budgets,delta=0.1):
 
     # gains={node:graph.degree(node) for node in graph.nodes()}
     df=defaultdict(list)
+
+    if node_weights is None:
+        node_weights = {node:1 for node in graph.nodes()}
+
+    
     for budget in budgets:
         gains=get_gains(graph,ground_set=None)
+
+        
 
         curr_obj=0
 
@@ -27,7 +34,7 @@ def quickfilter(dataset,budgets,delta=0.1):
         uncovered=defaultdict(lambda: True)
         for node in graph.nodes():
 
-            if gains[node]>=delta/budget*curr_obj:
+            if gains[node]/node_weights[node]>=delta/budget*curr_obj:
                 curr_obj+=gains[node]
                 pruned_universe.append(node)
 
@@ -36,8 +43,7 @@ def quickfilter(dataset,budgets,delta=0.1):
                 
 
         
-        # Pg=1-len(pruned_universe)/graph.number_of_nodes()
-        Pg=len(pruned_universe)/graph.number_of_nodes()
+        Pg=1-len(pruned_universe)/graph.number_of_nodes()
 
         print('Pruned Universe:',len(pruned_universe))
         
@@ -49,9 +55,13 @@ def quickfilter(dataset,budgets,delta=0.1):
         Pv=1-subgraph.number_of_nodes()/graph.number_of_nodes()
         Pe=1-subgraph.number_of_edges()/graph.number_of_edges()
         
-        solution_subgraph,_ = greedy(graph,budget,pruned_universe)
+        solution_subgraph,_ = modified_greedy(graph=graph,budget=budget,ground_set=pruned_universe,node_weights=node_weights)
+        print(solution_subgraph)
+        print([node_weights[node] for node in solution_subgraph])
 
-        greedy_solution,_ = greedy(graph,budget)
+        greedy_solution,_ = modified_greedy(graph=graph,budget=budget,node_weights=node_weights)
+        print(greedy_solution)
+        print([node_weights[node] for node in greedy_solution])
         print()
 
         coverage= calculate_cover(graph,solution_subgraph)
@@ -61,7 +71,7 @@ def quickfilter(dataset,budgets,delta=0.1):
         df['Pe'].append(Pe)
         df['Pg'].append(Pg)
         df['Objective Value'].append(coverage)
-        df['Ratio'].append(coverage/calculate_cover(graph,greedy_solution))
+        df['Ratio'].append(calculate_cover(graph,greedy_solution)/coverage)
         # df['Solution'].append(solution_subgraph)
         # df['Objective Value (Ratio)'].append(coverage/graph.number_of_nodes())
         
@@ -88,30 +98,13 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", type=str, default='Facebook', help="Name of the dataset to be used (default: 'Facebook')")
     parser.add_argument("--budgets", nargs='+', type=int, help="Budgets")
     parser.add_argument("--delta", type=float, default=0.1, help="Delta")
-
-    # parser.add_argument(
-    #     "--dataset",
-    #     type=str,
-    #     default='Facebook',
-    #     help="Name of the dataset to be used (default: 'Facebook')"
-    # )
-    # parser.add_argument(
-    #     "--budgets",
-    #     nargs='+',
-    #     type=int,
-    #     help="Budgets"
-    # )
-    # parser.add_argument(
-    #     "--delta",
-    #     type=float,
-    #     default=0.1,
-    #     help="Delta"
-    # )
+    parser.add_argument("--cost_model",type= str, default= 'random', help = 'model of node weights')
+    
 
 
     args = parser.parse_args()
 
-
+    node_weights = load_from_pickle(f'../../data/test/{args.dataset}_weights_{args.cost_model}')
     # for budget in args.budgets:
 
-    quickfilter(dataset=args.dataset,budgets=args.budgets)
+    quickfilter(dataset=args.dataset,budgets=args.budgets,node_weights=node_weights)
