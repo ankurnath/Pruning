@@ -8,11 +8,11 @@ from greedy import greedy,gain_adjustment,get_gains
 
 
 def quickfilter(dataset,budgets,delta=0.1):
-    load_graph_file_path=f'../../data/test/{dataset}'
-    graph=load_from_pickle(load_graph_file_path)
+    # load_graph_file_path=f'../../data/test/{dataset}'
+    # graph=load_from_pickle(load_graph_file_path)
 
-    # load_graph_file_path=f'../../data/snap_dataset/{dataset}.txt'
-    # graph=nx.read_edgelist(f'../../data/snap_dataset/{dataset}.txt', create_using=nx.Graph(), nodetype=int)
+    load_graph_file_path=f'../../data/snap_dataset/{dataset}.txt'
+    graph=nx.read_edgelist(f'../../data/snap_dataset/{dataset}.txt', create_using=nx.Graph(), nodetype=int)
 
     # pruning stage
 
@@ -49,25 +49,30 @@ def quickfilter(dataset,budgets,delta=0.1):
         Pv=1-subgraph.number_of_nodes()/graph.number_of_nodes()
         Pe=1-subgraph.number_of_edges()/graph.number_of_edges()
         
-        solution_subgraph,_ = greedy(graph,budget,pruned_universe)
+        solution_subgraph,queries_subgraph = greedy(graph,budget,pruned_universe)
 
-        greedy_solution,_ = greedy(graph,budget)
+        greedy_solution,queries_graph= greedy(graph,budget)
         print()
 
         coverage= calculate_cover(graph,solution_subgraph)
-
+        df['Dataset'].append(args.dataset)
         df['Budget'].append(budget)
-        df['Pv'].append(Pv)
-        df['Pe'].append(Pe)
-        df['Pg'].append(Pg)
-        df['Objective Value'].append(coverage)
-        df['Ratio'].append(coverage/calculate_cover(graph,greedy_solution))
+        df['Size of Ground set'].append(graph.number_of_nodes())
+        df['Size of Pruned Ground set'].append(len(pruned_universe))
+        # df['Budget'].append(budget)
+        # df['Pv'].append(Pv)
+        # df['Pe'].append(Pe)
+        # df['Pg'].append(Pg)
+        df['Objective Value(Pruned)'].append(coverage)
+        
+        df['Objective Value (Ratio)'].append(coverage/calculate_cover(graph,greedy_solution))
+        df['Queries(Ratio)'].append(queries_subgraph/queries_graph)
         # df['Solution'].append(solution_subgraph)
         # df['Objective Value (Ratio)'].append(coverage/graph.number_of_nodes())
         
 
     df['delta']=[delta]*len(df['Budget'])
-
+    # print(df)
     df=pd.DataFrame(df)
 
     
@@ -76,6 +81,7 @@ def quickfilter(dataset,budgets,delta=0.1):
     # except:
     #     raise ValueError('Greedy value is not found.')
     print(df)
+
 
 
     save_folder=f'data/{args.dataset}'

@@ -66,10 +66,16 @@ def modified_greedy(graph,budget,ground_set=None , node_weights= None):
             break
 
         if node_weights[selected_element]+constraint <= budget:
+            # print('Merginal gain:',gains[selected_element])
+            
             # print(node_weights[selected_element]+constraint)
             solution.append(selected_element)
             gain_adjustment(graph,gains,selected_element,uncovered)
             constraint += node_weights[selected_element]
+            # print('Constraint:',constraint)
+
+        if constraint == budget:
+            break
 
         gains.pop(selected_element)
 

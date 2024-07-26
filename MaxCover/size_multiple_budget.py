@@ -68,7 +68,7 @@ def quickfilter_multi(dataset,budgets,delta,eps):
         
         # Pg=1-len(pruned_universe)/graph.number_of_nodes()
         Pg=len(pruned_universe)/graph.number_of_nodes()
-        print("Pg:",round(Pg,4))
+        print("Pg:",round(Pg,4)*100)
 
         print('Pruned Universe:',len(pruned_universe))
         
