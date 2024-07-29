@@ -10,7 +10,7 @@ import heapq
 import os
 from tqdm import tqdm
 
-from large_graph import Graph
+# from large_graph import Graph
 
 def SS(dataset,r,c,budgets):
 
@@ -18,8 +18,8 @@ def SS(dataset,r,c,budgets):
     # graph=load_from_pickle(file_path)
 
     file_path=f'../../data/snap_dataset/{args.dataset}.txt'
-    # graph=nx.read_edgelist(f'../../data/snap_dataset/{args.dataset}.txt', create_using=nx.Graph(), nodetype=int)
-    graph = Graph(file_path=file_path)
+    graph=nx.read_edgelist(f'../../data/snap_dataset/{args.dataset}.txt', create_using=nx.Graph(), nodetype=int)
+    # graph = Graph(file_path=file_path)
 
     pruned_universe=set()
 

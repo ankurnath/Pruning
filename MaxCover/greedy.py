@@ -66,15 +66,15 @@ def gain_adjustment(graph,gains,selected_element,uncovered):
 def prob_greedy(graph,budget,ground_set=None,delta=0):
 
 
-    gains=get_gains(graph,ground_set)
+    gains = get_gains(graph,ground_set)
 
-    solution=[]
-    uncovered=defaultdict(lambda: True)
+    solution = []
+    uncovered = defaultdict(lambda: True)
 
 
     for _ in range(budget):
 
-        selected_element=select_variable(gains)
+        selected_element = select_variable(gains)
 
         if selected_element is None or gains[selected_element]<delta:
             break
@@ -86,9 +86,9 @@ def prob_greedy(graph,budget,ground_set=None,delta=0):
 
 def greedy(graph,budget,ground_set=None):
     
-    number_of_queries=0
+    number_of_queries = 0
 
-    gains=get_gains(graph,ground_set)
+    gains = get_gains(graph,ground_set)
     
 
 
@@ -96,7 +96,7 @@ def greedy(graph,budget,ground_set=None):
     uncovered=defaultdict(lambda: True)
 
     for i in range(budget):
-        number_of_queries+= (len(gains)-i)
+        number_of_queries += (len(gains)-i)
 
         selected_element=max(gains, key=gains.get)
 

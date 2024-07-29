@@ -5,6 +5,9 @@ import os
 
 
 
+
+
+
 def calculate_cover(graph: nx.Graph, selected_nodes):
 
     covered_elements=set()

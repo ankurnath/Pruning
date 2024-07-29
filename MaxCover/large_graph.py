@@ -4,8 +4,8 @@ import os
 from collections import defaultdict
 
 
-dataset = 'friendster'
-file_path = f'../../data/snap_dataset/{dataset}.txt'
+# dataset = 'friendster'
+# file_path = f'../../data/snap_dataset/{dataset}.txt'
 
 class Graph(object):
 
@@ -48,14 +48,7 @@ class Graph(object):
     
     def nodes(self):
         return self.adj_list.keys()
-
-
-
-
-
-
-graph = Graph(file_path=file_path)
-
+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
 # from greedy import greedy
 # from utils import calculate_cover
 
