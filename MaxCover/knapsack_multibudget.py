@@ -6,7 +6,9 @@ import numpy as np
 
 from greedy import greedy,gain_adjustment,get_gains
 
-from budgeted_greedy import modified_greedy
+from numba_greedy import numba_greedy
+
+# from budgeted_greedy import modified_greedy
 import matplotlib.pyplot as plt
 
 
@@ -14,9 +16,6 @@ import matplotlib.pyplot as plt
 def quickfilter_multi(graph, node_weights , max_budget, min_budget,delta ,eps,args):
    
     df=defaultdict(list)
- 
-    # for budget in budgets:
-
     u_taus = {}
     gains_taus ={}
     uncovered_taus = {}
@@ -35,7 +34,8 @@ def quickfilter_multi(graph, node_weights , max_budget, min_budget,delta ,eps,ar
 
         for i in range(m+1):
             # print('Do we cast tau to integer ?')
-            tau = int((1+eps)**i * min_budget)
+            # tau = int((1+eps)**i * min_budget)
+            tau = (1+eps)**i * min_budget
 
             if gains_taus[i][node]/node_weights[node]>=(delta/tau)*curr_obj_taus[i]:
                 # print(gains_taus[i][node])
@@ -57,58 +57,74 @@ def quickfilter_multi(graph, node_weights , max_budget, min_budget,delta ,eps,ar
     for i in range(1,m+1):
         u = u.union(u_taus[i])
 
-    pruned_universe = list(u)
-    
-    # Pg=1-len(pruned_universe)/graph.number_of_nodes()
-    Pg=len(pruned_universe)/graph.number_of_nodes()
-    print("Pg:",round(Pg,4)*100)
+    pruned_universe_multi = list(u)
 
-    print('Multi budget Pruned Universe:',len(pruned_universe))
+    Pg=len(pruned_universe_multi)/graph.number_of_nodes()
+    print("Pg(%):",round(Pg,4)*100)
+    print('Multi budget Pruned Universe:',len(pruned_universe_multi))
     print("Multi budget Pruned Universe in percentage:",round(Pg,4)*100)
-    
-    
-    # # Subgraph 
-    # subgraph =make_subgraph(graph,pruned_universe)
 
+    gains=get_gains(graph,ground_set=None)
+    curr_obj=0
+    pruned_universe_single=[]
+    uncovered=defaultdict(lambda: True)
+    for node in graph.nodes():
 
+        if gains[node]/node_weights[node]>=delta/max_budget*curr_obj:
+            curr_obj+=gains[node]
+            pruned_universe_single.append(node)
+
+            # gains adjustment
+            gain_adjustment(graph,gains,node,uncovered)   
+    
+    print(f'Single budget Size of Pruned universe:{len(pruned_universe_single)}')
+    print("Single budget Pruned Universe in percentage:",round(len(pruned_universe_single)/graph.number_of_nodes(),4)*100)
+    
     multi_ratios = []
+    single_ratios = []
 
     x = [int((1+eps)**i * min_budget)  for i in range(m+1)] + [max_budget]
     x.sort()
 
     if x[-1]>max_budget:
         x.pop()
-    print(x)
+    print('Budgets',x)
 
     for i in x:
-        solution_subgraph,_ = modified_greedy(graph=graph, budget=i,node_weights=node_weights,ground_set=pruned_universe) 
-        greedy_solution,_ = modified_greedy(graph=graph, budget=i, node_weights=node_weights) 
-        coverage= calculate_cover(graph,solution_subgraph)
-        multi_ratios.append(coverage/calculate_cover(graph,greedy_solution))
+        # solution_subgraph,_ = modified_greedy(graph=graph, budget=i,node_weights=node_weights,ground_set=pruned_universe) 
+        # greedy_solution,_ = modified_greedy(graph=graph, budget=i, node_weights=node_weights) 
+        greedy_solution,_ = numba_greedy(graph=graph, budget=i, node_weights=node_weights) 
+        solution_subgraph_multi,_ = numba_greedy(graph=graph, budget=i,node_weights=node_weights,ground_set=pruned_universe_multi)
+        solution_subgraph_single,_ = numba_greedy(graph=graph, budget=i,node_weights=node_weights,ground_set=pruned_universe_single) 
+        greedy_coverage = calculate_cover(graph,greedy_solution)
+        multi_coverage= calculate_cover(graph,solution_subgraph_multi)
+        single_coverage = calculate_cover(graph,solution_subgraph_single)
+        multi_ratios.append(multi_coverage/greedy_coverage)
+        single_ratios.append(single_coverage /greedy_coverage)
+
+        print('Multi-ratio',multi_ratios[-1])
+        print('Single-ratio',single_ratios[-1])
+
+    # print(greedy_solution)
+    # print('Degree',sorted([graph.degree(node) for node in greedy_solution]))
+    
+    
+    # print(solution_subgraph)
+    # print('Degree',[graph.degree(node) for node in solution_subgraph])
 
     #################################################
-    gains=get_gains(graph,ground_set=None)
-    curr_obj=0
-    pruned_universe=[]
-    uncovered=defaultdict(lambda: True)
-    for node in graph.nodes():
-
-        if gains[node]/node_weights[node]>=delta/max_budget*curr_obj:
-            curr_obj+=gains[node]
-            pruned_universe.append(node)
-
-            # gains adjustment
-            gain_adjustment(graph,gains,node,uncovered)    
+     
 
 
-    print(f'Single budget Size of Pruned universe:{len(pruned_universe)}')
-    print("Single budget Pruned Universe in percentage:",round(len(pruned_universe)/graph.number_of_nodes(),4)*100)
-    single_ratios = []
-    for i in x:
-        solution_subgraph,_ = modified_greedy(graph=graph, budget=i,node_weights=node_weights,ground_set = pruned_universe) 
-        greedy_solution,_ = modified_greedy(graph=graph, budget=i, node_weights=node_weights) 
-        coverage= calculate_cover(graph,solution_subgraph)
-        single_ratios.append(coverage/calculate_cover(graph,greedy_solution))
+    
+    
+    # for i in x:
+    #     # solution_subgraph,_ = modified_greedy(graph=graph, budget=i,node_weights=node_weights,ground_set = pruned_universe) 
+    #     # greedy_solution,_ = modified_greedy(graph=graph, budget=i, node_weights=node_weights) 
+    #     solution_subgraph,_ = numba_greedy(graph=graph, budget=i,node_weights=node_weights,ground_set = pruned_universe) 
+    #     greedy_solution,_ = numba_greedy(graph=graph, budget=i, node_weights=node_weights) 
+    #     coverage= calculate_cover(graph,solution_subgraph)
+    #     single_ratios.append(coverage/calculate_cover(graph,greedy_solution))
 
     
     #################################################
@@ -170,7 +186,7 @@ def quickfilter_multi(graph, node_weights , max_budget, min_budget,delta ,eps,ar
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--dataset", type=str, default='Facebook', help="Name of the dataset to be used (default: 'Facebook')")
-    parser.add_argument("--cost_model",type=str,default='random',help='model of node weights')
+    parser.add_argument("--cost_model",type=str,default='degree',help='model of node weights')
     parser.add_argument('--max_budget', type = int ,default=100, help = 'Maximum Budget')
     parser.add_argument('--min_budget', type = int ,default=10, help = 'Minimum Budget')
 
@@ -179,11 +195,27 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    file_path=f'../../data/test/{args.dataset}'
-    graph = load_from_pickle(file_path)
+    # file_path=f'../../data/test/{args.dataset}'
+    # graph = load_from_pickle(file_path)
 
-    node_weights = load_from_pickle(f'../../data/test/{args.dataset}_weights_{args.cost_model}')
+    # node_weights = load_from_pickle(f'../../data/test/{args.dataset}_weights_{args.cost_model}')
+    
+    graph = nx.read_edgelist(f'../../data/snap_dataset/{args.dataset}.txt', create_using=nx.Graph(), nodetype=int)
+    
+    if args.cost_model == 'uniform':
+        node_weights = {node:1 for node in graph.nodes()}
 
+    elif args.cost_model == 'degree':
+        # alpha = 1/20
+        alpha = 1/20
+        out_degrees = {node: graph.degree(node) for node in graph.nodes()}
+        out_degree_max = np.max(list(out_degrees.values()))
+        out_degree_min = np.min(list(out_degrees.values()))
+        node_weights = {node: (out_degrees[node] - out_degree_min + alpha) / (out_degree_max - out_degree_min) for node in graph.nodes()}
+
+    else:
+        raise NotImplementedError('Unknown model')
+    
     max_budget = args.max_budget
     min_budget = args.min_budget
     delta = args.delta 
