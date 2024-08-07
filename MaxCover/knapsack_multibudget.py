@@ -82,6 +82,7 @@ def quickfilter_multi(graph, node_weights , max_budget, min_budget,delta ,eps,ar
     
     multi_ratios = []
     single_ratios = []
+    greedy_coverages = []
 
     x = [int((1+eps)**i * min_budget)  for i in range(m+1)] + [max_budget]
     x.sort()
@@ -97,15 +98,17 @@ def quickfilter_multi(graph, node_weights , max_budget, min_budget,delta ,eps,ar
         solution_subgraph_multi,_ = numba_greedy(graph=graph, budget=i,node_weights=node_weights,ground_set=pruned_universe_multi)
         solution_subgraph_single,_ = numba_greedy(graph=graph, budget=i,node_weights=node_weights,ground_set=pruned_universe_single) 
         greedy_coverage = calculate_cover(graph,greedy_solution)
+        greedy_coverages.append(greedy_coverage)
         multi_coverage= calculate_cover(graph,solution_subgraph_multi)
         single_coverage = calculate_cover(graph,solution_subgraph_single)
         multi_ratios.append(multi_coverage/greedy_coverage)
         single_ratios.append(single_coverage /greedy_coverage)
 
+        print('greedy')
         print('Multi-ratio',multi_ratios[-1])
         print('Single-ratio',single_ratios[-1])
 
-    # print(greedy_solution)
+    print(greedy_coverages)
     # print('Degree',sorted([graph.degree(node) for node in greedy_solution]))
     
     
