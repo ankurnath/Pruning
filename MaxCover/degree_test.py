@@ -68,19 +68,10 @@ def test(dataset,budgets):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
+    parser.add_argument( "--dataset", type=str, default='Facebook', help="Name of the dataset to be used for training (default: 'Facebook')" )
+    parser.add_argument( "--budgets", nargs='+', type=int, help="Budgets" )
 
-    parser.add_argument(
-        "--dataset",
-        type=str,
-        default='Facebook',
-        help="Name of the dataset to be used for training (default: 'Facebook')"
-    )
-    parser.add_argument(
-        "--budgets",
-        nargs='+',
-        type=int,
-        help="Budgets"
-    )
+    
     
 
 

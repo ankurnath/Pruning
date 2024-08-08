@@ -45,7 +45,7 @@ def quickfilter(dataset,budgets,delta=0.1,node_weights=None):
         
         Pg=1-len(pruned_universe)/graph.number_of_nodes()
 
-        print('Pruned Universe:',len(pruned_universe))
+        # print('Pruned Universe:',len(pruned_universe))
         
         
         # Subgraph 
@@ -56,22 +56,24 @@ def quickfilter(dataset,budgets,delta=0.1,node_weights=None):
         Pe=1-subgraph.number_of_edges()/graph.number_of_edges()
         
         solution_subgraph,_ = modified_greedy(graph=graph,budget=budget,ground_set=pruned_universe,node_weights=node_weights)
-        print(solution_subgraph)
-        print([node_weights[node] for node in solution_subgraph])
+        # print(solution_subgraph)
+        # print([node_weights[node] for node in solution_subgraph])
 
         greedy_solution,_ = modified_greedy(graph=graph,budget=budget,node_weights=node_weights)
-        print(greedy_solution)
-        print([node_weights[node] for node in greedy_solution])
-        print()
+        # print(greedy_solution)
+        # print([node_weights[node] for node in greedy_solution])
+        # print()
 
         coverage= calculate_cover(graph,solution_subgraph)
+        ratio = calculate_cover(graph,greedy_solution)/coverage
+        print(f'Budget {budget} Ratio:',ratio)
 
         df['Budget'].append(budget)
         df['Pv'].append(Pv)
         df['Pe'].append(Pe)
         df['Pg'].append(Pg)
         df['Objective Value'].append(coverage)
-        df['Ratio'].append(calculate_cover(graph,greedy_solution)/coverage)
+        df['Ratio'].append(ratio)
         # df['Solution'].append(solution_subgraph)
         # df['Objective Value (Ratio)'].append(coverage/graph.number_of_nodes())
         

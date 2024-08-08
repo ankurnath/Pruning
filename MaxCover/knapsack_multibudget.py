@@ -61,10 +61,12 @@ def quickfilter_multi(graph, node_weights , max_budget, min_budget,delta ,eps,ar
     
     # Pg=1-len(pruned_universe)/graph.number_of_nodes()
     Pg=len(pruned_universe)/graph.number_of_nodes()
-    print("Pg:",round(Pg,4)*100)
+    # print("Pg:",round(Pg,4)*100)
 
     print('Multi budget Pruned Universe:',len(pruned_universe))
     print("Multi budget Pruned Universe in percentage:",round(Pg,4)*100)
+
+    df['Pruned Ground (Multi)%'].append(round(Pg,4)*100)
     
     
     # # Subgraph 
@@ -73,6 +75,8 @@ def quickfilter_multi(graph, node_weights , max_budget, min_budget,delta ,eps,ar
 
     multi_ratios = []
 
+    multi_ratios_covers= []
+
     x = [int((1+eps)**i * min_budget)  for i in range(m+1)] + [max_budget]
     x.sort()
 
@@ -80,11 +84,24 @@ def quickfilter_multi(graph, node_weights , max_budget, min_budget,delta ,eps,ar
         x.pop()
     print(x)
 
+    greedy_solutions = []
+    greedy_covers = []
     for i in x:
         solution_subgraph,_ = modified_greedy(graph=graph, budget=i,node_weights=node_weights,ground_set=pruned_universe) 
-        greedy_solution,_ = modified_greedy(graph=graph, budget=i, node_weights=node_weights) 
-        coverage= calculate_cover(graph,solution_subgraph)
-        multi_ratios.append(coverage/calculate_cover(graph,greedy_solution))
+        greedy_solution,_ = modified_greedy(graph=graph, budget=i, node_weights=node_weights)
+        greedy_solutions.append(greedy_solution) 
+        coverage = calculate_cover(graph,solution_subgraph)
+        multi_ratios_covers .append(coverage)
+        greedy_cover = calculate_cover(graph,greedy_solution)
+        greedy_covers.append(greedy_cover)
+        multi_ratios.append(coverage/greedy_cover )
+        
+
+    df['Budgets'] = [x ]
+    df['Cover (Multi)'] = [multi_ratios_covers]
+    df['Ratio (Multi)'] = [multi_ratios]
+    df['Cover (greedy)'] = [greedy_covers]
+    df['Solutions (greedy)'] = [greedy_solutions]
 
     #################################################
     gains=get_gains(graph,ground_set=None)
@@ -103,20 +120,32 @@ def quickfilter_multi(graph, node_weights , max_budget, min_budget,delta ,eps,ar
 
     print(f'Single budget Size of Pruned universe:{len(pruned_universe)}')
     print("Single budget Pruned Universe in percentage:",round(len(pruned_universe)/graph.number_of_nodes(),4)*100)
-    single_ratios = []
-    for i in x:
-        solution_subgraph,_ = modified_greedy(graph=graph, budget=i,node_weights=node_weights,ground_set = pruned_universe) 
-        greedy_solution,_ = modified_greedy(graph=graph, budget=i, node_weights=node_weights) 
-        coverage= calculate_cover(graph,solution_subgraph)
-        single_ratios.append(coverage/calculate_cover(graph,greedy_solution))
-
     
+    df['Pruned Ground (Single)%'].append(round(Pg,4)*100)
+    
+    single_ratios = []
+    single_ratios_covers= []
+    for idx,i in enumerate(x):
+        solution_subgraph,_ = modified_greedy(graph=graph, budget=i,node_weights=node_weights,ground_set = pruned_universe) 
+        # greedy_solution,_ = modified_greedy(graph=graph, budget=i, node_weights=node_weights) 
+        coverage= calculate_cover(graph,solution_subgraph)
+        single_ratios_covers.append(coverage)
+        single_ratios.append(coverage/calculate_cover(graph,greedy_solutions[idx]))
+
+    df['Cover (Single)'] = [single_ratios_covers]
+    df['Ratio (Single)'] = [single_ratios]
     #################################################
+    # print(df)
+    df=pd.DataFrame(df)
+    print(df)
 
         
     fontsize = 20
     # plt.plot(x,ratios)
     # plt.scatter(x, ratios, color='blue', marker='o', s=100, edgecolor='black', alpha=0.7)
+    # plt.plot(x,np.array(multi_ratios_covers)/np.array(single_ratios_covers),linestyle='--', marker='o', markersize=20, color='blue', markeredgecolor='black', alpha=0.7, label='Multi-Budget vs Single-Budget Ratios')
+    # plt.plot(x, multi_ratios_covers, linestyle='--', marker='o', markersize=20, color='blue', markeredgecolor='black', alpha=0.7, label='Multi-Budget')
+    # plt.plot(x, single_ratios_covers, linestyle='--', marker='*', markersize=20, color='red', markeredgecolor='black', alpha=0.7, label='Single-Budget')
     plt.plot(x, multi_ratios, linestyle='--', marker='o', markersize=20, color='blue', markeredgecolor='black', alpha=0.7, label='Multi-Budget')
     plt.plot(x, single_ratios, linestyle='--', marker='*', markersize=20, color='red', markeredgecolor='black', alpha=0.7, label='Single-Budget')
     
@@ -127,6 +156,13 @@ def quickfilter_multi(graph, node_weights , max_budget, min_budget,delta ,eps,ar
     plt.legend()
     plt.show()
 
+    print('Multi-Budget ratios',multi_ratios)
+    print('Single Budget ratios',single_ratios)
+    df['dataset'] = args.dataset
+    df['Eps'] = eps
+    df['Delta'] = delta
+    df['Max Budget'] = max_budget
+    df['Min Budget'] = min_budget
 
 
         
@@ -162,10 +198,16 @@ def quickfilter_multi(graph, node_weights , max_budget, min_budget,delta ,eps,ar
     # print(df)
 
 
-    # save_folder=f'data/{args.dataset}'
-    # file_path=os.path.join(save_folder,'QuickFilter')
-    # os.makedirs(save_folder,exist_ok=True)
-    # save_to_pickle(df,file_path) 
+    save_folder=f'data/knapsack'
+    file_path=os.path.join(save_folder,args.dataset)
+    os.makedirs(save_folder,exist_ok=True)
+    save_to_pickle(df,file_path)
+    load_from_pickle(file_path=file_path)
+    print(df.columns)
+    # print(df['Cover (greedy)'])
+    # print(df['Solutions (greedy)'][0])
+    
+    
 
 if __name__ == "__main__":
     parser = ArgumentParser()

@@ -6,6 +6,7 @@ import numpy as np
 import os
 
 from greedy import get_gains, gain_adjustment
+from tqdm import tqdm
 
 
 def modified_greedy(graph,budget,ground_set=None , node_weights= None):
@@ -40,8 +41,8 @@ def modified_greedy(graph,budget,ground_set=None , node_weights= None):
 
     
 
-    # for i in range(N):
-    while gains:
+    for i in tqdm(range(N)):
+    # while gains:
 
     # for i in range(budget):
         number_of_queries+= len(gains)

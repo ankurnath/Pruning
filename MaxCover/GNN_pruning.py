@@ -45,21 +45,23 @@ if __name__ == "__main__":
     data.y=y
     num_features=1
 
-    x=[graph.degree(node) for node in graph.nodes()]
+    # x=[graph.degree(node) for node in graph.nodes()]
     # data.x= torch.randn(size=(graph.num,num_features))
     # data.x = torch.tensor(x,dtype=torch.float).reshape(-1,1)
     data.x = torch.rand(size=(graph.number_of_nodes(),1))
 
 
     import torch.nn.functional as F
-    from torch_geometric.nn import GCNConv
+    from torch_geometric.nn import GCNConv,SAGEConv
 
     class GCN(torch.nn.Module):
-        def __init__(self, hidden_channels):
+        def __init__(self, hidden_channels,out_channels=2):
             super(GCN, self).__init__()
             torch.manual_seed(12345)
-            self.conv1 = GCNConv(num_features, hidden_channels)
-            self.conv2 = GCNConv(hidden_channels, 2)
+            # self.conv1 = GCNConv(num_features, hidden_channels)
+            # self.conv2 = GCNConv(hidden_channels, out_channels)
+            self.conv1 = SAGEConv(num_features,hidden_channels)
+            self.conv2 = SAGEConv(hidden_channels,out_channels)
 
         def forward(self, x, edge_index):
             x = self.conv1(x, edge_index)
