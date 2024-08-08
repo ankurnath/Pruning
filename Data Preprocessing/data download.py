@@ -9,6 +9,7 @@ def download(datasets):
 
     DATASETS_URLS={ 
                 "Facebook":"https://snap.stanford.edu/data/facebook_combined.txt.gz",
+                "web-Google":"https://snap.stanford.edu/data/web-Google.txt.gz",
                 "Wiki": "",
                 "DBLP":"https://snap.stanford.edu/data/bigdata/communities/com-dblp.ungraph.txt.gz",
                 "Skitter":"https://snap.stanford.edu/data/as-skitter.txt.gz",
