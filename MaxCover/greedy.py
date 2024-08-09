@@ -118,14 +118,10 @@ def greedy(graph,budget,ground_set=None):
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument( "--dataset", type=str, default='Facebook', help="Name of the dataset to be used (default: 'Facebook')" )
-    parser.add_argument( "--budgets", nargs='+', type=int, help="Budgets" )
+    parser.add_argument("--budget", type=int,default=10, help="Budgets")
   
     args = parser.parse_args()
 
-    # file_path=f'../../data/test/{args.dataset}'
-
-    # file_path=f'../../data/s/{args.dataset}'
-    # graph=load_from_pickle(file_path)
     load_graph_file_path=f'../../data/snap_dataset/{args.dataset}.txt'
     graph=nx.read_edgelist(f'../../data/snap_dataset/{args.dataset}.txt', create_using=nx.Graph(), nodetype=int)
 
