@@ -12,14 +12,15 @@ from tqdm import tqdm
 
 # from large_graph import Graph
 
-def SS(dataset,r,c,budgets):
+def SS(dataset,r,c,budget):
 
     # file_path=f'../../data/test/{dataset}'
     # graph=load_from_pickle(file_path)
 
     file_path=f'../../data/snap_dataset/{args.dataset}.txt'
-    graph=nx.read_edgelist(f'../../data/snap_dataset/{args.dataset}.txt', create_using=nx.Graph(), nodetype=int)
+    # graph=nx.read_edgelist(f'../../data/snap_dataset/{args.dataset}.txt', create_using=nx.Graph(), nodetype=int)
     # graph = Graph(file_path=file_path)
+    graph = load_graph(file_path=file_path)
 
     pruned_universe=set()
 
@@ -86,41 +87,93 @@ def SS(dataset,r,c,budgets):
 
     pruned_universe=pruned_universe.union(set(universe))
 
+    ##################################################################
 
-    pruned_ground_ratio=len(pruned_universe)/graph.number_of_nodes()
-    print('Ground set (Ratio):',pruned_ground_ratio)
+    Pg=len(pruned_universe)/graph.number_of_nodes()
+    start = time.time()
+    solution_unpruned,queries_unpruned= greedy(graph,budget)
+    end = time.time()
+    time_unpruned = round(end-start,4)
+    print('Elapsed time (unpruned):',round(time_unpruned,4))
 
-    # Subgraph
-    # subgraph = make_subgraph(graph,pruned_universe)
+    start = time.time()
+    solution_pruned,queries_pruned = greedy(graph=graph,budget=budget,ground_set=pruned_universe)
+    end = time.time()
+    time_pruned = round(end-start,4)
+    print('Elapsed time (pruned):',time_pruned)
+    
+    
+    objective_unpruned = calculate_cover(graph,solution_unpruned)
+    objective_pruned = calculate_cover(graph,solution_pruned)
+    
+    ratio = objective_pruned/objective_unpruned
 
-    # Pv=1-subgraph.number_of_nodes()/graph.number_of_nodes()
-    # Pe=1-subgraph.number_of_edges()/graph.number_of_edges()
-    # print('Pv:',Pv)
-    # print('Pe:',Pe)
-    df=defaultdict(list)
-    for budget in budgets:
-        solution_subgraph,queries_subgraph = greedy(graph,budget,pruned_universe)
-        solution_graph,queries_graph= greedy(graph,budget)
-        pruned_cover= calculate_cover(graph,solution_subgraph)
-        whole_cover= calculate_cover(graph,solution_graph)
 
-        df['Dataset'].append(args.dataset)
-        df['Size of Ground set'].append(graph.number_of_nodes())
-        df['Size of Pruned Ground set'].append(len(pruned_universe))
-        df['Budget'].append(budget)
-        # df['Solution'].append(solution_subgraph)
-        df['Objective Value(Pruned)'].append(pruned_cover)
-        df['Objective Value (Ratio)'].append(pruned_cover/whole_cover)
-        df['Queries(Ratio)'].append(queries_subgraph/queries_graph)
+    print('Performance of QuickFilter')
+    print('Size Constraint,k:',budget)
+    print('Size of Ground Set,|U|:',graph.number_of_nodes())
+    print('Size of Pruned Ground Set, |Upruned|:', len(pruned_universe))
+    print('Pg(%):', round(Pg,4)*100)
+    print('Ratio:',round(ratio,4)*100)
+    print('Queries:',round(queries_pruned/queries_unpruned,4)*100)
 
-    df=pd.DataFrame(df)
 
+    save_folder = f'data/{dataset}'
+    os.makedirs(save_folder,exist_ok=True)
+    save_file_path = os.path.join(save_folder,'SS')
+
+    df ={'Dataset':dataset,'Budget':budget,'r':r,'c':c,'Objective Value(Unpruned)':objective_unpruned,
+              'Objective Value(Pruned)':objective_pruned ,'Ground Set': graph.number_of_nodes(),
+              'Ground set(Pruned)':len(pruned_universe), 'Queries(Unpruned)': queries_unpruned,'Time(Unpruned)':time_unpruned,
+              'Time(Pruned)': time_pruned,
+              'Queries(Pruned)': queries_pruned, 'Pruned Ground set(%)': round(Pg,4)*100,
+              'Ratio(%)':round(ratio,4)*100, 'Queries(%)': round(queries_pruned/queries_unpruned,4)*100,
+              'TimeRatio': time_pruned/time_unpruned
+
+              }
+
+   
+    df = pd.DataFrame(df,index=[0])
+    save_to_pickle(df,save_file_path)
     print(df)
 
-    save_folder='data/Blimes'
-    file_path=os.path.join(save_folder,args.dataset)
-    os.makedirs(save_folder,exist_ok=True)
-    save_to_pickle(df,file_path)
+    ###################################################################################################
+
+
+    # pruned_ground_ratio=len(pruned_universe)/graph.number_of_nodes()
+    # print('Ground set (Ratio):',pruned_ground_ratio)
+
+    # # Subgraph
+    # # subgraph = make_subgraph(graph,pruned_universe)
+
+    # # Pv=1-subgraph.number_of_nodes()/graph.number_of_nodes()
+    # # Pe=1-subgraph.number_of_edges()/graph.number_of_edges()
+    # # print('Pv:',Pv)
+    # # print('Pe:',Pe)
+    # df=defaultdict(list)
+    # for budget in budgets:
+    #     solution_subgraph,queries_subgraph = greedy(graph,budget,pruned_universe)
+    #     solution_graph,queries_graph= greedy(graph,budget)
+    #     pruned_cover= calculate_cover(graph,solution_subgraph)
+    #     whole_cover= calculate_cover(graph,solution_graph)
+
+    #     df['Dataset'].append(args.dataset)
+    #     df['Size of Ground set'].append(graph.number_of_nodes())
+    #     df['Size of Pruned Ground set'].append(len(pruned_universe))
+    #     df['Budget'].append(budget)
+    #     # df['Solution'].append(solution_subgraph)
+    #     df['Objective Value(Pruned)'].append(pruned_cover)
+    #     df['Objective Value (Ratio)'].append(pruned_cover/whole_cover)
+    #     df['Queries(Ratio)'].append(queries_subgraph/queries_graph)
+
+    # df=pd.DataFrame(df)
+
+    # print(df)
+
+    # save_folder='data/Blimes'
+    # file_path=os.path.join(save_folder,args.dataset)
+    # os.makedirs(save_folder,exist_ok=True)
+    # save_to_pickle(df,file_path)
 
     
 
@@ -129,11 +182,12 @@ def SS(dataset,r,c,budgets):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument( "--dataset", type=str, default='Facebook', help="Name of the dataset to be used (default: 'Facebook')" )
+    parser.add_argument( "--dataset", type=str, default='Facebook',required=True, help="Name of the dataset to be used (default: 'Facebook')" )
     parser.add_argument( "--r", type=float, default=8, help="r" )
     parser.add_argument( "--c", type=float, default=8, help="c" )
-    parser.add_argument( "--budgets", nargs='+', type=int, help="Budgets" )
+    # parser.add_argument( "--budgets", nargs='+', type=int, help="Budgets" )
+    parser.add_argument("--budget", type=int,required=True,default=10, help="Budgets")
 
     args = parser.parse_args()
 
-    SS(dataset=args.dataset,r=args.r,c=args.c,budgets=args.budgets)
+    SS(dataset=args.dataset,r=args.r,c=args.c,budgets=args.budget)

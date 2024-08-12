@@ -43,8 +43,8 @@ def gain_adjustment(graph,gains,selected_element,uncovered):
             
 
     if uncovered[selected_element]:
-        gains[selected_element]-=1
-        uncovered[selected_element]=False
+        gains[selected_element] -= 1
+        uncovered[selected_element] = False
         for neighbor in graph.neighbors(selected_element):
             if neighbor in gains and gains[neighbor]>0:
                 gains[neighbor]-=1
@@ -60,7 +60,7 @@ def gain_adjustment(graph,gains,selected_element,uncovered):
                     gains[neighbor_of_neighbor ]-=1
 
 
-    assert gains[selected_element] == 0
+    assert gains[selected_element] == 0, f'gains of selected element = {gains[selected_element]}'
 
 
 def prob_greedy(graph,budget,ground_set=None,delta=0):
@@ -112,7 +112,10 @@ def greedy(graph,budget,ground_set=None):
 
     return solution,number_of_queries
 
-        
+
+
+def heuristic(graph:nx.Graph,budget:int,ground_set=None):
+    pass 
 
 
 if __name__ == "__main__":

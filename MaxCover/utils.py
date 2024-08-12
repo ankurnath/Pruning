@@ -3,6 +3,7 @@ import networkx as nx
 import os
 from smartprint import smartprint as sprint
 import time
+from tqdm import tqdm
 
 
 
@@ -28,6 +29,28 @@ def make_subgraph(graph, nodes):
         edges_to_add += [(u, v) for u, v in list(graph.edges(node))]
     subgraph.add_edges_from(edges_to_add)
     return subgraph
+
+
+def load_graph(file_path):
+
+    try:
+        graph = nx.read_edgelist(file_path, create_using=nx.Graph(), nodetype=int)
+
+    except:
+        f = open(file_path, mode="r")
+        lines = f.readlines()
+        edges = []
+
+        for line in lines:
+            line = line.split()
+            if line[0].isdigit():
+                edges.append([int(line[0]), int(line[1])])
+        graph = nx.Graph()
+        graph.add_edges_from(edges)
+
+
+    graph.remove_edges_from(list(nx.selfloop_edges(graph)))
+    return graph
 
 def load_from_pickle(file_path):
     """
