@@ -22,12 +22,13 @@ def SS(dataset,r,c,budget):
     # graph = Graph(file_path=file_path)
     graph = load_graph(file_path=file_path)
 
-    pruned_universe=set()
 
+    start = time.time()
+    pruned_universe=set()
     universe=list(graph.nodes())
     n=graph.number_of_nodes()
     while len(universe)> r*np.log2(n):
-        print('Size of pruned universe:',len(universe))
+        print('Size of universe:',len(universe))
         U=random.sample(universe,int(r*np.log2(n)))
         universe = set(universe)
         for node in tqdm(U):
@@ -87,6 +88,12 @@ def SS(dataset,r,c,budget):
 
     pruned_universe=pruned_universe.union(set(universe))
 
+    end= time.time()
+
+    time_to_prune = end-start
+
+    print('time elapsed to pruned',time_to_prune)
+
     ##################################################################
 
     Pg=len(pruned_universe)/graph.number_of_nodes()
@@ -109,7 +116,7 @@ def SS(dataset,r,c,budget):
     ratio = objective_pruned/objective_unpruned
 
 
-    print('Performance of QuickFilter')
+    print('Performance of SS')
     print('Size Constraint,k:',budget)
     print('Size of Ground Set,|U|:',graph.number_of_nodes())
     print('Size of Pruned Ground Set, |Upruned|:', len(pruned_universe))
@@ -122,13 +129,14 @@ def SS(dataset,r,c,budget):
     os.makedirs(save_folder,exist_ok=True)
     save_file_path = os.path.join(save_folder,'SS')
 
-    df ={'Dataset':dataset,'Budget':budget,'r':r,'c':c,'Objective Value(Unpruned)':objective_unpruned,
+    df ={     'Dataset':dataset,'Budget':budget,'r':r,'c':c,'Objective Value(Unpruned)':objective_unpruned,
               'Objective Value(Pruned)':objective_pruned ,'Ground Set': graph.number_of_nodes(),
               'Ground set(Pruned)':len(pruned_universe), 'Queries(Unpruned)': queries_unpruned,'Time(Unpruned)':time_unpruned,
               'Time(Pruned)': time_pruned,
               'Queries(Pruned)': queries_pruned, 'Pruned Ground set(%)': round(Pg,4)*100,
               'Ratio(%)':round(ratio,4)*100, 'Queries(%)': round(queries_pruned/queries_unpruned,4)*100,
-              'TimeRatio': time_pruned/time_unpruned
+              'TimeRatio': time_pruned/time_unpruned,
+              'TimeToPrune':time_to_prune
 
               }
 
@@ -190,4 +198,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    SS(dataset=args.dataset,r=args.r,c=args.c,budgets=args.budget)
+    SS(dataset=args.dataset,r=args.r,c=args.c,budget=args.budget)

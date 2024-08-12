@@ -10,17 +10,18 @@ def download(datasets):
     DATASETS_URLS={ 
                 "Facebook":"https://snap.stanford.edu/data/facebook_combined.txt.gz",
                 "web-Google":"https://snap.stanford.edu/data/web-Google.txt.gz",
-                "Wiki": "",
+                "Wiki": "https://snap.stanford.edu/data/wiki-Vote.txt.gz",
                 "DBLP":"https://snap.stanford.edu/data/bigdata/communities/com-dblp.ungraph.txt.gz",
+                "Slashdot": "https://snap.stanford.edu/data/soc-sign-Slashdot081106.txt.gz",
                 "Skitter":"https://snap.stanford.edu/data/as-skitter.txt.gz",
-                "Brightkite":"https://snap.stanford.edu/data/loc-brightkite_edges.txt.gz",
-                "Twitter-ego":"https://snap.stanford.edu/data/twitter_combined.txt.gz",
-                "Gowalla":"https://snap.stanford.edu/data/loc-gowalla_edges.txt.gz",
+                # "Brightkite":"https://snap.stanford.edu/data/loc-brightkite_edges.txt.gz",
+                # "Twitter-ego":"https://snap.stanford.edu/data/twitter_combined.txt.gz",
+                # "Gowalla":"https://snap.stanford.edu/data/loc-gowalla_edges.txt.gz",
                 "YouTube":"https://snap.stanford.edu/data/bigdata/communities/com-youtube.ungraph.txt.gz",
-                "StackOverflow":"https://snap.stanford.edu/data/sx-stackoverflow.txt.gz",
-                "Orkut":"https://snap.stanford.edu/data/bigdata/communities/com-orkut.ungraph.txt.gz",
-                "Twitter":"",
-                "FriendSter":"https://snap.stanford.edu/data/bigdata/communities/com-friendster.ungraph.txt.gz",
+                # "StackOverflow":"https://snap.stanford.edu/data/sx-stackoverflow.txt.gz",
+                # "Orkut":"https://snap.stanford.edu/data/bigdata/communities/com-orkut.ungraph.txt.gz",
+                "Twitter":"https://snap.stanford.edu/data/twitter_combined.txt.gz",
+                # "FriendSter":"https://snap.stanford.edu/data/bigdata/communities/com-friendster.ungraph.txt.gz",
                 }
 
 

@@ -1,4 +1,24 @@
 import pickle
+import networkx as nx
+
+def load_graph(file_path):
+
+    try:
+        graph = nx.read_edgelist(file_path, create_using=nx.Graph(), nodetype=int)
+
+    except:
+        f = open(file_path, mode="r")
+        lines = f.readlines()
+        edges = []
+
+        for line in lines:
+            line = line.split()
+            if line[0].isdigit():
+                edges.append([int(line[0]), int(line[1])])
+        graph = nx.Graph()
+        graph.add_edges_from(edges)
+
+    return graph
 def load_from_pickle(file_path):
     """
     Load data from a pickle file.

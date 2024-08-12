@@ -18,7 +18,9 @@ def train_test_split (dataset:str,ratio:float,edge_level_split:bool,seed:int):
 
 
     logging.info(f"Starting train_test_split with dataset={dataset}, ratio={ratio}, edge_level_split={edge_level_split}")
-    graph = nx.read_edgelist(f'../../data/snap_dataset/{dataset}.txt', create_using=nx.Graph(), nodetype=int)
+    # graph = nx.read_edgelist(f'../../data/snap_dataset/{dataset}.txt', create_using=nx.Graph(), nodetype=int)
+    
+    graph = load_graph(f'../../data/snap_dataset/{dataset}.txt')
     logging.info(f"Graph loaded with {graph.number_of_nodes()} nodes and {graph.number_of_edges()} edges")
     train_save_folder='../../data/train'
     test_save_folder='../../data/test'

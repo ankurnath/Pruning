@@ -25,29 +25,21 @@ if __name__ == "__main__":
 
     solution,_=greedy(graph=graph,budget=budget,ground_set=None)
 
-    # subgraph = make_subgraph(graph,solution)
 
-
-    # train_mask=torch.tensor([mapping[node] for node in subgraph.nodes()],dtype=torch.long)
     mapping = dict(zip(graph.nodes(), range(graph.number_of_nodes())))
     train_mask = torch.tensor([mapping[node] for node in solution], dtype=torch.long)
     y=torch.zeros(graph.number_of_nodes(),dtype=torch.long)
 
-    # for node in subgraph.nodes():
+
     for node in solution:
-        # train_mask[mapping[node]]=1
         y[mapping[node]]=1
 
 
-    # data.train_mask=train_mask
 
-    # print('y:',torch.sum(y))
     data.y=y
     num_features=1
 
     x=[graph.degree(node) for node in graph.nodes()]
-    # data.x= torch.randn(size=(graph.num,num_features))
-    # data.x = torch.tensor(x,dtype=torch.float).reshape(-1,1)
     data.x = torch.rand(size=(graph.number_of_nodes(),1))
 
 
@@ -64,7 +56,6 @@ if __name__ == "__main__":
         def forward(self, x, edge_index):
             x = self.conv1(x, edge_index)
             x = x.relu()
-            # x = F.dropout(x, p=0.5, training=self.training)
             x = self.conv2(x, edge_index)
             return x
 
@@ -75,7 +66,7 @@ if __name__ == "__main__":
 
     model.train()
 
-    for epoch in range(1,1000):
+    for epoch in tqdm(range(1,1000)):
 
         out = model(data.x, data.edge_index)  # Perform a single forward pass.
 
@@ -95,83 +86,79 @@ if __name__ == "__main__":
     model.eval()
 
 
-    test_graph = load_from_pickle(f'../../data/test/{dataset}')
+    # test_graph = load_from_pickle(f'../../data/test/{dataset}')
+    test_graph = load_graph(f'../../data/snap_dataset/{dataset}.txt')
     test_data = from_networkx(test_graph)
 
     test_data.x =torch.rand(size=(test_graph.number_of_nodes(),1))
 
+    start = time.time()
     out = model(test_data.x, test_data.edge_index)
-    # print(out[:100])
     pred = out.argmax(dim=1).cpu().numpy()  # Use the class with highest probability.
     indices = np.where(pred == 1)[0]
-
-    print('Pruned Ground ratio:',indices.shape[0]/test_graph.number_of_nodes())
-
     reverse_mapping = dict(zip(range(test_graph.number_of_nodes()),test_graph.nodes()))
+    pruned_universe = [reverse_mapping[node] for node in indices]
+    # print(pruned_universe)
+    end= time.time()
 
-    ground_set=[ reverse_mapping[node] for node in indices]
+    time_to_prune = end-start
 
-    solution_greedy,quries_greedy=greedy(test_graph,budget=budget)
+    print('time elapsed to pruned',time_to_prune)
 
-    solution_pruned,quries_pruned= greedy(test_graph,budget=budget,ground_set=ground_set)
+    graph = test_graph
+
+    ##################################################################
+
+    Pg=len(pruned_universe)/graph.number_of_nodes()
+    start = time.time()
+    solution_unpruned,queries_unpruned= greedy(graph,budget)
+    end = time.time()
+    time_unpruned = round(end-start,4)
+    print('Elapsed time (unpruned):',round(time_unpruned,4))
+
+    start = time.time()
+    solution_pruned,queries_pruned = greedy(graph=graph,budget=budget,ground_set=pruned_universe)
+    end = time.time()
+    time_pruned = round(end-start,4)
+    print('Elapsed time (pruned):',time_pruned)
+    
+    
+    objective_unpruned = calculate_cover(graph,solution_unpruned)
+    objective_pruned = calculate_cover(graph,solution_pruned)
+    
+    ratio = objective_pruned/objective_unpruned
 
 
-    whole_ground_set_objective_value = calculate_cover(test_graph, solution_greedy )
-    pruned_ground_set_objective_value = calculate_cover(test_graph, solution_pruned)
+    print('Performance of GNNpruner')
+    print('Size Constraint,k:',budget)
+    print('Size of Ground Set,|U|:',graph.number_of_nodes())
+    print('Size of Pruned Ground Set, |Upruned|:', len(pruned_universe))
+    print('Pg(%):', round(Pg,4)*100)
+    print('Ratio:',round(ratio,4)*100)
+    print('Queries:',round(queries_pruned/queries_unpruned,4)*100)
 
 
-    ratio = pruned_ground_set_objective_value / whole_ground_set_objective_value
-    df = defaultdict(list)
+    save_folder = f'data/{dataset}'
+    os.makedirs(save_folder,exist_ok=True)
+    save_file_path = os.path.join(save_folder,'GNNpruner')
 
+    df ={      'Dataset':dataset,'Budget':budget,'Objective Value(Unpruned)':objective_unpruned,
+              'Objective Value(Pruned)':objective_pruned ,'Ground Set': graph.number_of_nodes(),
+              'Ground set(Pruned)':len(pruned_universe), 'Queries(Unpruned)': queries_unpruned,'Time(Unpruned)':time_unpruned,
+              'Time(Pruned)': time_pruned,
+              'Queries(Pruned)': queries_pruned, 'Pruned Ground set(%)': round(Pg,4)*100,
+              'Ratio(%)':round(ratio,4)*100, 'Queries(%)': round(queries_pruned/queries_unpruned,4)*100,
+              'TimeRatio': time_pruned/time_unpruned,
+              'TimeToPrune':time_to_prune
 
-    # Format the numbers to 4 digits
-    formatted_ratio = round(ratio, 4)
-    formatted_queries_ratio = round(quries_pruned / quries_greedy, 4)
-    # print(formatted_queries_ratio)
+              }
 
-    df['Dataset'].append(dataset)
-    df['Objective value (Ratio)'].append(formatted_ratio)
-    df['Queries (Ratio)'].append(formatted_queries_ratio)
-    df['Budget'].append(budget)
-    df['Objective value(Greedy)'].append(whole_ground_set_objective_value )
-    df ['Objective value(Pruned Greedy)'].append(pruned_ground_set_objective_value)
-
-
-    df= pd.DataFrame(df)
-
+   
+    df = pd.DataFrame(df,index=[0])
+    save_to_pickle(df,save_file_path)
     print(df)
 
-    save_folder = 'data/GNN'
 
-    os.makedirs(save_folder,exist_ok=True)
-
-    file_path = os.path.join(save_folder,f'{dataset}_{budget}')
-    df.to_pickle(file_path)
-
-    # print('Ratio:',calculate_cover(test_graph, solution_pruned)/calculate_cover(test_graph, solution_greedy))
-
-
-    # print(solution_pruned,solution_greedy)
-
-# # print(pred.sum())
-# correct = pred == data.y
-
-
-# positive = pred==1
-
-# negative = pred== 0
-# # print()
-
-# # print('Correct positive:',(correct & positive).sum())
-# # Print the count of correct positive predictions
-# print('Correct positive:', (correct & positive).sum().item())
-
-# print('Positive class',positive.sum().item())
-# print('Negative class',negative.sum().item())
-# print(correct.sum()/graph.number_of_nodes())
-# print(subgraph_size.sum()/data.y.sum())
-
-# print(subgraph_size.sum()/graph.number_of_nodes())
 
 
 

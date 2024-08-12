@@ -18,8 +18,7 @@ def quickfilter(dataset,budget,delta=0.1):
     load_graph_file_path=f'../../data/snap_dataset/{dataset}.txt'
     # graph=nx.read_edgelist(f'../../data/snap_dataset/{dataset}.txt', create_using=nx.Graph(), nodetype=int)
     graph = load_graph(load_graph_file_path)
-    # sprint(list(nx.selfloop_edges(graph)))
-    # print(type(graph))
+    
 
     
     
@@ -37,7 +36,11 @@ def quickfilter(dataset,budget,delta=0.1):
             pruned_universe.append(node)
             gain_adjustment(graph,gains,node,uncovered)
             
+    end= time.time()
 
+    time_to_prune = end-start
+
+    print('time elapsed to pruned',time_to_prune)
     
     
     ##################################################################
@@ -75,13 +78,14 @@ def quickfilter(dataset,budget,delta=0.1):
     os.makedirs(save_folder,exist_ok=True)
     save_file_path = os.path.join(save_folder,'Quickfilter')
 
-    df ={'Dataset':dataset,'Budget':budget,'Delta':delta,'Objective Value(Unpruned)':objective_unpruned,
+    df ={      'Dataset':dataset,'Budget':budget,'Delta':delta,'Objective Value(Unpruned)':objective_unpruned,
               'Objective Value(Pruned)':objective_pruned ,'Ground Set': graph.number_of_nodes(),
               'Ground set(Pruned)':len(pruned_universe), 'Queries(Unpruned)': queries_unpruned,'Time(Unpruned)':time_unpruned,
               'Time(Pruned)': time_pruned,
               'Queries(Pruned)': queries_pruned, 'Pruned Ground set(%)': round(Pg,4)*100,
               'Ratio(%)':round(ratio,4)*100, 'Queries(%)': round(queries_pruned/queries_unpruned,4)*100,
-              'TimeRatio': time_pruned/time_unpruned
+              'TimeRatio': time_pruned/time_unpruned,
+              'TimeToPrune':time_to_prune
 
               }
 
@@ -98,7 +102,7 @@ def quickfilter(dataset,budget,delta=0.1):
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--dataset", type=str, default='Facebook', help="Name of the dataset to be used (default: 'Facebook')")
-    parser.add_argument("--budget", type=int,default=10, help="Budgets")
+    parser.add_argument("--budget", type=int,required=True,default=10, help="Budgets")
     parser.add_argument("--delta", type=float, default=0.1, help="Delta")
     args = parser.parse_args()
     quickfilter(dataset=args.dataset,budget=args.budget)
