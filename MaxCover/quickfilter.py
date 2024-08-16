@@ -22,7 +22,7 @@ def quickfilter(dataset,budget,delta=0.1):
 
     
     
-    
+    start = time.time()
     gains=get_gains(graph,ground_set=None)
 
     curr_obj=0

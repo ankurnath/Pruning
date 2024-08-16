@@ -5,11 +5,13 @@ from utils import *
 import numpy as np
 
 
-def gurobi_solver(graph:nx.Graph,budget:int,node_weights:dict):
+def gurobi_solver(graph:nx.Graph,budget:int,node_weights:dict,max_time = None,max_threads = None):
 
     graph,forward_mapping,reverse_mapping = relabel_graph(graph)
+    
+    
 
-    node_weights = {forward_mapping[node]:node_weights[node] for node in node_weights}
+    node_weights = {forward_mapping[node]:node_weights[node] for node in graph.nodes()}
 
     regions, population = gp.multidict({node:1 for node in graph.nodes()})
     
@@ -24,6 +26,11 @@ def gurobi_solver(graph:nx.Graph,budget:int,node_weights:dict):
     sites, coverage, cost = gp.multidict(temp_dict)
 
     m = gp.Model("cell_tower")
+    if max_time is None:
+        m.setParam('TimeLimit', 600)
+
+    if max_threads:
+        m.setParam('Threads', max_threads)
 
     build = m.addVars(len(sites), vtype=GRB.BINARY, name="Build")
     is_covered = m.addVars(len(regions), vtype=GRB.BINARY, name="Is_covered")
@@ -42,7 +49,7 @@ def gurobi_solver(graph:nx.Graph,budget:int,node_weights:dict):
         if (abs(build[tower].x) > 1e-6):
             solution.append(reverse_mapping[tower])
             
-    return solution
+    return solution, m.ObjVal
 
 
 if __name__ == "__main__":

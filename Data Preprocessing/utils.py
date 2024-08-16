@@ -17,7 +17,7 @@ def load_graph(file_path):
                 edges.append([int(line[0]), int(line[1])])
         graph = nx.Graph()
         graph.add_edges_from(edges)
-
+    graph.remove_edges_from(list(nx.selfloop_edges(graph)))
     return graph
 def load_from_pickle(file_path):
     """

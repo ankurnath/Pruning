@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 from utils import *
+import random
 # import pandas as pd
 from collections import defaultdict
 import numpy as np
@@ -17,48 +18,39 @@ import matplotlib.pyplot as plt
 def quickfilter_multi(graph, node_weights , max_budget, min_budget,delta ,eps,args):
    
     df=defaultdict(list)
-    u_taus = {}
-    gains_taus ={}
-    uncovered_taus = {}
+    # u_taus = {}
+    # gains_taus ={}
+    # uncovered_taus = {}
     
 
     m = int(np.floor (np.log(max_budget/min_budget)/np.log(1+eps)))
     print ('m =',m)
     curr_obj_taus = defaultdict(int)
-    for i in range(m+1):
-        tau = (1+eps)**i * min_budget
-        u_taus [i] =set([])
-        gains_taus [i] = get_gains(graph,ground_set=None)
-        uncovered_taus[i] = defaultdict(lambda: True)
-        
+    # for i in range(m+1):
+    #     tau = (1+eps)**i * min_budget
+    #     u_taus [i] =set([])
+    #     gains_taus [i] = get_gains(graph,ground_set=None)
+    #     uncovered_taus[i] = defaultdict(lambda: True)
+
+    gains = get_gains(graph=graph,ground_set=None)
+
+    uncovered = defaultdict(lambda: True)
+
+    taus = [ (1+eps)**i * min_budget for i in range(m+1)]
+
+    curr_obj = 0
+    pruned_universe_multi = []    
     for node in graph.nodes():
+        
+        tau = random.choice(taus)
 
-        for i in range(m+1):
-            # print('Do we cast tau to integer ?')
-            # tau = int((1+eps)**i * min_budget)
-            tau = (1+eps)**i * min_budget
+        if gains[node]/node_weights[node]>=(delta/tau)*curr_obj:
 
-            if gains_taus[i][node]/node_weights[node]>=(delta/tau)*curr_obj_taus[i]:
-                # print(gains_taus[i][node])
-                curr_obj_taus[i]+=gains_taus[i][node]
-                u_taus [i].add(node)
-                # pruned_universe.append(node)
+            curr_obj += gains[node]
+            pruned_universe_multi.append(node)
 
-                # gains adjustment
-                gain_adjustment(graph,gains_taus[i],node,uncovered_taus[i])
-            
+            gain_adjustment(graph,gains,node,uncovered)
 
-    
-    # for key in u_taus:
-    #     print(f'key:{key} tau:{int((1+eps)**key * min_budget)} size:{len(u_taus[key])}')
-
-
-    u = u_taus [0]
-
-    for i in range(1,m+1):
-        u = u.union(u_taus[i])
-
-    pruned_universe_multi = list(u)
 
     Pg_multi=len(pruned_universe_multi)/graph.number_of_nodes()
     Pg_multi = round(Pg_multi,4)*100

@@ -137,8 +137,10 @@ def numba_greedy(graph:nx.Graph,budget:int,node_weights:dict,ground_set=None):
     max_gain = 0
     max_node = None
 
+    # print()
+
     # Iterate through each node
-    for node in range(N):
+    for node in range(ground_set_size):
         # Check if the node is in the mask, within budget, and has a higher gain than the current max
         if mask[node] == 1 and node_weights[node] <= budget:
             number_of_queries += 1
@@ -152,7 +154,7 @@ def numba_greedy(graph:nx.Graph,budget:int,node_weights:dict,ground_set=None):
     start_time = time.time()
 
     constraint = 0
-    for i in tqdm(range(N)):
+    for i in tqdm(range(ground_set_size)):
         number_of_queries += (ground_set_size- i)
         selected_element = select_element(gains,node_weights,mask)
         # selected_element = np.argmax(gains)
@@ -173,9 +175,9 @@ def numba_greedy(graph:nx.Graph,budget:int,node_weights:dict,ground_set=None):
     # print(number_of_queries)
     if calculate_cover(graph,solution)>=calculate_cover(graph,[max_node]):
         # print('Cover:',calculate_cover(graph,solution))
-        return [reverse_mapping[node] for node in solution],number_of_queries
+        return [reverse_mapping[node] for node in solution],number_of_queries,calculate_cover(graph,solution)
     else:
-        return [reverse_mapping[max_node]],number_of_queries
+        return [reverse_mapping[max_node]],number_of_queries,calculate_cover(graph,[max_node])
 
 
 if __name__ == "__main__":

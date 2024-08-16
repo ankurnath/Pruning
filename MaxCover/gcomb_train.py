@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from utils import load_from_pickle,calculate_cover,save_to_pickle
+from utils import *
 import pandas as pd
 from collections import defaultdict
 from greedy import prob_greedy
@@ -12,6 +12,9 @@ def train(dataset,budgets,m,delta):
     load_graph_file_path=f'../../data/train/{args.dataset}'
 
     graph=load_from_pickle(load_graph_file_path)
+    graph.remove_edges(list(nx.selfloop_edges(graph)))
+
+    # print(list(nx.selfloop_edges(graph)))
 
     max_budget=max(budgets)
 
@@ -45,43 +48,21 @@ def train(dataset,budgets,m,delta):
         'Ranks':r,
         }
     
-    # print(df)
+    
     file_path=os.path.join(save_folder,f'{dataset}')
     save_to_pickle(df,file_path)
-    # df.to_pickle(file_path)
+    
 
     
 
 if __name__ == "__main__":
     parser = ArgumentParser()
 
-    parser.add_argument(
-        "--dataset",
-        type=str,
-        default='Facebook',
-        help="Name of the dataset to be used for training (default: 'Facebook')"
-    )
-    parser.add_argument(
-        "--budgets",
-        nargs='+',
-        type=int,
-        help="Budgets"
-    )
+    parser.add_argument( "--dataset", type=str, default='Facebook', help="Name of the dataset to be used for training (default: 'Facebook')" )
+    parser.add_argument( "--budgets", nargs='+', type=int, help="Budgets" )
+    parser.add_argument( "--delta", type=float, default=0.001, help="Delta" )
+    parser.add_argument( "--m", type=int, default=30, help='--number_of_attempts')
 
-    parser.add_argument(
-        "--delta",
-        type=float,
-        default=0.001,
-        help="Delta"
-    )
-
-    parser.add_argument(
-        "--m",
-        type=int,
-        default=30,
-        help='--number_of_attempts'
-
-    )
     
     args = parser.parse_args()
     train(args.dataset,args.budgets,args.m,args.delta)
