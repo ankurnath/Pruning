@@ -4,7 +4,7 @@ from greedy import get_gains, gain_adjustment
 from helper_functions import *
 
 
-def modified_greedy(graph,budget,ground_set=None , node_weights= None):
+def knapsack_greedy(graph,budget,ground_set=None , node_weights= None):
     
     number_of_queries=0
 
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     node_weights = generate_node_weights(graph=graph,cost_model=cost_model)
 
 
-    modified_greedy(graph = graph,budget = budget,node_weights=node_weights)
+    knapsack_greedy(graph = graph,budget = budget,node_weights=node_weights)
 
 
 

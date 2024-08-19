@@ -95,7 +95,7 @@ def select_element(gains,node_weights,mask):
 #     return solution
 
 
-def numba_greedy(graph:nx.Graph,budget:int,node_weights:dict,ground_set=None):
+def knapsack_numba_greedy(graph:nx.Graph,budget:int,node_weights:dict,ground_set=None):
     # forw
     graph, forward_mapping, reverse_mapping = relabel_graph(graph=graph)
     
@@ -112,7 +112,7 @@ def numba_greedy(graph:nx.Graph,budget:int,node_weights:dict,ground_set=None):
     
     gains = get_gains(adj_list=adj_list,start=start,end=end)
     uncovered = np.ones(N)
-    number_of_queries = 0
+    
     if ground_set is None:
         ground_set_size = N
 
@@ -135,6 +135,8 @@ def numba_greedy(graph:nx.Graph,budget:int,node_weights:dict,ground_set=None):
     # print()
 
     # Iterate through each node
+
+    number_of_queries = 0
     for node in range(ground_set_size):
         # Check if the node is in the mask, within budget, and has a higher gain than the current max
         if mask[node] == 1 and node_weights[node] <= budget:
@@ -166,9 +168,9 @@ def numba_greedy(graph:nx.Graph,budget:int,node_weights:dict,ground_set=None):
     print("Elapsed time:",round(end_time-start_time,4))
     
     if calculate_obj(graph,solution)>=calculate_obj(graph,[max_node]):
-        return [reverse_mapping[node] for node in solution],number_of_queries,calculate_obj(graph,solution)
+        return calculate_obj(graph,solution),number_of_queries,[reverse_mapping[node] for node in solution]
     else:
-        return [reverse_mapping[max_node]],number_of_queries,calculate_obj(graph,[max_node])
+        return calculate_obj(graph,[max_node]),number_of_queries,[reverse_mapping[max_node]]
 
 
 if __name__ == "__main__":

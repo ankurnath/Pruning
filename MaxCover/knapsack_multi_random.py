@@ -1,37 +1,25 @@
-from argparse import ArgumentParser
 from utils import *
-import random
-# import pandas as pd
-from collections import defaultdict
-import numpy as np
-
 from greedy import greedy,gain_adjustment,get_gains
 
-from numba_greedy import numba_greedy
+from knapsack_numba_greedy import knapsack_numba_greedy
 
 # from budgeted_greedy import modified_greedy
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 # from IP_solver import gurobi_solver
 
 
 
-def quickfilter_multi(graph, node_weights , max_budget, min_budget,delta ,eps,args):
+def quickfilter_random(dataset, cost_model , max_budget, min_budget,delta ,eps,args):
+
+    load_graph_file_path=f'../../data/snap_dataset/{dataset}.txt'
+    graph = load_graph(load_graph_file_path)
+    node_weights = generate_node_weights(graph=graph,cost_model=cost_model)
    
-    df=defaultdict(list)
-    # u_taus = {}
-    # gains_taus ={}
-    # uncovered_taus = {}
-    
+    start = time.time()
 
     m = int(np.floor (np.log(max_budget/min_budget)/np.log(1+eps)))
     print ('m =',m)
     curr_obj_taus = defaultdict(int)
-    # for i in range(m+1):
-    #     tau = (1+eps)**i * min_budget
-    #     u_taus [i] =set([])
-    #     gains_taus [i] = get_gains(graph,ground_set=None)
-    #     uncovered_taus[i] = defaultdict(lambda: True)
-
     gains = get_gains(graph=graph,ground_set=None)
 
     uncovered = defaultdict(lambda: True)
@@ -58,6 +46,13 @@ def quickfilter_multi(graph, node_weights , max_budget, min_budget,delta ,eps,ar
     print('Multi budget Pruned Universe:',len(pruned_universe_multi))
     print("Multi budget Pruned Universe in percentage:",Pg_multi)
 
+    end = time.time()
+
+    timetoprune_multi = end-start
+
+
+
+    start = time.time()
     gains=get_gains(graph,ground_set=None)
     curr_obj=0
     pruned_universe_single=[]
@@ -76,10 +71,12 @@ def quickfilter_multi(graph, node_weights , max_budget, min_budget,delta ,eps,ar
     print(f'Single budget Size of Pruned universe:{len(pruned_universe_single)}')
     print("Single budget Pruned Universe in percentage:",round(len(pruned_universe_single)/graph.number_of_nodes(),4)*100)
     
-    multi_ratios = []
-    single_ratios = []
-    # greedy_coverages = []
-    unpruned_obj = []
+    end= time.time()
+
+    timetoprune_single = end - start
+
+
+    
 
     # x = [int((1+eps)**i * min_budget)  for i in range(m+1)] + [max_budget]
 
@@ -89,119 +86,96 @@ def quickfilter_multi(graph, node_weights , max_budget, min_budget,delta ,eps,ar
     if x[-1]>max_budget:
         x.pop()
     print('Budgets',x)
-    subgraph_multi = make_subgraph(graph,pruned_universe_multi)
-    subgraph_single = make_subgraph(graph,pruned_universe_single)
+    # subgraph_multi = make_subgraph(graph,pruned_universe_multi)
+    # subgraph_single = make_subgraph(graph,pruned_universe_single)
 
     # print(subgraph_multi.number_of_nodes()/graph.number_of_nodes())
 
+    df = defaultdict(list)
+
     for i in x:
-        solution_pruned_multi,_,objective_multi_pruned = numba_greedy(graph=graph, budget=i,node_weights=node_weights,ground_set=pruned_universe_multi)
-        solution_pruned_single,_,objective_single_pruned = numba_greedy(graph=graph, budget=i,node_weights=node_weights,ground_set=pruned_universe_single)
-        # solution_pruned_multi,_,objective_multi_pruned = numba_greedy(graph=subgraph_multi , budget=i,node_weights=node_weights)
-        # solution_pruned_single,_,objective_single_pruned = numba_greedy(graph=subgraph_single, budget=i,node_weights=node_weights)
+        start = time.time()
+        objective_multi_pruned,queries_multi_pruned,solution_multi_pruned= knapsack_numba_greedy(graph=graph, 
+                                                                                                 budget=i,node_weights=node_weights,
+                                                                                                 ground_set=pruned_universe_multi)
+        end = time.time()
+
+        time_multi_pruned = end -start
+
+        start = time.time()
+        objective_single_pruned,queries_single_pruned,solution_single_pruned= knapsack_numba_greedy(graph=graph, 
+                                                                                                 budget=i,node_weights=node_weights,
+                                                                                                 ground_set=pruned_universe_single)
         
-        solution_unpruned,_,objective_unpruned = numba_greedy(graph=graph, budget=i, node_weights=node_weights) 
-        multi_ratios.append(objective_multi_pruned/objective_unpruned)
-        single_ratios.append(objective_single_pruned/objective_unpruned)
-        unpruned_obj.append(objective_unpruned)
+        end = time.time()
+        time_single_pruned = end -start
+
+        start = time.time()
+        objective_unpruned,queries_unpruned,solution_unpruned= knapsack_numba_greedy(graph=graph,budget=i,
+                                                                                 node_weights=node_weights)
         
-        # greedy_coverage = calculate_cover(graph,greedy_solution)
-        # greedy_coverages.append(greedy_coverage)
-        # multi_coverage= calculate_cover(graph,solution_subgraph_multi)
-        # single_coverage = calculate_cover(graph,solution_subgraph_single)
-        # multi_ratios.append(multi_coverage/greedy_coverage)
-        # single_ratios.append(single_coverage /greedy_coverage)
-        # greedy_solution,_ = numba_greedy(graph=graph, budget=i, node_weights=node_weights) 
-        # solution_subgraph_multi,_ = numba_greedy(graph=graph, budget=i,node_weights=node_weights,ground_set=pruned_universe_multi)
-        # solution_subgraph_single,_ = numba_greedy(graph=graph, budget=i,node_weights=node_weights,ground_set=pruned_universe_single) 
-        # greedy_coverage = calculate_cover(graph,greedy_solution)
-        # greedy_coverages.append(greedy_coverage)
-        # multi_coverage= calculate_cover(graph,solution_subgraph_multi)
-        # single_coverage = calculate_cover(graph,solution_subgraph_single)
-        # multi_ratios.append(multi_coverage/greedy_coverage)
-        # single_ratios.append(single_coverage /greedy_coverage)
+        
+        end = time.time()
 
-        # print('greedy')
-        print('Multi-ratio',multi_ratios[-1])
-        print('Single-ratio',single_ratios[-1])
+        time_unpruned = end- start
+        df['Dataset'].append(dataset)
+        df['Budget'].append(i)
+        df['Delta'].append(delta)
+        df['Objective Value(Unpruned)'].append(objective_unpruned)
+        df['Objective Value Multi(Pruned)'].append(objective_multi_pruned)
+        df['Objective Value Single(Pruned)'].append(objective_single_pruned)
+        df['Ground Set'].append(graph.number_of_nodes())
+        df['Ground set Multi (Pruned)'].append(len(pruned_universe_multi))
+        df['Ground set Single (Pruned)'].append(len(pruned_universe_single))
+        
+        df['Time(Unpruned)'].append(time_unpruned)
+        df['Time Multi(Pruned)'].append(time_multi_pruned)
+        df['Time Single(Pruned)'].append(time_single_pruned)
+        df['Queries (Unpruned)'].append(queries_unpruned)
+        df['Queries Multi (pruned)'].append(queries_multi_pruned)
+        df['Queries Single (pruned)'].append(queries_single_pruned)
 
-    print(unpruned_obj)
-    # print('Degree',sorted([graph.degree(node) for node in greedy_solution]))
-    
-    
-    # print(solution_subgraph)
-    # print('Degree',[graph.degree(node) for node in solution_subgraph])
+        df['Pruned Ground set Multi(%)'].append(Pg_multi)
+        df['Pruned Ground set Single(%)'].append(Pg_single)
 
-    #################################################
-     
+        df['Ratio Multi'].append(round(objective_multi_pruned/objective_unpruned,4)*100)
+        df['Ratio Single'].append(round(objective_single_pruned/objective_unpruned,4)*100)
+
+        df['Queries Multi(%)'].append(round(queries_multi_pruned/queries_unpruned))
+        df['Queries Single(%)'].append(round(queries_single_pruned/queries_unpruned))
+
+        df['TimeRatio(Multi)'].append(time_multi_pruned/time_unpruned)
+        df['TimeRatio(Single)'].append(time_single_pruned/time_unpruned)
+
+        df['TimeToPrune(Multi)'].append(timetoprune_multi)
+        df['TimeToPrune(Single)'].append(timetoprune_single)
 
 
-    
-    
-    # for i in x:
-    #     # solution_subgraph,_ = modified_greedy(graph=graph, budget=i,node_weights=node_weights,ground_set = pruned_universe) 
-    #     # greedy_solution,_ = modified_greedy(graph=graph, budget=i, node_weights=node_weights) 
-    #     solution_subgraph,_ = numba_greedy(graph=graph, budget=i,node_weights=node_weights,ground_set = pruned_universe) 
-    #     greedy_solution,_ = numba_greedy(graph=graph, budget=i, node_weights=node_weights) 
-    #     coverage= calculate_cover(graph,solution_subgraph)
-    #     single_ratios.append(coverage/calculate_cover(graph,greedy_solution))
 
-    
-    #################################################
+
+    df = pd.DataFrame(df)
+
+    save_folder = f'data/{dataset}/knapsack_multi_random'
+    os.makedirs(save_folder,exist_ok=True)
+    save_file_path = os.path.join(save_folder,f'Quickfilter_{cost_model}')
+    save_to_pickle(df,save_file_path)
+
+
+    print(df[['Ratio Multi','Queries Multi (pruned)','Queries Multi(%)','Ratio Single','Queries Single (pruned)','Queries Single(%)']])
 
         
     fontsize = 20
-    # plt.plot(x,ratios)
-    # plt.scatter(x, ratios, color='blue', marker='o', s=100, edgecolor='black', alpha=0.7)
-    plt.plot(x, multi_ratios, linestyle='--', marker='o', markersize=20, color='blue', markeredgecolor='black', alpha=0.7, label=f'Multi-Budget {Pg_multi:.2f}%')
-    plt.plot(x, single_ratios, linestyle='--', marker='*', markersize=20, color='red', markeredgecolor='black', alpha=0.7, label=f'Single-Budget {Pg_single:.2f}%')
+    plt.plot(x, df['Ratio Multi'], linestyle='--', marker='o', markersize=20, color='blue', markeredgecolor='black', alpha=0.7, label=f'Multi-Budget {Pg_multi:.2f}%')
+    plt.plot(x, df['Ratio Single'], linestyle='--', marker='*', markersize=20, color='red', markeredgecolor='black', alpha=0.7, label=f'Single-Budget {Pg_single:.2f}%')
     
-    # plt.plot(x, ratios, linestyle='--', marker='o', markersize=20, color='blue', markeredgecolor='black', alpha=0.7, label='Multi-Budget')
+    
     plt.xlabel('Budgets', fontsize=fontsize )
-    plt.ylabel('Ratios', fontsize=fontsize)
+    plt.ylabel('Ratios (%)', fontsize=fontsize)
     plt.title(f' Dataset:{args.dataset} Eps:{eps} Delta:{delta} Max Budget:{max_budget} Min Budget: {min_budget}',fontsize=fontsize)
     plt.legend()
-    plt.show()
 
-
-
-        
-    #     Pv=1-subgraph.number_of_nodes()/graph.number_of_nodes()
-    #     Pe=1-subgraph.number_of_edges()/graph.number_of_edges()
-        
-    #     solution_subgraph,_ = greedy(graph,budget,pruned_universe)
-
-    #     greedy_solution,_ = greedy(graph,budget)
-    #     # print()
-
-    #     coverage= calculate_cover(graph,solution_subgraph)
-
-    #     df['Budget'].append(budget)
-    #     df['Pv'].append(Pv)
-    #     df['Pe'].append(Pe)
-    #     df['Pg'].append(Pg)
-    #     df['Objective Value'].append(coverage)
-    #     df['Ratio'].append(coverage/calculate_cover(graph,greedy_solution))
-    #     df['Solution'].append(solution_subgraph)
-    #     df['Objective Value (Ratio)'].append(coverage/graph.number_of_nodes())
-        
-
-    # df['delta']=[delta]*len(df['Budget'])
-
-    # df=pd.DataFrame(df)
-
-    
-    # try:
-    #     df['Ratio']=df['Objective Value']/load_from_pickle(f'data/{args.dataset}/Greedy')['Objective Value']
-    # except:
-    #     raise ValueError('Greedy value is not found.')
-    # print(df)
-
-
-    # save_folder=f'data/{args.dataset}'
-    # file_path=os.path.join(save_folder,'QuickFilter')
-    # os.makedirs(save_folder,exist_ok=True)
-    # save_to_pickle(df,file_path) 
+    plt.savefig(os.path.join(save_folder,f'Quickfilter_{cost_model}.pdf'), bbox_inches='tight')
+    # plt.show()
 
 if __name__ == "__main__":
     parser = ArgumentParser()
@@ -215,37 +189,19 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # file_path=f'../../data/test/{args.dataset}'
-    # graph = load_from_pickle(file_path)
-
-    # node_weights = load_from_pickle(f'../../data/test/{args.dataset}_weights_{args.cost_model}')
     
-    # graph = nx.read_edgelist(f'../../data/snap_dataset/{args.dataset}.txt', create_using=nx.Graph(), nodetype=int)
-
-    # graph.remove_edge(list(nx.selfloop_edges(graph)))
-    graph = load_graph(f'../../data/snap_dataset/{args.dataset}.txt')
-    
-    if args.cost_model == 'uniform':
-        node_weights = {node:1 for node in graph.nodes()}
-
-    elif args.cost_model == 'degree':
-        # alpha = 1/20
-        alpha = 1/20
-        out_degrees = {node: graph.degree(node) for node in graph.nodes()}
-        out_degree_max = np.max(list(out_degrees.values()))
-        out_degree_min = np.min(list(out_degrees.values()))
-        node_weights = {node: (out_degrees[node] - out_degree_min + alpha) / (out_degree_max - out_degree_min) for node in graph.nodes()}
-
-    else:
-        raise NotImplementedError('Unknown model')
-    
+    dataset = args.dataset
+    cost_model = args.cost_model
     max_budget = args.max_budget
     min_budget = args.min_budget
     delta = args.delta 
     eps = args.eps
 
+    quickfilter_random(dataset, cost_model , max_budget, min_budget,delta ,eps,args)
+
+        
 
 
-    quickfilter_multi(graph = graph, node_weights = node_weights, 
-                      max_budget = max_budget, min_budget = min_budget, 
-                      delta = delta, eps = eps ,args = args)
+
+        
+    
