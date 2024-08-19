@@ -1,11 +1,5 @@
-from argparse import ArgumentParser
 from utils import *
-import pandas as pd
-from collections import defaultdict
-
 from greedy import greedy,gain_adjustment,get_gains
-
-
 
 
 def quickfilter(dataset,budget,delta=0.1):
@@ -16,17 +10,11 @@ def quickfilter(dataset,budget,delta=0.1):
     
 
     load_graph_file_path=f'../../data/snap_dataset/{dataset}.txt'
-    # graph=nx.read_edgelist(f'../../data/snap_dataset/{dataset}.txt', create_using=nx.Graph(), nodetype=int)
     graph = load_graph(load_graph_file_path)
-    
-
-    
     
     start = time.time()
     gains=get_gains(graph,ground_set=None)
-
     curr_obj=0
-
     pruned_universe=[]
     uncovered=defaultdict(lambda: True)
     for node in tqdm(graph.nodes()):
@@ -47,21 +35,16 @@ def quickfilter(dataset,budget,delta=0.1):
 
     Pg=len(pruned_universe)/graph.number_of_nodes()
     start = time.time()
-    solution_unpruned,queries_unpruned= greedy(graph,budget)
+    objective_unpruned,queries_unpruned,solution_unpruned= greedy(graph,budget)
     end = time.time()
     time_unpruned = round(end-start,4)
     print('Elapsed time (unpruned):',round(time_unpruned,4))
 
     start = time.time()
-    solution_pruned,queries_pruned = greedy(graph=graph,budget=budget,ground_set=pruned_universe)
+    objective_pruned,queries_pruned,solution_pruned = greedy(graph=graph,budget=budget,ground_set=pruned_universe)
     end = time.time()
     time_pruned = round(end-start,4)
     print('Elapsed time (pruned):',time_pruned)
-    
-    
-    objective_unpruned = calculate_cover(graph,solution_unpruned)
-    objective_pruned = calculate_cover(graph,solution_pruned)
-    
     ratio = objective_pruned/objective_unpruned
 
 
@@ -78,7 +61,7 @@ def quickfilter(dataset,budget,delta=0.1):
     os.makedirs(save_folder,exist_ok=True)
     save_file_path = os.path.join(save_folder,'Quickfilter')
 
-    df ={      'Dataset':dataset,'Budget':budget,'Delta':delta,'Objective Value(Unpruned)':objective_unpruned,
+    df ={     'Dataset':dataset,'Budget':budget,'Delta':delta,'Objective Value(Unpruned)':objective_unpruned,
               'Objective Value(Pruned)':objective_pruned ,'Ground Set': graph.number_of_nodes(),
               'Ground set(Pruned)':len(pruned_universe), 'Queries(Unpruned)': queries_unpruned,'Time(Unpruned)':time_unpruned,
               'Time(Pruned)': time_pruned,
@@ -101,8 +84,8 @@ def quickfilter(dataset,budget,delta=0.1):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--dataset", type=str, default='Facebook', help="Name of the dataset to be used (default: 'Facebook')")
+    parser.add_argument("--dataset", type=str, default='Facebook',required=True, help="Name of the dataset to be used (default: 'Facebook')")
     parser.add_argument("--budget", type=int,required=True,default=10, help="Budgets")
-    parser.add_argument("--delta", type=float, default=0.1, help="Delta")
+    parser.add_argument("--delta", type=float, default=0.1,required=True, help="Delta")
     args = parser.parse_args()
     quickfilter(dataset=args.dataset,budget=args.budget)

@@ -1,11 +1,6 @@
-from numba import njit
-from argparse import ArgumentParser
-import networkx as nx
-
 from utils import *
-import numpy as np
-import time
-from tqdm import tqdm
+from helper_functions import *
+
 
 
 def flatten_graph(graph:nx.Graph):
@@ -169,15 +164,11 @@ def numba_greedy(graph:nx.Graph,budget:int,node_weights:dict,ground_set=None):
     end_time = time.time()
 
     print("Elapsed time:",round(end_time-start_time,4))
-
-    # print('Solution',solution)
-    # print('Degree:',[graph.degree(node) for node in solution])
-    # print(number_of_queries)
-    if calculate_cover(graph,solution)>=calculate_cover(graph,[max_node]):
-        # print('Cover:',calculate_cover(graph,solution))
-        return [reverse_mapping[node] for node in solution],number_of_queries,calculate_cover(graph,solution)
+    
+    if calculate_obj(graph,solution)>=calculate_obj(graph,[max_node]):
+        return [reverse_mapping[node] for node in solution],number_of_queries,calculate_obj(graph,solution)
     else:
-        return [reverse_mapping[max_node]],number_of_queries,calculate_cover(graph,[max_node])
+        return [reverse_mapping[max_node]],number_of_queries,calculate_obj(graph,[max_node])
 
 
 if __name__ == "__main__":
@@ -192,23 +183,8 @@ if __name__ == "__main__":
 
     graph = nx.read_edgelist(f'../../data/snap_dataset/{args.dataset}.txt', create_using=nx.Graph(), nodetype=int)
     
-    # node_weights = {node:1 for node in graph.nodes()}
-
-    if args.cost_model == 'uniform':
-        node_weights = {node:1 for node in graph.nodes()}
-
-    elif args.cost_model == 'degree':
-        # alpha = 1/20
-        alpha = 1
-        out_degrees = {node: graph.degree(node) for node in graph.nodes()}
-        out_degree_max = np.max(list(out_degrees.values()))
-        out_degree_min = np.min(list(out_degrees.values()))
-        node_weights = {node: (out_degrees[node] - out_degree_min + alpha) / (out_degree_max - out_degree_min) for node in graph.nodes()}
-
-    else:
-        raise NotImplementedError('Unknown model')
-
-
+    cost_model = args.cost_model
+    node_weights = generate_node_weights(graph=graph,cost_model=cost_model)
 
     numba_greedy(graph=graph,budget=args.budget,node_weights=node_weights)
     

@@ -1,22 +1,18 @@
-from argparse import ArgumentParser
 from utils import *
-import pandas as pd
-from collections import defaultdict
 from greedy import prob_greedy
-import numpy as np
-import os 
+
 
 
 def train(dataset,budgets,m,delta):
+    # print(budgets)
 
-    load_graph_file_path=f'../../data/train/{args.dataset}'
+    load_graph_file_path=f'../../data/train/{dataset}'
 
-    graph=load_from_pickle(load_graph_file_path)
-    graph.remove_edges(list(nx.selfloop_edges(graph)))
+    graph = load_from_pickle(load_graph_file_path)
 
-    # print(list(nx.selfloop_edges(graph)))
-
+    budgets.sort()
     max_budget=max(budgets)
+    
 
     outdegrees=[(node,graph.degree(node)) for node in graph.nodes()]
     outdegrees=sorted(outdegrees,key=lambda x:x[1],reverse=True)
@@ -26,8 +22,9 @@ def train(dataset,budgets,m,delta):
     r=[0]*len(budgets)
     for _ in range(m):
 
-        greedy_solution=prob_greedy(graph,max_budget,ground_set=None,delta=delta*outdegrees[0][1])
+        greedy_solution=prob_greedy(graph=graph,budget=max_budget,ground_set=None,delta=delta*outdegrees[0][1])
         r_temp=[ranks[node] for node in greedy_solution]
+    
         for i,budget in enumerate(budgets):
             
             r[i]=max(r[i],max(r_temp[:budget]))
@@ -61,7 +58,7 @@ if __name__ == "__main__":
     parser.add_argument( "--dataset", type=str, default='Facebook', help="Name of the dataset to be used for training (default: 'Facebook')" )
     parser.add_argument( "--budgets", nargs='+', type=int, help="Budgets" )
     parser.add_argument( "--delta", type=float, default=0.001, help="Delta" )
-    parser.add_argument( "--m", type=int, default=30, help='--number_of_attempts')
+    parser.add_argument( "--m", type=int, default=1, help='--number_of_attempts')
 
     
     args = parser.parse_args()

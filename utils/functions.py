@@ -9,28 +9,6 @@ import pickle
 from argparse import ArgumentParser
 from collections import defaultdict
 import matplotlib.pyplot as plt
-import random
-from numba import njit
-
-
-def generate_node_weights(graph,cost_model):
-
-    if cost_model == 'uniform':
-        node_weights = {node:1 for node in graph.nodes()}
-
-    elif cost_model == 'degree':
-        
-        alpha = 1/20
-        out_degrees = {node: graph.degree(node) for node in graph.nodes()}
-        out_degree_max = np.max(list(out_degrees.values()))
-        out_degree_min = np.min(list(out_degrees.values()))
-        node_weights = {node: (out_degrees[node] - out_degree_min + alpha) / (out_degree_max - out_degree_min) for node in graph.nodes()}
-
-    else:
-        raise NotImplementedError('Unknown model')
-    
-    return node_weights
-
 
 
 def make_subgraph(graph, nodes):
@@ -100,16 +78,3 @@ def relabel_graph(graph: nx.Graph):
     graph = nx.relabel_nodes(graph, forward_mapping)
 
     return graph, forward_mapping, reverse_mapping
-
-
-def save_to_pickle(data, file_path):
-    """
-    Save data to a pickle file.
-
-    Parameters:
-    - data: The data to be saved.
-    - file_path: The path to the pickle file.
-    """
-    with open(file_path, 'wb') as file:
-        pickle.dump(data, file)
-    print(f'Data has been saved to {file_path}')

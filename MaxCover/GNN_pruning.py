@@ -23,7 +23,7 @@ if __name__ == "__main__":
     data= from_networkx(graph)
 
 
-    solution,_=greedy(graph=graph,budget=budget,ground_set=None)
+    _,_,solution=greedy(graph=graph,budget=budget,ground_set=None)
 
 
     mapping = dict(zip(graph.nodes(), range(graph.number_of_nodes())))
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     model.eval()
 
 
-    # test_graph = load_from_pickle(f'../../data/test/{dataset}')
+    
     test_graph = load_graph(f'../../data/snap_dataset/{dataset}.txt')
     test_data = from_networkx(test_graph)
 
@@ -111,20 +111,17 @@ if __name__ == "__main__":
 
     Pg=len(pruned_universe)/graph.number_of_nodes()
     start = time.time()
-    solution_unpruned,queries_unpruned= greedy(graph,budget)
+    objective_unpruned,queries_unpruned,solution_unpruned= greedy(graph,budget)
     end = time.time()
     time_unpruned = round(end-start,4)
     print('Elapsed time (unpruned):',round(time_unpruned,4))
 
     start = time.time()
-    solution_pruned,queries_pruned = greedy(graph=graph,budget=budget,ground_set=pruned_universe)
+    objective_pruned,queries_pruned,solution_pruned = greedy(graph=graph,budget=budget,ground_set=pruned_universe)
     end = time.time()
     time_pruned = round(end-start,4)
     print('Elapsed time (pruned):',time_pruned)
     
-    
-    objective_unpruned = calculate_cover(graph,solution_unpruned)
-    objective_pruned = calculate_cover(graph,solution_pruned)
     
     ratio = objective_pruned/objective_unpruned
 

@@ -1,10 +1,6 @@
-from argparse import ArgumentParser
 from utils import *
-import pandas as pd
-from collections import defaultdict
 from greedy import greedy
-import numpy as np
-import os 
+
 
 
 def test(dataset,budget):
@@ -16,9 +12,6 @@ def test(dataset,budget):
     load_graph_file_path=f'../../data/snap_dataset/{dataset}.txt'
     graph = load_graph(load_graph_file_path)
 
-
-    
-    
 
     dict=load_from_pickle(f'pretrained agents/GCOMB/{dataset}')
     start = time.time()
@@ -38,23 +31,18 @@ def test(dataset,budget):
 
     Pg=len(pruned_universe)/graph.number_of_nodes()
     start = time.time()
-    solution_unpruned,queries_unpruned= greedy(graph,budget)
+    objective_unpruned,queries_unpruned,solution_unpruned= greedy(graph,budget)
     end = time.time()
     time_unpruned = round(end-start,4)
     print('Elapsed time (unpruned):',round(time_unpruned,4))
 
     start = time.time()
-    solution_pruned,queries_pruned = greedy(graph=graph,budget=budget,ground_set=pruned_universe)
+    objective_pruned,queries_pruned,solution_pruned = greedy(graph=graph,budget=budget,ground_set=pruned_universe)
     end = time.time()
     time_pruned = round(end-start,4)
     print('Elapsed time (pruned):',time_pruned)
     
-    
-    objective_unpruned = calculate_cover(graph,solution_unpruned)
-    objective_pruned = calculate_cover(graph,solution_pruned)
-    
     ratio = objective_pruned/objective_unpruned
-
 
     print('Performance of GCOMB')
     print('Size Constraint,k:',budget)
@@ -92,7 +80,7 @@ if __name__ == "__main__":
 
 
     parser = ArgumentParser()
-    parser.add_argument( "--dataset", type=str, default='Facebook', help="Name of the dataset to be used for training (default: 'Facebook')" )
+    parser.add_argument( "--dataset", type=str, default='Facebook',required=True, help="Name of the dataset to be used for training (default: 'Facebook')" )
     parser.add_argument("--budget", type=int,required=True,default=100, help="Budgets")
     
 
