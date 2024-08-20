@@ -47,7 +47,8 @@ def knapsack_quickfilter(dataset,budget,delta,cost_model):
 
     Pg=len(pruned_universe)/graph.number_of_nodes()
     start = time.time()
-    objective_unpruned,queries_unpruned,solution_unpruned= knapsack_numba_greedy(graph=graph,budget=budget,node_weights=node_weights)
+    objective_unpruned,queries_unpruned,solution_unpruned= knapsack_numba_greedy(graph=graph,budget=budget,
+                                                                                 node_weights=node_weights)
     end = time.time()
     time_unpruned = round(end-start,4)
     print('Elapsed time (unpruned):',round(time_unpruned,4))

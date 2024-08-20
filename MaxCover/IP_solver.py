@@ -11,7 +11,7 @@ def gurobi_solver(graph:nx.Graph,budget:int,node_weights:dict,max_time = None,ma
     
     
 
-    node_weights = {forward_mapping[node]:node_weights[node] for node in graph.nodes()}
+    node_weights = {forward_mapping[node]:node_weights[node] for node in forward_mapping}
 
     regions, population = gp.multidict({node:1 for node in graph.nodes()})
     
@@ -49,7 +49,7 @@ def gurobi_solver(graph:nx.Graph,budget:int,node_weights:dict,max_time = None,ma
         if (abs(build[tower].x) > 1e-6):
             solution.append(reverse_mapping[tower])
             
-    return solution, m.ObjVal
+    return  m.ObjVal,m.IterCount,m.solution
 
 
 if __name__ == "__main__":
