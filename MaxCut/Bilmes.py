@@ -1,108 +1,157 @@
-from argparse import ArgumentParser
-from utils import load_from_pickle,make_subgraph,calculate_cut
-import pandas as pd
-from collections import defaultdict
 
+from utils import *
 from greedy import greedy
-import numpy as np
-import random
+from helper_functions import *
 import heapq
 
 
+# from large_graph import Graph
+
 def SS(dataset,r,c,budget):
-    graph=load_from_pickle(f'../../data/test/{dataset}')
 
+    
+    file_path=f'../../data/snap_dataset/{args.dataset}.txt'
+    graph = load_graph(file_path=file_path)
+
+
+    start = time.time()
     pruned_universe=set()
-
     universe=list(graph.nodes())
     n=graph.number_of_nodes()
     while len(universe)> r*np.log2(n):
+        print('Size of universe:',len(universe))
         U=random.sample(universe,int(r*np.log2(n)))
-        for node in U:
+        universe = set(universe)
+        for node in tqdm(U):
             universe.remove(node)
+        # universe = list(universe)
         U=set(U)
         pruned_universe=pruned_universe.union(U)
 
-        lst=[]
 
-        universe_gain=calculate_cut(graph,universe)
+        universe_gain=calculate_obj(graph,universe) # f(V)
 
-        for v in universe:
+        # for v in universe:
+
+        universe_u_gain = {} # f(V U u)
+        u_gain = {} # f(u)
+        # get all neighbors 
+        
+        
+        for u in tqdm(U):
+            universe.add(u)
+            universe_u_gain[u] = calculate_obj (graph ,universe)
+            universe.remove(u)
+            u_gain[u] = calculate_obj (graph , [u])
+
+
+        lst = []
+
+        for v in tqdm(universe):
 
             w=float('inf')
             
-            for u in graph.neighbors(v):
+            # for u in graph.neighbors(v):
                 
-                if u in U:
-                    universe_copy=universe.copy()
-                    universe_copy.append(u)
-                    
-                    local_gain=calculate_cut(graph,[u,v])-calculate_cut(graph,[v])
-                    # print(local_gain)
+            for u in U:
+                # universe_copy=universe.copy()
+                # universe_copy.append(u)
+                
+                local_gain = calculate_obj(graph,[u,v])-u_gain[u] # f(v U u) -f(u)
+                # print(local_gain)
 
-                    global_gain=calculate_cut(graph,universe_copy)-universe_gain
-                    w=min(w,local_gain-global_gain)
+                global_gain = universe_u_gain[u]-universe_gain
+                w=min(w,local_gain-global_gain)
 
             lst.append((w,v))
 
         remove_nodes=heapq.nsmallest(int((1-1/np.sqrt(c))*len(universe)), lst)
         # print(remove_nodes)
-        for w,node in remove_nodes:
+        universe = set(universe)
+        for w,node in tqdm(remove_nodes):
             # if w>0:
             #     print(w)
             universe.remove(node)
+            # universe.re
+        universe = list(universe)
 
         
 
     pruned_universe=pruned_universe.union(set(universe))
 
-    print('Ratio:',len(pruned_universe)/graph.number_of_nodes())
+    end= time.time()
 
-    # Subgraph
-    subgraph =make_subgraph(graph,pruned_universe)
-    print('Pv:',1-subgraph.number_of_nodes()/graph.number_of_nodes())
-    print('Pe:',1-subgraph.number_of_edges()/graph.number_of_edges())
+    time_to_prune = end-start
 
-    solution_subgraph = greedy(subgraph,budget)
+    print('time elapsed to pruned',time_to_prune)
 
-    coverage= calculate_cut(graph,solution_subgraph)
+    ##################################################################
 
-    print('Cut',coverage/graph.number_of_edges())
+    Pg=len(pruned_universe)/graph.number_of_nodes()
+    start = time.time()
+    objective_unpruned,queries_unpruned,solution_unpruned= greedy(graph,budget)
+    end = time.time()
+    time_unpruned = round(end-start,4)
+    print('Elapsed time (unpruned):',round(time_unpruned,4))
+
+    start = time.time()
+    objective_pruned,queries_pruned,solution_pruned = greedy(graph=graph,budget=budget,ground_set=pruned_universe)
+    end = time.time()
+    time_pruned = round(end-start,4)
+    print('Elapsed time (pruned):',time_pruned)
+    
+    
+    objective_unpruned = calculate_obj(graph,solution_unpruned)
+    objective_pruned = calculate_obj(graph,solution_pruned)
+    
+    ratio = objective_pruned/objective_unpruned
+
+
+    print('Performance of SS')
+    print('Size Constraint,k:',budget)
+    print('Size of Ground Set,|U|:',graph.number_of_nodes())
+    print('Size of Pruned Ground Set, |Upruned|:', len(pruned_universe))
+    print('Pg(%):', round(Pg,4)*100)
+    print('Ratio:',round(ratio,4)*100)
+    print('Queries:',round(queries_pruned/queries_unpruned,4)*100)
+
+
+    save_folder = f'data/{dataset}'
+    os.makedirs(save_folder,exist_ok=True)
+    save_file_path = os.path.join(save_folder,'SS')
+
+    df ={     'Dataset':dataset,'Budget':budget,'r':r,'c':c,'Objective Value(Unpruned)':objective_unpruned,
+              'Objective Value(Pruned)':objective_pruned ,'Ground Set': graph.number_of_nodes(),
+              'Ground set(Pruned)':len(pruned_universe), 'Queries(Unpruned)': queries_unpruned,'Time(Unpruned)':time_unpruned,
+              'Time(Pruned)': time_pruned,
+              'Queries(Pruned)': queries_pruned, 'Pruned Ground set(%)': round(Pg,4)*100,
+              'Ratio(%)':round(ratio,4)*100, 'Queries(%)': round(queries_pruned/queries_unpruned,4)*100,
+              'TimeRatio': time_pruned/time_unpruned,
+              'TimeToPrune':time_to_prune
+
+              }
+
+   
+    df = pd.DataFrame(df,index=[0])
+    save_to_pickle(df,save_file_path)
+    print(df)
+
+    ###################################################################################################
+
+
+   
+
+    
 
 
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-
-    parser.add_argument(
-        "--dataset",
-        type=str,
-        default='Facebook',
-        help="Name of the dataset to be used (default: 'Facebook')"
-    )
-
-    parser.add_argument(
-        "--r",
-        type=float,
-        default=8,
-        help="r"
-    )
-
-    parser.add_argument(
-        "--c",
-        type=float,
-        default=8,
-        help="c"
-    )
-
-    parser.add_argument(
-        "--budget",
-        type=int,
-        default=20,
-        help="Budget"
-    )
-
+    parser.add_argument( "--dataset", type=str, default='Facebook',required=True, help="Name of the dataset to be used (default: 'Facebook')" )
+    parser.add_argument( "--r", type=float, default=8, help="r" )
+    parser.add_argument( "--c", type=float, default=8, help="c" )
+    parser.add_argument("--budget", type=int,required=True,default=10, help="Budgets")
 
     args = parser.parse_args()
 
