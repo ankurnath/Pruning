@@ -110,7 +110,9 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
     # queries_multi = []
     # queries_single = []
 
-    for i in x:
+    for i in x[::-1]:
+
+        print(i)
 
         start = time.time()
         objective_multi_pruned,queries_multi_pruned,solution_multi_pruned= gurobi_solver(        graph= subgraph_multi, 
@@ -137,6 +139,10 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
         end = time.time()
 
         time_unpruned = end- start
+        sprint(objective_multi_pruned)
+        sprint(objective_single_pruned)
+        sprint(objective_unpruned)
+        
         df['Dataset'].append(dataset)
         df['Budget'].append(i)
         df['Delta'].append(delta)
@@ -161,7 +167,7 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
         df['Ratio Single'].append(round(objective_single_pruned/objective_unpruned,4)*100)
 
         df['Queries Multi(%)'].append(round(queries_multi_pruned/queries_unpruned,4)*100)
-        df['Queries Single(%)'].append(round(queries_single_pruned/queries_unpruned)*100)
+        df['Queries Single(%)'].append(round(queries_single_pruned/queries_unpruned,4)*100)
 
         df['TimeRatio(Multi)'].append(time_multi_pruned/time_unpruned)
         df['TimeRatio(Single)'].append(time_single_pruned/time_unpruned)
@@ -193,7 +199,7 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
     plt.title(f' Dataset:{args.dataset} Eps:{eps} Delta:{delta} Max Budget:{max_budget} Min Budget: {min_budget}',fontsize=fontsize)
     plt.legend()
 
-    plt.savefig(os.path.join(save_folder,f'Quickfilter_{cost_model}.pdf'), bbox_inches='tight')
+    plt.savefig(os.path.join(save_folder,f'Quickfilter_{cost_model}.png'), bbox_inches='tight')
     # plt.show()
 
 if __name__ == "__main__":

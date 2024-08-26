@@ -109,7 +109,7 @@ def greedy(graph,budget,ground_set=None):
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument( "--dataset", type=str, default='Facebook', help="Name of the dataset to be used (default: 'Facebook')" )
-    parser.add_argument("--budget", type=int,default=5, help="Budgets")
+    parser.add_argument("--budget", type=int,default=20, help="Budgets")
   
     args = parser.parse_args()
 
@@ -118,7 +118,12 @@ if __name__ == "__main__":
 
     load_graph_file_path=f'../../data/snap_dataset/{dataset}.txt'
 
-    graph = load_graph(load_graph_file_path)
+    n = 1000
+    p = 0.5
+
+    graph = nx.erdos_renyi_graph(n=n,p=p,seed=100)
+
+    # graph = load_graph(load_graph_file_path)
     
     greedy(graph=graph,budget=budget)
 

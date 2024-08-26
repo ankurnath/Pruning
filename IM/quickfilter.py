@@ -6,7 +6,7 @@ import numpy as np
 import random
 import os
 from tqdm import tqdm
-from greedy import imm
+from imm import imm
 
 
 def bfs(subgraph, initial_nodes,graph):

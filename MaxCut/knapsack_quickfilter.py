@@ -127,6 +127,11 @@ if __name__ == "__main__":
     cost_model = args.cost_model
 
 
+    sprint(dataset)
+    sprint(budget)
+    sprint(cost_model)
+
+
     knapsack_quickfilter(dataset=dataset,budget = budget,delta = delta,cost_model = cost_model)
 
   

@@ -19,6 +19,8 @@ def gurobi_solver(graph:nx.Graph,budget:int,node_weights:dict,max_time = None,ma
     # else:
     #     model.setParam('TimeLimit',max_time)
 
+    model.setParam('OutputFlag',1)
+
     if max_time:
         model.setParam('TimeLimit',max_time)
 
@@ -46,6 +48,8 @@ def gurobi_solver(graph:nx.Graph,budget:int,node_weights:dict,max_time = None,ma
     for node in vdict.keys():
         if (abs(vdict[node].x) > 1e-6):
             solution.append(reverse_mapping[node])
+
+    # sprint(len(solution))
             
     return model.ObjVal,model.IterCount,solution
 
@@ -53,13 +57,18 @@ def gurobi_solver(graph:nx.Graph,budget:int,node_weights:dict,max_time = None,ma
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--dataset", type=str, default='Facebook', help="Name of the dataset to be used (default: 'Facebook')")
-    parser.add_argument("--budget", type=int,default=10, help="Budgets")
-    parser.add_argument("--cost_model",type= str, default= 'random', help = 'model of node weights')
+    parser.add_argument("--budget", type=int,default=100, help="Budgets")
+    parser.add_argument("--cost_model",type= str, default= 'degree', help = 'model of node weights')
 
 
     args = parser.parse_args()
 
     graph = load_graph(f'../../data/snap_dataset/{args.dataset}.txt')
+
+    # n = 1000
+    # p = 0.5
+
+    # graph = nx.erdos_renyi_graph(n=n,p=p,seed=100)
     
     node_weights=generate_node_weights(graph=graph,cost_model=args.cost_model)
     
