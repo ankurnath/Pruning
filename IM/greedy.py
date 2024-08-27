@@ -4,6 +4,7 @@ from collections import deque
 
 
 def calculate_spread(graph,solution,mc=10000):
+    sprint('Calculating spread')
     # print(f'Default weight has been loaded:{0.01}')
     weight = 0.01    
     print(f'Default weight = {weight}')
@@ -83,7 +84,8 @@ def gain_adjustment(gains,node_rr_set,RR,selected_element,covered_rr_set):
         if index not in covered_rr_set:
             covered_rr_set.add(index)
             for rr_node in RR[index]:
-                gains[rr_node]-=1
+                if rr_node in gains:
+                    gains[rr_node]-=1
 
 
 

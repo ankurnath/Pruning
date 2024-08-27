@@ -51,7 +51,7 @@ def QS(dataset,budget,num_rr,delta,seed):
 
     # sprint([graph.degree(node) for node in pruned_universe])
    
-    subgraph = make_subgraph(graph,pruned_universe)
+    subgraph = make_subgraph(graph,pruned_universe) 
 
     ##################################################################
 

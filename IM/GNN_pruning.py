@@ -49,7 +49,7 @@ if __name__ == "__main__":
 
     # print('y:',torch.sum(y))
     data.y=y
-    num_features=1
+    num_features= 1
 
     x=[graph.degree(node) for node in graph.nodes()]
     # data.x= torch.randn(size=(graph.num,num_features))
