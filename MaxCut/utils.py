@@ -18,6 +18,9 @@ def generate_node_weights(graph,cost_model):
     if cost_model == 'uniform':
         node_weights = {node:1 for node in graph.nodes()}
 
+    if cost_model == 'random':
+        node_weights = {node:random.random() for node in graph.nodes()}
+
     elif cost_model == 'degree':
         
         alpha = 1/20

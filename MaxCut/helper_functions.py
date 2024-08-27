@@ -10,3 +10,5 @@ def calculate_obj(graph: nx.Graph, solution):
             if neighbor not in solution:
                 cut+=1
     return cut
+
+

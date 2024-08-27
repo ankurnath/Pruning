@@ -103,158 +103,158 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
     timetoprune_single = end - start
     
     
-    # x = [(1+eps)**i * min_budget for i in range(m+1)] + [max_budget]
-    # x.sort()
+    x = [(1+eps)**i * min_budget for i in range(m+1)] + [max_budget]
+    x.sort()
 
-    # if x[-1]>max_budget:
-    #     x.pop()
-    # print('Budgets',x)
-    # # subgraph_multi = make_subgraph(graph,pruned_universe_multi)
-    # # subgraph_single = make_subgraph(graph,pruned_universe_single)
+    if x[-1]>max_budget:
+        x.pop()
+    print('Budgets',x)
+    # subgraph_multi = make_subgraph(graph,pruned_universe_multi)
+    # subgraph_single = make_subgraph(graph,pruned_universe_single)
 
 
-    # df = defaultdict(list)
+    df = defaultdict(list)
 
-    # # queries_multi = []
-    # # queries_single = []
+    # queries_multi = []
+    # queries_single = []
 
 
 
     
 
 
-    # for i in x[::-1]:
+    for i in x[::-1]:
 
-    #     print(i)
+        print(i)
 
-    #     start = time.time()
-
-        
-    #     solution_multi_pruned,queries_multi_pruned =    knapsack_greedy (graph=graph,ground_set = pruned_universe_multi, 
-    #                                                                       num_rr=num_rr,
-    #                                                                       budget = x, 
-    #                                                                       node_weights = node_weights)
-    #     objective_multi_pruned = calculate_spread(graph=graph,solution = solution_multi_pruned)
-        
-
-
-
-    #     # objective_multi_pruned,queries_multi_pruned,solution_multi_pruned= gurobi_solver(        graph= subgraph_multi, 
-    #     #                                                                                          budget=i,
-    #     #                                                                                          node_weights=node_weights)
-    #     end = time.time()
-
-    #     time_multi_pruned = end -start
-
-    #     start = time.time()
-
-    #     solution_single_pruned,queries_single_pruned =    knapsack_greedy (graph=graph,
-    #                                                                        ground_set = pruned_universe_single, 
-    #                                                                       num_rr=num_rr,
-    #                                                                       budget = x, 
-    #                                                                       node_weights = node_weights)
-    #     objective_single_pruned = calculate_spread(graph=graph,solution = solution_single_pruned)
-
-    #     # objective_single_pruned,queries_single_pruned,solution_single_pruned = sample_greedy(     graph= graph, 
-    #     #                                                                                          budget=i,
-    #     #                                                                                          node_weights=node_weights,
-    #     #                                                                                          ground_set=pruned_universe_single)
-    #     # objective_single_pruned,queries_single_pruned,solution_single_pruned= gurobi_solver(graph = subgraph_single, 
-    #     #                                                                                          budget=i,
-    #     #                                                                                          node_weights=node_weights
-    #     #                                                                                          )
-        
-    #     end = time.time()
-    #     time_single_pruned = end -start
-
-    #     start = time.time()
-    #     solution_unpruned,queries_unpruned = knapsack_greedy (graph=graph,ground_set =None, 
-    #                                                           num_rr=num_rr,budget = x, 
-    #                                                           node_weights = node_weights)
-    #     objective_unpruned = calculate_spread(graph=graph,solution=solution_unpruned )
-
-
-    #     # objective_unpruned,queries_unpruned =run_sampling_multiple_times(        graph=graph,
-    #     #                                                                          budget=i,
-    #     #                                                                          node_weights=node_weights,
-    #     #                                                                          ground_set=None,
-    #     #                                                                          num_iterations=10)
-
-
-
-    #     # objective_unpruned,queries_unpruned,solution_unpruned= sample_greedy(graph=graph,budget=i,
-    #     #                                                                          node_weights=node_weights)
+        start = time.time()
 
         
-    #     # objective_unpruned,queries_unpruned,solution_unpruned= gurobi_solver(graph=graph,budget=i,
-    #     #                                                                          node_weights=node_weights)
+        solution_multi_pruned,queries_multi_pruned =    knapsack_greedy (graph=graph,ground_set = pruned_universe_multi, 
+                                                                          num_rr=num_rr,
+                                                                          budget = x, 
+                                                                          node_weights = node_weights)
+        objective_multi_pruned = calculate_spread(graph=graph,solution = solution_multi_pruned)
+        
+
+
+
+        # objective_multi_pruned,queries_multi_pruned,solution_multi_pruned= gurobi_solver(        graph= subgraph_multi, 
+        #                                                                                          budget=i,
+        #                                                                                          node_weights=node_weights)
+        end = time.time()
+
+        time_multi_pruned = end -start
+
+        start = time.time()
+
+        solution_single_pruned,queries_single_pruned =    knapsack_greedy (graph=graph,
+                                                                           ground_set = pruned_universe_single, 
+                                                                          num_rr=num_rr,
+                                                                          budget = x, 
+                                                                          node_weights = node_weights)
+        objective_single_pruned = calculate_spread(graph=graph,solution = solution_single_pruned)
+
+        # objective_single_pruned,queries_single_pruned,solution_single_pruned = sample_greedy(     graph= graph, 
+        #                                                                                          budget=i,
+        #                                                                                          node_weights=node_weights,
+        #                                                                                          ground_set=pruned_universe_single)
+        # objective_single_pruned,queries_single_pruned,solution_single_pruned= gurobi_solver(graph = subgraph_single, 
+        #                                                                                          budget=i,
+        #                                                                                          node_weights=node_weights
+        #                                                                                          )
+        
+        end = time.time()
+        time_single_pruned = end -start
+
+        start = time.time()
+        solution_unpruned,queries_unpruned = knapsack_greedy (graph=graph,ground_set =None, 
+                                                              num_rr=num_rr,budget = x, 
+                                                              node_weights = node_weights)
+        objective_unpruned = calculate_spread(graph=graph,solution=solution_unpruned )
+
+
+        # objective_unpruned,queries_unpruned =run_sampling_multiple_times(        graph=graph,
+        #                                                                          budget=i,
+        #                                                                          node_weights=node_weights,
+        #                                                                          ground_set=None,
+        #                                                                          num_iterations=10)
+
+
+
+        # objective_unpruned,queries_unpruned,solution_unpruned= sample_greedy(graph=graph,budget=i,
+        #                                                                          node_weights=node_weights)
+
+        
+        # objective_unpruned,queries_unpruned,solution_unpruned= gurobi_solver(graph=graph,budget=i,
+        #                                                                          node_weights=node_weights)
         
         
-    #     end = time.time()
+        end = time.time()
 
-    #     time_unpruned = end- start
-    #     sprint(objective_multi_pruned)
-    #     sprint(objective_single_pruned)
-    #     sprint(objective_unpruned)
+        time_unpruned = end- start
+        sprint(objective_multi_pruned)
+        sprint(objective_single_pruned)
+        sprint(objective_unpruned)
         
-    #     df['Dataset'].append(dataset)
-    #     df['Budget'].append(i)
-    #     df['Delta'].append(delta)
-    #     df['Objective Value(Unpruned)'].append(objective_unpruned)
-    #     df['Objective Value Multi(Pruned)'].append(objective_multi_pruned)
-    #     df['Objective Value Single(Pruned)'].append(objective_single_pruned)
-    #     df['Ground Set'].append(graph.number_of_nodes())
-    #     df['Ground set Multi (Pruned)'].append(len(pruned_universe_multi))
-    #     df['Ground set Single (Pruned)'].append(len(pruned_universe_single))
+        df['Dataset'].append(dataset)
+        df['Budget'].append(i)
+        df['Delta'].append(delta)
+        df['Objective Value(Unpruned)'].append(objective_unpruned)
+        df['Objective Value Multi(Pruned)'].append(objective_multi_pruned)
+        df['Objective Value Single(Pruned)'].append(objective_single_pruned)
+        df['Ground Set'].append(graph.number_of_nodes())
+        df['Ground set Multi (Pruned)'].append(len(pruned_universe_multi))
+        df['Ground set Single (Pruned)'].append(len(pruned_universe_single))
         
-    #     df['Time(Unpruned)'].append(time_unpruned)
-    #     df['Time Multi(Pruned)'].append(time_multi_pruned)
-    #     df['Time Single(Pruned)'].append(time_single_pruned)
-    #     df['Queries (Unpruned)'].append(queries_unpruned)
-    #     df['Queries Multi (pruned)'].append(queries_multi_pruned)
-    #     df['Queries Single (pruned)'].append(queries_single_pruned)
+        df['Time(Unpruned)'].append(time_unpruned)
+        df['Time Multi(Pruned)'].append(time_multi_pruned)
+        df['Time Single(Pruned)'].append(time_single_pruned)
+        df['Queries (Unpruned)'].append(queries_unpruned)
+        df['Queries Multi (pruned)'].append(queries_multi_pruned)
+        df['Queries Single (pruned)'].append(queries_single_pruned)
 
-    #     df['Pruned Ground set Multi(%)'].append(Pg_multi)
-    #     df['Pruned Ground set Single(%)'].append(Pg_single)
+        df['Pruned Ground set Multi(%)'].append(Pg_multi)
+        df['Pruned Ground set Single(%)'].append(Pg_single)
 
-    #     df['Ratio Multi'].append(round(objective_multi_pruned/objective_unpruned,4)*100)
-    #     df['Ratio Single'].append(round(objective_single_pruned/objective_unpruned,4)*100)
+        df['Ratio Multi'].append(round(objective_multi_pruned/objective_unpruned,4)*100)
+        df['Ratio Single'].append(round(objective_single_pruned/objective_unpruned,4)*100)
 
-    #     df['Queries Multi(%)'].append(round(queries_multi_pruned/queries_unpruned,4)*100)
-    #     df['Queries Single(%)'].append(round(queries_single_pruned/queries_unpruned,4)*100)
+        df['Queries Multi(%)'].append(round(queries_multi_pruned/queries_unpruned,4)*100)
+        df['Queries Single(%)'].append(round(queries_single_pruned/queries_unpruned,4)*100)
 
-    #     df['TimeRatio(Multi)'].append(time_multi_pruned/time_unpruned)
-    #     df['TimeRatio(Single)'].append(time_single_pruned/time_unpruned)
+        df['TimeRatio(Multi)'].append(time_multi_pruned/time_unpruned)
+        df['TimeRatio(Single)'].append(time_single_pruned/time_unpruned)
 
-    #     df['TimeToPrune(Multi)'].append(timetoprune_multi)
-    #     df['TimeToPrune(Single)'].append(timetoprune_single)
-
-
+        df['TimeToPrune(Multi)'].append(timetoprune_multi)
+        df['TimeToPrune(Single)'].append(timetoprune_single)
 
 
-    # df = pd.DataFrame(df)
-
-    # save_folder = f'data/{dataset}/knapsack_multi'
-    # os.makedirs(save_folder,exist_ok=True)
-    # save_file_path = os.path.join(save_folder,f'Quickfilter_{cost_model}')
-    # save_to_pickle(df,save_file_path)
 
 
-    # print(df[['Ratio Multi','Queries Multi (pruned)','Queries Multi(%)','Ratio Single','Queries Single (pruned)','Queries Single(%)']])
+    df = pd.DataFrame(df)
+
+    save_folder = f'data/{dataset}/knapsack_multi'
+    os.makedirs(save_folder,exist_ok=True)
+    save_file_path = os.path.join(save_folder,f'Quickfilter_{cost_model}')
+    save_to_pickle(df,save_file_path)
+
+
+    print(df[['Ratio Multi','Queries Multi (pruned)','Queries Multi(%)','Ratio Single','Queries Single (pruned)','Queries Single(%)']])
 
         
-    # fontsize = 20
-    # plt.plot(x, df['Ratio Multi'], linestyle='--', marker='o', markersize=20, color='blue', markeredgecolor='black', alpha=0.7, label=f'Multi-Budget {Pg_multi:.2f}%')
-    # plt.plot(x, df['Ratio Single'], linestyle='--', marker='*', markersize=20, color='red', markeredgecolor='black', alpha=0.7, label=f'Single-Budget {Pg_single:.2f}%')
+    fontsize = 20
+    plt.plot(x, df['Ratio Multi'], linestyle='--', marker='o', markersize=20, color='blue', markeredgecolor='black', alpha=0.7, label=f'Multi-Budget {Pg_multi:.2f}%')
+    plt.plot(x, df['Ratio Single'], linestyle='--', marker='*', markersize=20, color='red', markeredgecolor='black', alpha=0.7, label=f'Single-Budget {Pg_single:.2f}%')
     
     
-    # plt.xlabel('Budgets', fontsize=fontsize )
-    # plt.ylabel('Ratios (%)', fontsize=fontsize)
-    # plt.title(f' Dataset:{args.dataset} Eps:{eps} Delta:{delta} Max Budget:{max_budget} Min Budget: {min_budget}',fontsize=fontsize)
-    # plt.legend()
+    plt.xlabel('Budgets', fontsize=fontsize )
+    plt.ylabel('Ratios (%)', fontsize=fontsize)
+    plt.title(f' Dataset:{args.dataset} Eps:{eps} Delta:{delta} Max Budget:{max_budget} Min Budget: {min_budget}',fontsize=fontsize)
+    plt.legend()
 
-    # plt.savefig(os.path.join(save_folder,f'Quickfilter_{cost_model}.png'), bbox_inches='tight')
-    # plt.show()
+    plt.savefig(os.path.join(save_folder,f'Quickfilter_{cost_model}.png'), bbox_inches='tight')
+    plt.show()
 
 if __name__ == "__main__":
     parser = ArgumentParser()

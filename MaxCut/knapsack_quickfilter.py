@@ -3,6 +3,7 @@ from greedy import gain_adjustment,get_gains
 from knapsack_greedy import knapsack_greedy
 from knapsack_numba_greedy import knapsack_numba_greedy
 from IP_solver import gurobi_solver
+from sample_greedy import sample_greedy,run_sampling_multiple_times
 
 def knapsack_quickfilter(dataset,budget,delta,cost_model):
 
@@ -47,21 +48,33 @@ def knapsack_quickfilter(dataset,budget,delta,cost_model):
 
     Pg=len(pruned_universe)/graph.number_of_nodes()
     start = time.time()
-    # objective_unpruned,queries_unpruned,solution_unpruned= knapsack_numba_greedy(graph=graph,budget=budget,
+
+    objective_unpruned,queries_unpruned = run_sampling_multiple_times(        graph=graph,
+                                                                                 budget=budget,
+                                                                                 node_weights=node_weights,
+                                                                                 ground_set=None,
+                                                                                 num_iterations=10)
+    # objective_unpruned,queries_unpruned,solution_unpruned= sample_greedy(graph=graph,budget=budget,
     #                                                                              node_weights=node_weights)
     
-    objective_unpruned,queries_unpruned,solution_unpruned = gurobi_solver(graph=graph,budget=budget,
-                                                                          node_weights=node_weights)
+    # objective_unpruned,queries_unpruned,solution_unpruned = gurobi_solver(graph=graph,budget=budget,
+    #                                                                       node_weights=node_weights)
     end = time.time()
     time_unpruned = round(end-start,4)
     print('Elapsed time (unpruned):',round(time_unpruned,4))
 
     start = time.time()
-    # objective_pruned,queries_pruned,solution_pruned = knapsack_numba_greedy(graph=graph,budget=budget,
+
+    objective_pruned,queries_pruned =   run_sampling_multiple_times(             graph=graph,
+                                                                                 budget=budget,
+                                                                                 node_weights=node_weights,
+                                                                                 ground_set=pruned_universe,
+                                                                                 num_iterations=10)
+    # objective_pruned,queries_pruned,solution_pruned = sample_greedy(graph=graph,budget=budget,
     #                                                                         node_weights=node_weights,
     #                                                                         ground_set=pruned_universe)
     
-    objective_pruned,queries_pruned,solution_pruned = gurobi_solver(graph=subgraph,budget=budget,node_weights=node_weights)
+    # objective_pruned,queries_pruned,solution_pruned = gurobi_solver(graph=subgraph,budget=budget,node_weights=node_weights)
     end = time.time()
     time_pruned = round(end-start,4)
     print('Elapsed time (pruned):',time_pruned)
@@ -110,7 +123,7 @@ def knapsack_quickfilter(dataset,budget,delta,cost_model):
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--dataset", type=str, default='DBLP', help="Name of the dataset to be used (default: 'Facebook')")
-    parser.add_argument("--budget", type=int,default=5, help="Budget")
+    parser.add_argument("--budget", type=int,default=100, help="Budget")
     parser.add_argument("--delta", type=float, default=0.1, help="Delta")
     parser.add_argument("--cost_model",type= str, default= 'degree', help = 'model of node weights')
     
@@ -130,6 +143,7 @@ if __name__ == "__main__":
     sprint(dataset)
     sprint(budget)
     sprint(cost_model)
+    sprint(delta)
 
 
     knapsack_quickfilter(dataset=dataset,budget = budget,delta = delta,cost_model = cost_model)

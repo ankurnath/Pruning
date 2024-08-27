@@ -5,6 +5,7 @@ from greedy import greedy,gain_adjustment,get_gains
 from knapsack_numba_greedy import knapsack_numba_greedy
 import matplotlib.pyplot as plt
 from IP_solver import gurobi_solver
+from sample_greedy import *
 
 
 
@@ -110,30 +111,71 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
     # queries_multi = []
     # queries_single = []
 
+
+
+    
+
+
     for i in x[::-1]:
 
         print(i)
 
         start = time.time()
-        objective_multi_pruned,queries_multi_pruned,solution_multi_pruned= gurobi_solver(        graph= subgraph_multi, 
-                                                                                                 budget=i,
-                                                                                                 node_weights=node_weights)
+
+        
+        objective_multi_pruned,queries_multi_pruned =run_sampling_multiple_times(graph=graph,
+                                                                                 budget=i,
+                                                                                 node_weights=node_weights,
+                                                                                 ground_set=pruned_universe_multi,
+                                                                                 num_iterations=10)
+        
+
+
+
+        # objective_multi_pruned,queries_multi_pruned,solution_multi_pruned= gurobi_solver(        graph= subgraph_multi, 
+        #                                                                                          budget=i,
+        #                                                                                          node_weights=node_weights)
         end = time.time()
 
         time_multi_pruned = end -start
 
         start = time.time()
-        objective_single_pruned,queries_single_pruned,solution_single_pruned= gurobi_solver(graph = subgraph_single, 
-                                                                                                 budget=i,
-                                                                                                 node_weights=node_weights
-                                                                                                 )
+
+        objective_single_pruned,queries_single_pruned =run_sampling_multiple_times(graph=graph,
+                                                                                 budget=i,
+                                                                                 node_weights=node_weights,
+                                                                                 ground_set=pruned_universe_single,
+                                                                                 num_iterations=10)
+
+        # objective_single_pruned,queries_single_pruned,solution_single_pruned = sample_greedy(     graph= graph, 
+        #                                                                                          budget=i,
+        #                                                                                          node_weights=node_weights,
+        #                                                                                          ground_set=pruned_universe_single)
+        # objective_single_pruned,queries_single_pruned,solution_single_pruned= gurobi_solver(graph = subgraph_single, 
+        #                                                                                          budget=i,
+        #                                                                                          node_weights=node_weights
+        #                                                                                          )
         
         end = time.time()
         time_single_pruned = end -start
 
         start = time.time()
-        objective_unpruned,queries_unpruned,solution_unpruned= gurobi_solver(graph=graph,budget=i,
-                                                                                 node_weights=node_weights)
+
+
+        objective_unpruned,queries_unpruned =run_sampling_multiple_times(        graph=graph,
+                                                                                 budget=i,
+                                                                                 node_weights=node_weights,
+                                                                                 ground_set=None,
+                                                                                 num_iterations=10)
+
+
+
+        # objective_unpruned,queries_unpruned,solution_unpruned= sample_greedy(graph=graph,budget=i,
+        #                                                                          node_weights=node_weights)
+
+        
+        # objective_unpruned,queries_unpruned,solution_unpruned= gurobi_solver(graph=graph,budget=i,
+        #                                                                          node_weights=node_weights)
         
         
         end = time.time()
