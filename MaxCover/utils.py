@@ -18,6 +18,9 @@ def generate_node_weights(graph,cost_model):
     if cost_model == 'uniform':
         node_weights = {node:1 for node in graph.nodes()}
 
+    elif cost_model == 'random':
+        node_weights = {node:random.random() for node in graph.nodes()}
+
     elif cost_model == 'degree':
         
         alpha = 1/20
@@ -27,7 +30,7 @@ def generate_node_weights(graph,cost_model):
         node_weights = {node: (out_degrees[node] - out_degree_min + alpha) / (out_degree_max - out_degree_min) for node in graph.nodes()}
 
     else:
-        raise NotImplementedError('Unknown model')
+        raise NotImplementedError(f'Unknown model {cost_model}')
     
     return node_weights
 

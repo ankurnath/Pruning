@@ -14,7 +14,8 @@ from greedy import *
 
 
 
-def QS(dataset,budget,num_rr,delta,seed):
+# def QS(dataset,budget,num_rr,delta,seed):
+def quickfilter(dataset,budget,delta,num_rr,seed):
 
     
     load_graph_file_path=f'../../data/snap_dataset/{dataset}.txt'
@@ -58,6 +59,7 @@ def QS(dataset,budget,num_rr,delta,seed):
     Pg=len(pruned_universe)/graph.number_of_nodes()
     start = time.time()
     # solution_unpruned, _ = imm(graph=graph,seed_size=budget,seed=seed)
+    queries_unpruned  = budget/2 * (2*graph.number_of_nodes() - budget +1) 
     solution_unpruned = imm(graph=graph,seed_size=budget,seed=seed)
     end = time.time()
 
@@ -69,6 +71,7 @@ def QS(dataset,budget,num_rr,delta,seed):
 
     start = time.time()
     solution_pruned = imm(graph=subgraph,seed_size=budget, seed=seed)
+    queries_pruned  = budget/2 * (2*len(pruned_universe) - budget +1) 
 
     # sprint([graph.degree(node) for node in solution_pruned])
     end = time.time()
@@ -99,13 +102,13 @@ def QS(dataset,budget,num_rr,delta,seed):
               'Objective Value(Pruned)':objective_pruned ,
               'Ground Set': graph.number_of_nodes(),
               'Ground set(Pruned)':len(pruned_universe), 
-            #   'Queries(Unpruned)': queries_unpruned,
+              'Queries(Unpruned)': queries_unpruned,
               'Time(Unpruned)':time_unpruned,
               'Time(Pruned)': time_pruned,
-            #   'Queries(Pruned)': queries_pruned, 
+              'Queries(Pruned)': queries_pruned, 
               'Pruned Ground set(%)': round(Pg,4)*100,
               'Ratio(%)':round(ratio,4)*100, 
-            #   'Queries(%)': round(queries_pruned/queries_unpruned,4)*100,
+              'Queries(%)': round(queries_pruned/queries_unpruned,4)*100,
               'TimeRatio': time_pruned/time_unpruned,
               'TimeToPrune':time_to_prune
 
@@ -138,6 +141,18 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    dataset = args.dataset
+    delta = args.delta 
+    budget = args.budget
+    num_rr = args.num_rr
+    seed = args.seed
+
+    sprint(dataset)
+    sprint(budget)
+    sprint(delta)
+    sprint(budget)
+    sprint(seed)
+
 
     # graph = load_from_pickle(file_path=f'../../data/test/{args.dataset}')
 
@@ -145,7 +160,9 @@ if __name__ == "__main__":
     # print([graph.degree(node) for node in solution])
 
 
-    QS(dataset=args.dataset,budget=args.budget,num_rr=args.num_rr,delta= args.delta,seed=args.seed)
+    quickfilter(dataset=dataset,budget=budget,
+                num_rr=num_rr,delta = delta,
+                seed=seed)
 
 
 

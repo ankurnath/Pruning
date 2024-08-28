@@ -32,14 +32,14 @@ def calculate_spread(graph,solution,mc=10000):
 
 
 
-def select_variable(gains):
-    sum_gain = sum(gains.values())
-    if sum_gain==0:
-        return None
-    else:
-        prob_dist=[gains[key]/sum_gain for key in gains]
-        element=np.random.choice([key for key in gains], p=prob_dist)
-        return element
+# def select_variable(gains):
+#     sum_gain = sum(gains.values())
+#     if sum_gain==0:
+#         return None
+#     else:
+#         prob_dist=[gains[key]/sum_gain for key in gains]
+#         element=np.random.choice([key for key in gains], p=prob_dist)
+#         return element
     
 
 def get_gains(graph,num_rr):

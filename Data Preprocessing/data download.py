@@ -10,6 +10,7 @@ def download(datasets):
     DATASETS_URLS={ 
                 "Facebook":"https://snap.stanford.edu/data/facebook_combined.txt.gz",
                 "web-Google":"https://snap.stanford.edu/data/web-Google.txt.gz",
+                "Deezer" : "https://snap.stanford.edu/data/gemsec_deezer_dataset.tar.gz",
                 "Wiki": "https://snap.stanford.edu/data/wiki-Vote.txt.gz",
                 "DBLP":"https://snap.stanford.edu/data/bigdata/communities/com-dblp.ungraph.txt.gz",
                 "Slashdot": "https://snap.stanford.edu/data/soc-sign-Slashdot081106.txt.gz",

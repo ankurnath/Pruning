@@ -67,11 +67,10 @@ if __name__ == "__main__":
             self.conv1 = GCNConv(num_features, hidden_channels)
             self.conv2 = GCNConv(hidden_channels, 2)
 
-        def forward(self, x, edge_index,edge_weight):
-            x = self.conv1(x, edge_index,edge_weight)
+        def forward(self, x, edge_index):
+            x = self.conv1(x, edge_index)
             x = x.relu()
-            # x = F.dropout(x, p=0.5, training=self.training)
-            x = self.conv2(x, edge_index,edge_weight)
+            x = self.conv2(x, edge_index)
             return x
 
         # def forward(self, x, edge_index,edge_weight):
@@ -90,7 +89,7 @@ if __name__ == "__main__":
 
     for epoch in range(1,1000):
 
-        out = model(data.x, data.edge_index,data.edge_weights)  # Perform a single forward pass.
+        out = model(data.x, data.edge_index)  # Perform a single forward pass.
 
         # mask=torch.cat([train_mask,torch.randint(graph.number_of_nodes())],axis=0)
         mask = torch.cat([train_mask, torch.randint(0, train_mask.size(0), (train_mask.size(0),))], dim=0)
@@ -126,14 +125,15 @@ if __name__ == "__main__":
     print('time elapsed to pruned',time_to_prune)
 
 
-    subgraph = make_subgraph(graph,pruned_universe)
+    subgraph = make_subgraph(test_graph,pruned_universe)
 
     ##################################################################
 
     Pg=len(pruned_universe)/test_graph.number_of_nodes()
     start = time.time()
     # solution_unpruned, _ = imm(graph=graph,seed_size=budget,seed=seed)
-    solution_unpruned = imm(graph=graph,seed_size=budget,seed=0)
+    solution_unpruned = imm(graph=test_graph,seed_size=budget,seed=0)
+    queries_unpruned  = budget/2 * (2*graph.number_of_nodes() - budget +1) 
     end = time.time()
 
 
@@ -144,14 +144,14 @@ if __name__ == "__main__":
 
     start = time.time()
     solution_pruned = imm(graph=subgraph,seed_size=budget, seed=0)
-
+    queries_pruned  = budget/2 * (2*len(pruned_universe) - budget +1) 
     # sprint([graph.degree(node) for node in solution_pruned])
     end = time.time()
     time_pruned = round(end-start,4)
     print('Elapsed time (pruned):',time_pruned)
 
-    objective_pruned = calculate_spread(graph=graph,solution=solution_pruned)
-    objective_unpruned = calculate_spread(graph=graph,solution=solution_unpruned)
+    objective_pruned = calculate_spread(graph=test_graph,solution=solution_pruned)
+    objective_unpruned = calculate_spread(graph=test_graph,solution=solution_unpruned)
 
     sprint(objective_pruned)
     sprint(objective_unpruned)
@@ -170,19 +170,19 @@ if __name__ == "__main__":
     os.makedirs(save_folder,exist_ok=True)
     save_file_path = os.path.join(save_folder,'Quickfilter')
 
-    df ={     'Dataset':dataset,'Budget':budget,
-                
-                'Objective Value(Unpruned)':objective_unpruned,
+    df ={     'Dataset':dataset,
+              'Budget':budget,
+              'Objective Value(Unpruned)':objective_unpruned,
               'Objective Value(Pruned)':objective_pruned ,
               'Ground Set': graph.number_of_nodes(),
               'Ground set(Pruned)':len(pruned_universe), 
-            #   'Queries(Unpruned)': queries_unpruned,
+              'Queries(Unpruned)': queries_unpruned,
               'Time(Unpruned)':time_unpruned,
               'Time(Pruned)': time_pruned,
-            #   'Queries(Pruned)': queries_pruned, 
+              'Queries(Pruned)': queries_pruned, 
               'Pruned Ground set(%)': round(Pg,4)*100,
               'Ratio(%)':round(ratio,4)*100, 
-            #   'Queries(%)': round(queries_pruned/queries_unpruned,4)*100,
+              'Queries(%)': round(queries_pruned/queries_unpruned,4)*100,
               'TimeRatio': time_pruned/time_unpruned,
               'TimeToPrune':time_to_prune
 

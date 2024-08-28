@@ -113,6 +113,7 @@ def SS(dataset,r,c,num_rr,budget):
     start = time.time()
     # solution_unpruned, _ = imm(graph=graph,seed_size=budget,seed=0)
     solution_unpruned = imm(graph=graph,seed_size=budget,seed=0)
+    queries_unpruned  = budget/2 * (2*graph.number_of_nodes() - budget +1) 
     end = time.time()
 
 
@@ -124,7 +125,7 @@ def SS(dataset,r,c,num_rr,budget):
     start = time.time()
     # solution_pruned, _ = imm(graph=subgraph,seed_size=budget, seed=0)
     solution_pruned = imm(graph=subgraph,seed_size=budget, seed=0)
-
+    queries_pruned  = budget/2 * (2*len(pruned_universe) - budget +1) 
     # sprint([graph.degree(node) for node in solution_pruned])
     end = time.time()
     time_pruned = round(end-start,4)
@@ -158,13 +159,13 @@ def SS(dataset,r,c,num_rr,budget):
               'Objective Value(Pruned)':objective_pruned ,
               'Ground Set': graph.number_of_nodes(),
               'Ground set(Pruned)':len(pruned_universe), 
-            #   'Queries(Unpruned)': queries_unpruned,
+              'Queries(Unpruned)': queries_unpruned,
               'Time(Unpruned)':time_unpruned,
               'Time(Pruned)': time_pruned,
-            #   'Queries(Pruned)': queries_pruned, 
+              'Queries(Pruned)': queries_pruned, 
               'Pruned Ground set(%)': round(Pg,4)*100,
               'Ratio(%)':round(ratio,4)*100, 
-            #   'Queries(%)': round(queries_pruned/queries_unpruned,4)*100,
+              'Queries(%)': round(queries_pruned/queries_unpruned,4)*100,
               'TimeRatio': time_pruned/time_unpruned,
               'TimeToPrune':time_to_prune
 
@@ -189,4 +190,17 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    SS(dataset=args.dataset,r=args.r,c=args.c,budget=args.budget,num_rr=args.num_rr)
+    dataset = args.dataset
+    r = args.r 
+    c = args.c 
+    budget = args.budget
+    num_rr = args.num_rr
+
+    sprint(dataset)
+    sprint(r)
+    sprint(c)
+    sprint(budget)
+    sprint(num_rr)
+
+    # SS(dataset=args.dataset,r=args.r,c=args.c,budget=args.budget,num_rr=args.num_rr)
+    SS (dataset=dataset,r=r,c=c,budget=budget,num_rr=num_rr)

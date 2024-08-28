@@ -23,6 +23,32 @@ def get_gains(graph,ground_set):
     
     return gains
 
+
+
+
+# def gain_adjustment(graph,gains,selected_element,uncovered):
+
+    # uncovered[selected_element] = False
+
+    # for neighbor in graph.neighbors(selected_element):
+    #     uncovered[neighbor] = False
+
+    
+
+    # for node in gains:
+    #     gains[node] = 0
+    #     if uncovered[node]:
+    #         gains[node] += 1
+
+    #     for neighbor in graph.neighbors(node):
+
+    #         if uncovered[neighbor]:
+    #             gains[node] += 1
+
+
+
+
+
     
 def gain_adjustment(graph,gains,selected_element,uncovered):
      

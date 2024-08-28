@@ -1,12 +1,10 @@
 from utils import *
 from greedy import greedy,gain_adjustment,get_gains
+from helper_functions import *
 
+def quickfilter(dataset,budget,delta):
 
-def quickfilter(dataset,budget,delta=0.1):
-
-    sprint(dataset)
-    sprint(budget)
-    sprint(delta)
+    
     
 
     load_graph_file_path=f'../../data/snap_dataset/{dataset}.txt'
@@ -36,12 +34,18 @@ def quickfilter(dataset,budget,delta=0.1):
     Pg=len(pruned_universe)/graph.number_of_nodes()
     start = time.time()
     objective_unpruned,queries_unpruned,solution_unpruned= greedy(graph,budget)
+
+    assert len(solution_unpruned) <= budget, 'Solution from  ground set exceeds the budget'
+    assert objective_unpruned == calculate_obj(graph=graph,solution=solution_unpruned)
     end = time.time()
     time_unpruned = round(end-start,4)
     print('Elapsed time (unpruned):',round(time_unpruned,4))
 
     start = time.time()
     objective_pruned,queries_pruned,solution_pruned = greedy(graph=graph,budget=budget,ground_set=pruned_universe)
+    assert len(solution_pruned) <= budget, 'Solution from pruned ground set exceeds the budget'
+    assert objective_pruned == calculate_obj(graph=graph,solution=solution_pruned)
+
     end = time.time()
     time_pruned = round(end-start,4)
     print('Elapsed time (pruned):',time_pruned)
@@ -88,4 +92,15 @@ if __name__ == "__main__":
     parser.add_argument("--budget", type=int,required=True,default=10, help="Budgets")
     parser.add_argument("--delta", type=float, default=0.1,required=True, help="Delta")
     args = parser.parse_args()
-    quickfilter(dataset=args.dataset,budget=args.budget)
+
+
+    dataset = args.dataset
+    budget = args.budget
+    delta = args.delta
+
+    sprint(dataset)
+    sprint(budget)
+    sprint(delta)
+
+
+    quickfilter(dataset=dataset,budget=budget,delta=delta)
