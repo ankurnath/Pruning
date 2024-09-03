@@ -23,7 +23,7 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
     gains_taus ={}
     uncovered_taus = {}
     
-    m = int(np.floor (np.log(max_budget/min_budget)/np.log(1+eps)))
+    m = int(np.ceil (np.log(max_budget/min_budget)/np.log(1+eps)))
     print ('m =',m)
     curr_obj_taus = defaultdict(int)
     for i in range(m+1):

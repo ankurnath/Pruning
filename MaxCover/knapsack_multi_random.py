@@ -17,7 +17,7 @@ def quickfilter_random(dataset, cost_model , max_budget, min_budget,delta ,eps,a
    
     start = time.time()
 
-    m = int(np.floor (np.log(max_budget/min_budget)/np.log(1+eps)))
+    m = int(np.ceil (np.log(max_budget/min_budget)/np.log(1+eps)))
     print ('m =',m)
     curr_obj_taus = defaultdict(int)
     gains = get_gains(graph=graph,ground_set=None)
