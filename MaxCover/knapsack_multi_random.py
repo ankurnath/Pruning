@@ -40,7 +40,7 @@ def quickfilter_random(dataset, cost_model , max_budget, min_budget,delta ,eps,a
             gain_adjustment(graph,gains,node,uncovered)
 
 
-    Pg_multi=len(pruned_universe_multi)/graph.number_of_nodes()
+    Pg_multi = len(pruned_universe_multi)/graph.number_of_nodes()
     Pg_multi = round(Pg_multi,4)*100
     print("Pg(%):",Pg_multi)
     print('Multi budget Pruned Universe:',len(pruned_universe_multi))
@@ -171,10 +171,10 @@ def quickfilter_random(dataset, cost_model , max_budget, min_budget,delta ,eps,a
     
     plt.xlabel('Budgets', fontsize=fontsize )
     plt.ylabel('Ratios (%)', fontsize=fontsize)
-    plt.title(f' Dataset:{args.dataset} Eps:{eps} Delta:{delta} Max Budget:{max_budget} Min Budget: {min_budget}',fontsize=fontsize)
+    plt.title(f' Dataset:{args.dataset} cost_mode:{cost_model} Eps:{eps} Delta:{delta} Max Budget:{max_budget} Min Budget: {min_budget}',fontsize=10)
     plt.legend()
 
-    plt.savefig(os.path.join(save_folder,f'Quickfilter_{cost_model}.pdf'), bbox_inches='tight')
+    plt.savefig(os.path.join(save_folder,f'Quickfilter_{cost_model}.png'), bbox_inches='tight')
     # plt.show()
 
 if __name__ == "__main__":

@@ -17,6 +17,8 @@ def SS(dataset,r,c,num_rr,budget):
     file_path=f'../../data/snap_dataset/{args.dataset}.txt'
     graph = load_graph(file_path=file_path)
 
+    queries_to_prune = 0
+
 
     start = time.time()
     pruned_universe=set()
@@ -24,6 +26,8 @@ def SS(dataset,r,c,num_rr,budget):
     n=graph.number_of_nodes()
 
     gains,node_rr_set,RR = get_gains(graph,num_rr)
+
+    queries_to_prune += len(gains)
     def calculate_spread(graph,solution):
 
         covered = set()
@@ -47,6 +51,7 @@ def SS(dataset,r,c,num_rr,budget):
 
         # universe_gain= calculate_obj(graph,universe) # f(V) 
         universe_gain = calculate_spread(graph,universe)
+        queries_to_prune += 1
 
         # for v in universe:
 
@@ -59,9 +64,11 @@ def SS(dataset,r,c,num_rr,budget):
             universe.add(u)
             # universe_u_gain[u] = calculate_obj (graph ,universe)
             universe_u_gain[u] = calculate_spread (graph ,universe)
+            queries_to_prune += 1
             universe.remove(u)
             # u_gain[u] = calculate_obj (graph , [u])
             u_gain[u] = calculate_spread (graph , [u])
+            queries_to_prune += 1
 
 
         lst = []
@@ -78,6 +85,7 @@ def SS(dataset,r,c,num_rr,budget):
                 
                 # local_gain = calculate_obj(graph,[u,v])-u_gain[u] # f(v U u) -f(u)
                 local_gain = calculate_spread(graph,[u,v])-u_gain[u] # f(v U u) -f(u)
+                queries_to_prune += 1
                 # print(local_gain)
 
                 global_gain = universe_u_gain[u]-universe_gain
@@ -102,6 +110,8 @@ def SS(dataset,r,c,num_rr,budget):
     end= time.time()
 
     time_to_prune = end-start
+
+    print('Number of queries needed to be pruned',queries_to_prune)
 
     print('time elapsed to pruned',time_to_prune)
 
@@ -155,6 +165,7 @@ def SS(dataset,r,c,num_rr,budget):
               'Budget':budget,
               'r':r,
               'c':c,
+              'QueriesToPrune': queries_to_prune,
               'Objective Value(Unpruned)':objective_unpruned,
               'Objective Value(Pruned)':objective_pruned ,
               'Ground Set': graph.number_of_nodes(),

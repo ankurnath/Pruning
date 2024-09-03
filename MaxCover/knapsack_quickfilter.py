@@ -107,7 +107,7 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", type=str, default='DBLP', help="Name of the dataset to be used (default: 'Facebook')")
     parser.add_argument("--budget", type=int,default=5, help="Budget")
     parser.add_argument("--delta", type=float, default=0.1, help="Delta")
-    parser.add_argument("--cost_model",type= str, default= 'degree', help = 'model of node weights')
+    parser.add_argument("--cost_model",type= str, default= 'random', help = 'model of node weights')
     
 
 

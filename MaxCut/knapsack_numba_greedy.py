@@ -26,7 +26,7 @@ def get_gains(adj_list,start,end):
     gains = np.zeros(N)
 
     for node in range(N):
-        gains[node]=end[node]-start[node]+1
+        gains[node]=end[node]-start[node]
 
     return gains
 
@@ -151,7 +151,8 @@ def knapsack_numba_greedy(graph:nx.Graph,budget:int,node_weights:dict,ground_set
     start_time = time.time()
 
     constraint = 0
-    for i in tqdm(range(ground_set_size)):
+    # for i in tqdm(range(ground_set_size)):
+    for i in range(ground_set_size):
         number_of_queries += (ground_set_size- i)
         selected_element = select_element(gains,node_weights,mask)
         # selected_element = np.argmax(gains)

@@ -13,12 +13,19 @@ import random
 from numba import njit
 
 
-def generate_node_weights(graph,cost_model):
+def generate_node_weights(graph,cost_model,seed = None):
 
     if cost_model == 'uniform':
         node_weights = {node:1 for node in graph.nodes()}
 
     elif cost_model == 'random':
+        
+        if seed is None:
+            random.seed(0)
+        else:
+            random.seed(0)
+
+
         node_weights = {node:random.random() for node in graph.nodes()}
 
     elif cost_model == 'degree':

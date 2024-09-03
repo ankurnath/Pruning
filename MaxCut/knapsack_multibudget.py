@@ -4,8 +4,8 @@ from greedy import greedy,gain_adjustment,get_gains
 
 from knapsack_numba_greedy import knapsack_numba_greedy
 import matplotlib.pyplot as plt
-from IP_solver import gurobi_solver
-from sample_greedy import *
+# from IP_solver import gurobi_solver
+from sample_greedy import run_sampling_multiple_times
 
 
 
@@ -89,34 +89,17 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
 
     timetoprune_single = end - start
     
-    # multi_ratios = []
-    # single_ratios = []
-    # # greedy_coverages = []
-    # unpruned_obj = []
-
-    # x = [int((1+eps)**i * min_budget)  for i in range(m+1)] + [max_budget]
-
-    x = [(1+eps)**i * min_budget for i in range(m+1)] + [max_budget]
-    x.sort()
-
-    if x[-1]>max_budget:
-        x.pop()
-    print('Budgets',x)
-    subgraph_multi = make_subgraph(graph,pruned_universe_multi)
-    subgraph_single = make_subgraph(graph,pruned_universe_single)
+    
 
 
     df = defaultdict(list)
 
-    # queries_multi = []
-    # queries_single = []
 
+    step = 20
+    budgets = list(range(min_budget,max_budget,step)) +[max_budget]
+    sprint(budgets)
 
-
-    
-
-
-    for i in x[::-1]:
+    for i in budgets:
 
         print(i)
 
@@ -127,14 +110,8 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
                                                                                  budget=i,
                                                                                  node_weights=node_weights,
                                                                                  ground_set=pruned_universe_multi,
-                                                                                 num_iterations=10)
+                                                                                 num_iterations=5)
         
-
-
-
-        # objective_multi_pruned,queries_multi_pruned,solution_multi_pruned= gurobi_solver(        graph= subgraph_multi, 
-        #                                                                                          budget=i,
-        #                                                                                          node_weights=node_weights)
         end = time.time()
 
         time_multi_pruned = end -start
@@ -145,16 +122,8 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
                                                                                  budget=i,
                                                                                  node_weights=node_weights,
                                                                                  ground_set=pruned_universe_single,
-                                                                                 num_iterations=10)
+                                                                                 num_iterations=5)
 
-        # objective_single_pruned,queries_single_pruned,solution_single_pruned = sample_greedy(     graph= graph, 
-        #                                                                                          budget=i,
-        #                                                                                          node_weights=node_weights,
-        #                                                                                          ground_set=pruned_universe_single)
-        # objective_single_pruned,queries_single_pruned,solution_single_pruned= gurobi_solver(graph = subgraph_single, 
-        #                                                                                          budget=i,
-        #                                                                                          node_weights=node_weights
-        #                                                                                          )
         
         end = time.time()
         time_single_pruned = end -start
@@ -166,17 +135,8 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
                                                                                  budget=i,
                                                                                  node_weights=node_weights,
                                                                                  ground_set=None,
-                                                                                 num_iterations=10)
+                                                                                 num_iterations=5)
 
-
-
-        # objective_unpruned,queries_unpruned,solution_unpruned= sample_greedy(graph=graph,budget=i,
-        #                                                                          node_weights=node_weights)
-
-        
-        # objective_unpruned,queries_unpruned,solution_unpruned= gurobi_solver(graph=graph,budget=i,
-        #                                                                          node_weights=node_weights)
-        
         
         end = time.time()
 
@@ -228,12 +188,12 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
     save_to_pickle(df,save_file_path)
 
 
-    print(df[['Ratio Multi','Queries Multi (pruned)','Queries Multi(%)','Ratio Single','Queries Single (pruned)','Queries Single(%)']])
+    print(df[['Budget','Ratio Multi','Queries Multi(%)','Ratio Single','Queries Single(%)','Objective Value(Unpruned)']])
 
         
     fontsize = 20
-    plt.plot(x, df['Ratio Multi'], linestyle='--', marker='o', markersize=20, color='blue', markeredgecolor='black', alpha=0.7, label=f'Multi-Budget {Pg_multi:.2f}%')
-    plt.plot(x, df['Ratio Single'], linestyle='--', marker='*', markersize=20, color='red', markeredgecolor='black', alpha=0.7, label=f'Single-Budget {Pg_single:.2f}%')
+    plt.plot(budgets, df['Ratio Multi'], linestyle='--', marker='o', markersize=20, color='blue', markeredgecolor='black', alpha=0.7, label=f'Multi-Budget {Pg_multi:.2f}%')
+    plt.plot(budgets, df['Ratio Single'], linestyle='--', marker='*', markersize=20, color='red', markeredgecolor='black', alpha=0.7, label=f'Single-Budget {Pg_single:.2f}%')
     
     
     plt.xlabel('Budgets', fontsize=fontsize )

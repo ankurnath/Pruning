@@ -2,7 +2,7 @@ from utils import *
 from greedy import gain_adjustment,get_gains
 from knapsack_greedy import knapsack_greedy
 from knapsack_numba_greedy import knapsack_numba_greedy
-from IP_solver import gurobi_solver
+# from IP_solver import gurobi_solver 
 from sample_greedy import sample_greedy,run_sampling_multiple_times
 
 def knapsack_quickfilter(dataset,budget,delta,cost_model):
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", type=str, default='DBLP', help="Name of the dataset to be used (default: 'Facebook')")
     parser.add_argument("--budget", type=int,default=100, help="Budget")
     parser.add_argument("--delta", type=float, default=0.1, help="Delta")
-    parser.add_argument("--cost_model",type= str, default= 'degree', help = 'model of node weights')
+    parser.add_argument("--cost_model",type= str, default= 'random', help = 'model of node weights')
     
 
 

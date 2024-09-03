@@ -79,7 +79,7 @@ def greedy(graph,budget,ground_set=None):
     gains = get_gains(graph,ground_set)
     
     solution=[]
-    # uncovered=defaultdict(lambda: True)
+    
     spins={node:1 for node in graph.nodes()}
     obj_val = 0
 

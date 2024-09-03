@@ -77,26 +77,17 @@ def quickfilter_random(dataset, cost_model , max_budget, min_budget,delta ,eps,a
 
     timetoprune_single = end - start
 
-
-    
-
-    # x = [int((1+eps)**i * min_budget)  for i in range(m+1)] + [max_budget]
-
-    x = [(1+eps)**i * min_budget for i in range(m+1)] + [max_budget]
-    x.sort()
-
-    if x[-1]>max_budget:
-        x.pop()
-    print('Budgets',x)
-    subgraph_multi = make_subgraph(graph,pruned_universe_multi)
-    subgraph_single = make_subgraph(graph,pruned_universe_single)
-
-    # print(subgraph_multi.number_of_nodes()/graph.number_of_nodes())
-
     df = defaultdict(list)
 
-    for i in x[::-1]:
-    # for i in range(10,110,10):
+
+    step = 20
+
+
+    budgets = list(range(min_budget,max_budget,step)) +[max_budget]
+    sprint(budgets)
+
+    for i in budgets:
+    
         sprint(i)
         start = time.time()
 
@@ -104,10 +95,8 @@ def quickfilter_random(dataset, cost_model , max_budget, min_budget,delta ,eps,a
                                                                                  budget=i,
                                                                                  node_weights=node_weights,
                                                                                  ground_set=pruned_universe_multi,
-                                                                                 num_iterations=10)
-        # objective_multi_pruned,queries_multi_pruned,solution_multi_pruned= gurobi_solver(        graph= subgraph_multi, 
-        #                                                                                          budget=i,
-        #                                                                                          node_weights=node_weights)
+                                                                                 num_iterations=5)
+        
         end = time.time()
 
         time_multi_pruned = end -start
@@ -117,7 +106,7 @@ def quickfilter_random(dataset, cost_model , max_budget, min_budget,delta ,eps,a
                                                                                  budget=i,
                                                                                  node_weights=node_weights,
                                                                                  ground_set=pruned_universe_single,
-                                                                                 num_iterations=10)
+                                                                                 num_iterations=5)
         
         end = time.time()
         time_single_pruned = end -start
@@ -127,7 +116,7 @@ def quickfilter_random(dataset, cost_model , max_budget, min_budget,delta ,eps,a
                                                                                  budget=i,
                                                                                  node_weights=node_weights,
                                                                                  ground_set=None,
-                                                                                 num_iterations=10)
+                                                                                 num_iterations=5)
         
         
         end = time.time()
@@ -179,17 +168,17 @@ def quickfilter_random(dataset, cost_model , max_budget, min_budget,delta ,eps,a
     save_to_pickle(df,save_file_path)
 
 
-    print(df[['Budget','Ratio Multi','Queries Multi (pruned)','Queries Multi(%)','Ratio Single','Queries Single (pruned)','Queries Single(%)']])
+    print(df[['Budget','Ratio Multi','Queries Multi(%)','Ratio Single','Queries Single(%)','Objective Value(Unpruned)']])
 
         
     fontsize = 20
-    plt.plot(x, df['Ratio Multi'], linestyle='--', marker='o', markersize=20, color='blue', markeredgecolor='black', alpha=0.7, label=f'Multi-Budget {Pg_multi:.2f}%')
-    plt.plot(x, df['Ratio Single'], linestyle='--', marker='*', markersize=20, color='red', markeredgecolor='black', alpha=0.7, label=f'Single-Budget {Pg_single:.2f}%')
+    plt.plot(budgets, df['Ratio Multi'], linestyle='--', marker='o', markersize=20, color='blue', markeredgecolor='black', alpha=0.7, label=f'Multi-Budget {Pg_multi:.2f}%')
+    plt.plot(budgets, df['Ratio Single'], linestyle='--', marker='*', markersize=20, color='red', markeredgecolor='black', alpha=0.7, label=f'Single-Budget {Pg_single:.2f}%')
     
     
     plt.xlabel('Budgets', fontsize=fontsize )
     plt.ylabel('Ratios (%)', fontsize=fontsize)
-    plt.title(f' Dataset:{args.dataset} Eps:{eps} Delta:{delta} Max Budget:{max_budget} Min Budget: {min_budget}',fontsize=fontsize)
+    plt.title(f' Dataset:{args.dataset} cost_model: {cost_model} Eps:{eps} Delta:{delta} Max Budget:{max_budget} Min Budget: {min_budget}',fontsize=fontsize)
     plt.legend()
 
     plt.savefig(os.path.join(save_folder,f'Quickfilter_{cost_model}.png'), bbox_inches='tight')

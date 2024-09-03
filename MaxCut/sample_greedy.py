@@ -60,7 +60,7 @@ def select_element(gains,node_weights,mask):
 
 
 
-def run_sampling_multiple_times(graph, budget, node_weights, ground_set, num_iterations=10):
+def run_sampling_multiple_times(graph, budget, node_weights, ground_set, num_iterations=5):
         """
         Runs the sample_greedy function multiple times and computes the mean of the objectives and queries.
         
@@ -81,11 +81,11 @@ def run_sampling_multiple_times(graph, budget, node_weights, ground_set, num_ite
         # Run the sampling process multiple times
         for _ in range(num_iterations):
             objective_multi_pruned, queries_multi_pruned, solution_multi_pruned = sample_greedy(
-                graph=graph, 
-                budget=budget,
-                node_weights=node_weights,
-                ground_set=ground_set
-            )
+                                                                                                    graph=graph, 
+                                                                                                    budget=budget,
+                                                                                                    node_weights=node_weights,
+                                                                                                    ground_set=ground_set
+                                                                                                )
             
             # Store the results in lists
             objective_results.append(objective_multi_pruned)
@@ -155,7 +155,8 @@ def sample_greedy(graph:nx.Graph,budget:int,node_weights:dict,ground_set=None):
 
     p = np.sqrt(2)-1 
 
-    for i in tqdm(range(ground_set_size)):
+    # for i in tqdm(range(ground_set_size)):
+    for i in range(ground_set_size):
         number_of_queries += (ground_set_size- i)
         selected_element = select_element(gains,node_weights,mask)
         if selected_element != -1 and gains[selected_element] !=0 and node_weights[selected_element] + constraint <= budget:
@@ -171,7 +172,7 @@ def sample_greedy(graph:nx.Graph,budget:int,node_weights:dict,ground_set=None):
 
     end_time = time.time()
 
-    print("Elapsed time:",round(end_time-start_time,4))
+    # print("Elapsed time:",round(end_time-start_time,4))
     
     if calculate_obj(graph,solution)>=calculate_obj(graph,[max_node]):
         return calculate_obj(graph,solution),number_of_queries,[reverse_mapping[node] for node in solution]

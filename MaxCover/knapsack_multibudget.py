@@ -110,7 +110,14 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
     # queries_multi = []
     # queries_single = []
 
-    for i in x:
+    # for i in x:
+    step = 20
+
+
+    budgets = list(range(min_budget,max_budget,step)) +[max_budget]
+    sprint(budgets)
+    
+    for i in budgets:
 
         start = time.time()
         objective_multi_pruned,queries_multi_pruned,solution_multi_pruned= knapsack_numba_greedy(graph=graph, 
@@ -183,16 +190,16 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
 
         
     fontsize = 20
-    plt.plot(x, df['Ratio Multi'], linestyle='--', marker='o', markersize=20, color='blue', markeredgecolor='black', alpha=0.7, label=f'Multi-Budget {Pg_multi:.2f}%')
-    plt.plot(x, df['Ratio Single'], linestyle='--', marker='*', markersize=20, color='red', markeredgecolor='black', alpha=0.7, label=f'Single-Budget {Pg_single:.2f}%')
+    plt.plot(budgets, df['Ratio Multi'], linestyle='--', marker='o', markersize=20, color='blue', markeredgecolor='black', alpha=0.7, label=f'Multi-Budget {Pg_multi:.2f}%')
+    plt.plot(budgets, df['Ratio Single'], linestyle='--', marker='*', markersize=20, color='red', markeredgecolor='black', alpha=0.7, label=f'Single-Budget {Pg_single:.2f}%')
     
     
     plt.xlabel('Budgets', fontsize=fontsize )
     plt.ylabel('Ratios (%)', fontsize=fontsize)
-    plt.title(f' Dataset:{args.dataset} Eps:{eps} Delta:{delta} Max Budget:{max_budget} Min Budget: {min_budget}',fontsize=fontsize)
+    plt.title(f' Dataset:{args.dataset} Cost model:{args.cost_model} Eps:{eps} Delta:{delta} Max Budget:{max_budget} Min Budget: {min_budget}',fontsize=10)
     plt.legend()
 
-    plt.savefig(os.path.join(save_folder,f'Quickfilter_{cost_model}.pdf'), bbox_inches='tight')
+    plt.savefig(os.path.join(save_folder,f'Quickfilter_{cost_model}.png'), bbox_inches='tight')
     # plt.show()
 
 if __name__ == "__main__":

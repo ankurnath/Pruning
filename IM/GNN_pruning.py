@@ -133,7 +133,7 @@ if __name__ == "__main__":
     start = time.time()
     # solution_unpruned, _ = imm(graph=graph,seed_size=budget,seed=seed)
     solution_unpruned = imm(graph=test_graph,seed_size=budget,seed=0)
-    queries_unpruned  = budget/2 * (2*graph.number_of_nodes() - budget +1) 
+    queries_unpruned  = budget/2 * (2*test_graph.number_of_nodes() - budget +1) 
     end = time.time()
 
 
@@ -168,7 +168,7 @@ if __name__ == "__main__":
 
     save_folder = f'data/{dataset}'
     os.makedirs(save_folder,exist_ok=True)
-    save_file_path = os.path.join(save_folder,'Quickfilter')
+    save_file_path = os.path.join(save_folder,'GNNpruner')
 
     df ={     'Dataset':dataset,
               'Budget':budget,

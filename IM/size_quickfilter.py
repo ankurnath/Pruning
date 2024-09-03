@@ -52,7 +52,7 @@ def quickfilter(dataset,budget,delta,num_rr,seed):
 
     # sprint([graph.degree(node) for node in pruned_universe])
    
-    subgraph = make_subgraph(graph,pruned_universe) 
+    
 
     ##################################################################
 
@@ -68,7 +68,8 @@ def quickfilter(dataset,budget,delta,num_rr,seed):
     
     time_unpruned = round(end-start,4)
     print('Elapsed time (unpruned):',round(time_unpruned,4))
-
+    
+    subgraph = make_subgraph(graph,pruned_universe) 
     start = time.time()
     solution_pruned = imm(graph=subgraph,seed_size=budget, seed=seed)
     queries_pruned  = budget/2 * (2*len(pruned_universe) - budget +1) 
@@ -98,7 +99,10 @@ def quickfilter(dataset,budget,delta,num_rr,seed):
     os.makedirs(save_folder,exist_ok=True)
     save_file_path = os.path.join(save_folder,'Quickfilter')
 
-    df ={     'Dataset':dataset,'Budget':budget,'Delta':delta,'Objective Value(Unpruned)':objective_unpruned,
+    df ={     'Dataset':dataset,
+              'Budget':budget,
+              'Delta':delta,
+              'Objective Value(Unpruned)':objective_unpruned,
               'Objective Value(Pruned)':objective_pruned ,
               'Ground Set': graph.number_of_nodes(),
               'Ground set(Pruned)':len(pruned_universe), 
