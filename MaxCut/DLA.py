@@ -16,6 +16,9 @@ def LA(graph:nx.Graph,gains:dict,node_weights:dict,budget:int):
             max_gain = gains[node]
             max_singleton = node 
 
+    sprint(max_gain)
+
+
     # Copy gains to new variables
     gains_X = gains.copy()
     gains_Y = gains.copy()
@@ -31,20 +34,32 @@ def LA(graph:nx.Graph,gains:dict,node_weights:dict,budget:int):
     X = []
     Y = []
 
-    for node in tqdm(V_1):
+    # for node in tqdm(V_1):
+    N = graph.number_of_nodes()
+    for node in range(N):
         # Calculate density gains once
+        # sprint(node)
+        # sprint(gains_X[node])
+        # sprint(gains_Y[node]) 
         density_gain_X = gains_X[node] / node_weights[node]
         density_gain_Y = gains_Y[node] / node_weights[node]
+
+        # sprint(density_gain_X)
+        # sprint(density_gain_Y)
         
         # Calculate current objectives per budget ratio
         obj_ratio_X = obj_X / budget
         obj_ratio_Y = obj_Y / budget
+
+        sprint(obj_ratio_X)
+        sprint(obj_ratio_Y)
 
         # Decide where to add the node
         if density_gain_X >= obj_ratio_X and density_gain_Y >= obj_ratio_Y:
             if density_gain_X >= density_gain_Y:
                 obj_X += gains_X[node]
                 gain_adjustment(graph=graph, gains=gains_X, selected_element=node, spins=spins_X)
+                # sprint(gains[node+1])
                 X.append(node)
             else:
                 obj_Y += gains_Y[node]
@@ -61,6 +76,12 @@ def LA(graph:nx.Graph,gains:dict,node_weights:dict,budget:int):
             gain_adjustment(graph=graph, gains=gains_Y, selected_element=node, spins=spins_Y)
             Y.append(node)
 
+
+    sprint(X[:10])
+    sprint(Y[:10])
+
+    sprint(len(X))
+    sprint(len(Y))
 
     sprint(obj_X)
     sprint(obj_Y)
@@ -119,12 +140,12 @@ def DLA(graph,node_weights,budget,eps=0.1):
     delta = np.ceil(np.log(1/eps_prime)/eps_prime)
 
     theta = 19 * tau / (6*eps_prime*budget)
-    sprint(theta)
+    # sprint(theta)
 
-    # # # X = set()
-    # # # Y = set ()
+    # # # # X = set()
+    # # # # Y = set ()
 
-    # Get new gains
+    # # Get new gains
     gains = get_gains(graph=graph,ground_set=None)
     X = []
     Y = []
@@ -132,8 +153,8 @@ def DLA(graph,node_weights,budget,eps=0.1):
     gains_X = gains.copy()
     gains_Y = gains.copy()
 
-    # # obj_X = 0 
-    # # obj_Y = 0
+    # # # obj_X = 0 
+    # # # obj_Y = 0
 
     c_X = 0 
     c_Y = 0
@@ -142,10 +163,10 @@ def DLA(graph,node_weights,budget,eps=0.1):
     spins_Y = np.zeros(graph.number_of_nodes())
 
 
-    sprint(tau*(1-eps_prime)/(6*budget))
+    # sprint(tau*(1-eps_prime)/(6*budget))
 
     while theta >= tau * (1 - eps_prime) / (6 * budget):
-        print(theta)
+        # print(theta)
 
         for node in graph.nodes():
             # Skip nodes already in X or Y
@@ -190,54 +211,54 @@ def DLA(graph,node_weights,budget,eps=0.1):
     sprint(c_X)
     sprint(c_Y)
 
-    def calculate_l_prime(nodes, node_weights, bound):
-        c = 0
-        l_prime = []
+    # def calculate_l_prime(nodes, node_weights, bound):
+    #     c = 0
+    #     l_prime = []
         
-        for node in nodes:
-            if c + node_weights[node] <= bound:
-                c += node_weights[node]
-                l_prime.append(node)
-            else:
-                break
+    #     for node in nodes:
+    #         if c + node_weights[node] <= bound:
+    #             c += node_weights[node]
+    #             l_prime.append(node)
+    #         else:
+    #             break
         
-        return l_prime, c
+    #     return l_prime, c
     
-    def get_max_obj(graph, solution, node_weights, budget, c_value):
+    # def get_max_obj(graph, solution, node_weights, budget, c_value):
 
-        max_obj = 0
-        for node in graph.nodes():
-            if node_weights[node] + c_value <= budget:
-                max_obj = max(max_obj, calculate_obj(graph=graph, solution=solution + [node]))
-        return max_obj
+    #     max_obj = 0
+    #     for node in graph.nodes():
+    #         if node_weights[node] + c_value <= budget:
+    #             max_obj = max(max_obj, calculate_obj(graph=graph, solution=solution + [node]))
+    #     return max_obj
 
 
-    S = max(calculate_obj(graph=graph,solution=S_prime),calculate_obj(graph=graph,solution=X),calculate_obj(graph=graph,solution=Y))
+    # S = max(calculate_obj(graph=graph,solution=S_prime),calculate_obj(graph=graph,solution=X),calculate_obj(graph=graph,solution=Y))
     
-    sprint(S)
-    sprint(delta)
+    # sprint(S)
+    # sprint(delta)
 
-    sprint(calculate_obj(graph=graph,solution=S_prime))
-    sprint(calculate_obj(graph=graph,solution=X))
-    sprint(calculate_obj(graph=graph,solution=Y))
-    # sprint(sum(node_weights[node] for node in Y))
-    # for l in range(int(delta+1)):
+    # sprint(calculate_obj(graph=graph,solution=S_prime))
+    # sprint(calculate_obj(graph=graph,solution=X))
+    # sprint(calculate_obj(graph=graph,solution=Y))
+    # # sprint(sum(node_weights[node] for node in Y))
+    # # for l in range(int(delta+1)):
 
-    for l in range(int(delta),-1,-1):
-        sprint(l)
+    # for l in range(int(delta),-1,-1):
+    #     sprint(l)
 
-        bound = eps_prime*budget * (1+eps_prime)** l
-        sprint(bound)
+    #     bound = eps_prime*budget * (1+eps_prime)** l
+    #     sprint(bound)
 
-        X_l_prime,c_X = calculate_l_prime(X, node_weights, bound)
-        Y_l_prime,c_Y = calculate_l_prime(Y, node_weights, bound)
+    #     X_l_prime,c_X = calculate_l_prime(X, node_weights, bound)
+    #     Y_l_prime,c_Y = calculate_l_prime(Y, node_weights, bound)
 
-        S = max(S,get_max_obj(graph=graph,solution=X_l_prime,node_weights=node_weights
-                              ,budget=budget,c_value=c_X))
+    #     S = max(S,get_max_obj(graph=graph,solution=X_l_prime,node_weights=node_weights
+    #                           ,budget=budget,c_value=c_X))
         
-        S = max(S,get_max_obj(graph=graph,solution=Y_l_prime,node_weights=node_weights
-                              ,budget=budget,c_value=c_Y))
-        sprint(S)
+    #     S = max(S,get_max_obj(graph=graph,solution=Y_l_prime,node_weights=node_weights
+    #                           ,budget=budget,c_value=c_Y))
+    #     sprint(S)
         
 
     # return S

@@ -172,7 +172,7 @@ def sample_greedy(graph:nx.Graph,budget:int,node_weights:dict,ground_set=None):
 
     end_time = time.time()
 
-    # print("Elapsed time:",round(end_time-start_time,4))
+    print("Elapsed time:",round(end_time-start_time,4))
     
     if calculate_obj(graph,solution)>=calculate_obj(graph,[max_node]):
         return calculate_obj(graph,solution),number_of_queries,[reverse_mapping[node] for node in solution]

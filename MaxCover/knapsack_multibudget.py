@@ -16,8 +16,6 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
 
 
     start = time.time()
-   
-    # df = defaultdict(list)
     u_taus = {}
     gains_taus ={}
     uncovered_taus = {}
@@ -88,32 +86,11 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
 
     timetoprune_single = end - start
     
-    # multi_ratios = []
-    # single_ratios = []
-    # # greedy_coverages = []
-    # unpruned_obj = []
-
-    # x = [int((1+eps)**i * min_budget)  for i in range(m+1)] + [max_budget]
-
-    x = [(1+eps)**i * min_budget for i in range(m+1)] + [max_budget]
-    x.sort()
-
-    if x[-1]>max_budget:
-        x.pop()
-    print('Budgets',x)
-    # subgraph_multi = make_subgraph(graph,pruned_universe_multi)
-    # subgraph_single = make_subgraph(graph,pruned_universe_single)
+    
 
 
     df = defaultdict(list)
-
-    # queries_multi = []
-    # queries_single = []
-
-    # for i in x:
     step = 20
-
-
     budgets = list(range(min_budget,max_budget,step)) +[max_budget]
     sprint(budgets)
     
