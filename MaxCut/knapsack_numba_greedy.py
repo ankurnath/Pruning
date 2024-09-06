@@ -186,6 +186,7 @@ if __name__ == "__main__":
 
     graph = nx.read_edgelist(f'../../data/snap_dataset/{args.dataset}.txt', create_using=nx.Graph(), nodetype=int)
     
+    graph,_,_ = relabel_graph(graph=graph)
     cost_model = args.cost_model
     node_weights = generate_node_weights(graph=graph,cost_model=cost_model)
 

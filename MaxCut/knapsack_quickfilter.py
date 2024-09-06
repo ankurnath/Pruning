@@ -3,7 +3,8 @@ from greedy import gain_adjustment,get_gains
 from knapsack_greedy import knapsack_greedy
 from knapsack_numba_greedy import knapsack_numba_greedy
 # from IP_solver import gurobi_solver 
-from sample_greedy import sample_greedy,run_sampling_multiple_times
+# from sample_greedy import sample_greedy,run_sampling_multiple_times
+from DLA_numba import DLA
 
 def knapsack_quickfilter(dataset,budget,delta,cost_model):
 
@@ -11,6 +12,7 @@ def knapsack_quickfilter(dataset,budget,delta,cost_model):
     load_graph_file_path=f'../../data/snap_dataset/{dataset}.txt'
 
     graph = load_graph(load_graph_file_path)
+    
 
     node_weights = generate_node_weights(graph=graph,cost_model=cost_model)
     
@@ -48,12 +50,17 @@ def knapsack_quickfilter(dataset,budget,delta,cost_model):
 
     Pg=len(pruned_universe)/graph.number_of_nodes()
     start = time.time()
-
-    objective_unpruned,queries_unpruned = run_sampling_multiple_times(        graph=graph,
+    objective_unpruned= DLA(        graph=graph,
                                                                                  budget=budget,
                                                                                  node_weights=node_weights,
                                                                                  ground_set=None,
-                                                                                 num_iterations=10)
+                                                                                 )
+
+    # objective_unpruned,queries_unpruned = run_sampling_multiple_times(        graph=graph,
+    #                                                                              budget=budget,
+    #                                                                              node_weights=node_weights,
+    #                                                                              ground_set=None,
+    #                                                                              num_iterations=10)
     # objective_unpruned,queries_unpruned,solution_unpruned= sample_greedy(graph=graph,budget=budget,
     #                                                                              node_weights=node_weights)
     
@@ -64,12 +71,17 @@ def knapsack_quickfilter(dataset,budget,delta,cost_model):
     print('Elapsed time (unpruned):',round(time_unpruned,4))
 
     start = time.time()
-
-    objective_pruned,queries_pruned =   run_sampling_multiple_times(             graph=graph,
+    objective_pruned =   DLA(             graph=graph,
                                                                                  budget=budget,
                                                                                  node_weights=node_weights,
                                                                                  ground_set=pruned_universe,
-                                                                                 num_iterations=10)
+                                                                                 )
+
+    # objective_pruned,queries_pruned =   run_sampling_multiple_times(             graph=graph,
+    #                                                                              budget=budget,
+    #                                                                              node_weights=node_weights,
+    #                                                                              ground_set=pruned_universe,
+    #                                                                              num_iterations=10)
     # objective_pruned,queries_pruned,solution_pruned = sample_greedy(graph=graph,budget=budget,
     #                                                                         node_weights=node_weights,
     #                                                                         ground_set=pruned_universe)
@@ -90,19 +102,27 @@ def knapsack_quickfilter(dataset,budget,delta,cost_model):
 
     # print(queries_pruned)
     # print(queries_unpruned)
-    print('Queries:',round(queries_pruned/queries_unpruned,4)*100)
+    # print('Queries:',round(queries_pruned/queries_unpruned,4)*100)
 
 
     save_folder = f'data/{dataset}/knapsack'
     os.makedirs(save_folder,exist_ok=True)
     save_file_path = os.path.join(save_folder,f'Quickfilter_{cost_model}')
 
-    df ={     'Dataset':dataset,'Budget':budget,'Delta':delta,'Objective Value(Unpruned)':objective_unpruned,
-              'Objective Value(Pruned)':objective_pruned ,'Ground Set': graph.number_of_nodes(),
-              'Ground set(Pruned)':len(pruned_universe), 'Queries(Unpruned)': queries_unpruned,'Time(Unpruned)':time_unpruned,
+    df ={     'Dataset':dataset,
+              'Budget':budget,
+              'Delta':delta,
+              'Objective Value(Unpruned)':objective_unpruned,
+              'Objective Value(Pruned)':objective_pruned ,
+              'Ground Set': graph.number_of_nodes(),
+              'Ground set(Pruned)':len(pruned_universe), 
+            #   'Queries(Unpruned)': queries_unpruned,
+              'Time(Unpruned)':time_unpruned,
               'Time(Pruned)': time_pruned,
-              'Queries(Pruned)': queries_pruned, 'Pruned Ground set(%)': round(Pg,4)*100,
-              'Ratio(%)':round(ratio,4)*100, 'Queries(%)': round(queries_pruned/queries_unpruned,4)*100,
+            #   'Queries(Pruned)': queries_pruned, 
+              'Pruned Ground set(%)': round(Pg,4)*100,
+              'Ratio(%)':round(ratio,4)*100, 
+            #   'Queries(%)': round(queries_pruned/queries_unpruned,4)*100,
               'TimeRatio': time_pruned/time_unpruned,
               'TimeToPrune':time_to_prune
 
@@ -122,7 +142,7 @@ def knapsack_quickfilter(dataset,budget,delta,cost_model):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--dataset", type=str, default='DBLP', help="Name of the dataset to be used (default: 'Facebook')")
+    parser.add_argument("--dataset", type=str, default='Facebook', help="Name of the dataset to be used (default: 'Facebook')")
     parser.add_argument("--budget", type=int,default=100, help="Budget")
     parser.add_argument("--delta", type=float, default=0.1, help="Delta")
     parser.add_argument("--cost_model",type= str, default= 'random', help = 'model of node weights')

@@ -7,7 +7,8 @@ from greedy import greedy,gain_adjustment,get_gains
 # import matplotlib.pyplot as plt
 # from IP_solver import gurobi_solver
 
-from sample_greedy import run_sampling_multiple_times
+# from sample_greedy import run_sampling_multiple_times
+from DLA_numba import DLA
 
 
 
@@ -90,33 +91,48 @@ def quickfilter_random(dataset, cost_model , max_budget, min_budget,delta ,eps,a
     
         sprint(i)
         start = time.time()
+        objective_multi_pruned=DLA(graph=graph,
+                                    budget=i,
+                                    node_weights=node_weights,
+                                    ground_set=pruned_universe_multi,
+                                    )
 
-        objective_multi_pruned,queries_multi_pruned =run_sampling_multiple_times(graph=graph,
-                                                                                 budget=i,
-                                                                                 node_weights=node_weights,
-                                                                                 ground_set=pruned_universe_multi,
-                                                                                 num_iterations=5)
+        # objective_multi_pruned,queries_multi_pruned =run_sampling_multiple_times(graph=graph,
+        #                                                                          budget=i,
+        #                                                                          node_weights=node_weights,
+        #                                                                          ground_set=pruned_universe_multi,
+        #                                                                          num_iterations=5)
         
         end = time.time()
 
         time_multi_pruned = end -start
 
         start = time.time()
-        objective_single_pruned,queries_single_pruned =run_sampling_multiple_times(graph=graph,
-                                                                                 budget=i,
-                                                                                 node_weights=node_weights,
-                                                                                 ground_set=pruned_universe_single,
-                                                                                 num_iterations=5)
+        objective_single_pruned=DLA(graph=graph,
+                                    budget=i,
+                                    node_weights=node_weights,
+                                    ground_set=pruned_universe_single,
+                                    )
+        # objective_single_pruned,queries_single_pruned =run_sampling_multiple_times(graph=graph,
+        #                                                                          budget=i,
+        #                                                                          node_weights=node_weights,
+        #                                                                          ground_set=pruned_universe_single,
+        #                                                                          num_iterations=5)
         
         end = time.time()
         time_single_pruned = end -start
 
         start = time.time()
-        objective_unpruned,queries_unpruned =run_sampling_multiple_times(        graph=graph,
-                                                                                 budget=i,
-                                                                                 node_weights=node_weights,
-                                                                                 ground_set=None,
-                                                                                 num_iterations=5)
+        objective_unpruned= DLA(        graph=graph,
+                                        budget=i,
+                                        node_weights=node_weights,
+                                        ground_set=None,
+                                        )
+        # objective_unpruned,queries_unpruned =run_sampling_multiple_times(        graph=graph,
+        #                                                                          budget=i,
+        #                                                                          node_weights=node_weights,
+        #                                                                          ground_set=None,
+        #                                                                          num_iterations=5)
         
         
         end = time.time()
@@ -138,9 +154,9 @@ def quickfilter_random(dataset, cost_model , max_budget, min_budget,delta ,eps,a
         df['Time(Unpruned)'].append(time_unpruned)
         df['Time Multi(Pruned)'].append(time_multi_pruned)
         df['Time Single(Pruned)'].append(time_single_pruned)
-        df['Queries (Unpruned)'].append(queries_unpruned)
-        df['Queries Multi (pruned)'].append(queries_multi_pruned)
-        df['Queries Single (pruned)'].append(queries_single_pruned)
+        # df['Queries (Unpruned)'].append(queries_unpruned)
+        # df['Queries Multi (pruned)'].append(queries_multi_pruned)
+        # df['Queries Single (pruned)'].append(queries_single_pruned)
 
         df['Pruned Ground set Multi(%)'].append(Pg_multi)
         df['Pruned Ground set Single(%)'].append(Pg_single)
@@ -148,8 +164,8 @@ def quickfilter_random(dataset, cost_model , max_budget, min_budget,delta ,eps,a
         df['Ratio Multi'].append(round(objective_multi_pruned/objective_unpruned,4)*100)
         df['Ratio Single'].append(round(objective_single_pruned/objective_unpruned,4)*100)
 
-        df['Queries Multi(%)'].append(round(queries_multi_pruned/queries_unpruned,4)*100)
-        df['Queries Single(%)'].append(round(queries_single_pruned/queries_unpruned,4)*100)
+        # df['Queries Multi(%)'].append(round(queries_multi_pruned/queries_unpruned,4)*100)
+        # df['Queries Single(%)'].append(round(queries_single_pruned/queries_unpruned,4)*100)
 
         df['TimeRatio(Multi)'].append(time_multi_pruned/time_unpruned)
         df['TimeRatio(Single)'].append(time_single_pruned/time_unpruned)
@@ -168,7 +184,7 @@ def quickfilter_random(dataset, cost_model , max_budget, min_budget,delta ,eps,a
     save_to_pickle(df,save_file_path)
 
 
-    print(df[['Budget','Ratio Multi','Queries Multi(%)','Ratio Single','Queries Single(%)','Objective Value(Unpruned)']])
+    print(df[['Budget','Ratio Multi','Ratio Single','Objective Value(Unpruned)']])
 
         
     fontsize = 20
@@ -178,7 +194,7 @@ def quickfilter_random(dataset, cost_model , max_budget, min_budget,delta ,eps,a
     
     plt.xlabel('Budgets', fontsize=fontsize )
     plt.ylabel('Ratios (%)', fontsize=fontsize)
-    plt.title(f' Dataset:{args.dataset} cost_model: {cost_model} Eps:{eps} Delta:{delta} Max Budget:{max_budget} Min Budget: {min_budget}',fontsize=fontsize)
+    plt.title(f' Dataset:{args.dataset}  cost_model: {cost_model} Eps:{eps} Delta:{delta} Max Budget:{max_budget} Min Budget: {min_budget}',fontsize=fontsize)
     plt.legend()
 
     plt.savefig(os.path.join(save_folder,f'Quickfilter_{cost_model}.png'), bbox_inches='tight')
