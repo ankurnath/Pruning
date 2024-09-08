@@ -40,7 +40,7 @@ def knapsack_quickfilter(dataset,budget,delta,cost_model):
 
 
         
-    subgraph = make_subgraph(graph,pruned_universe)
+    # subgraph = make_subgraph(graph,pruned_universe)
     # solution_unpruned,objval_unpruned= gurobi_solver(graph=graph,budget=budget,node_weights=node_weights)
     # solution_pruned,objval_pruned= gurobi_solver(graph=subgraph,budget=budget,node_weights=node_weights)
 
@@ -51,10 +51,10 @@ def knapsack_quickfilter(dataset,budget,delta,cost_model):
     Pg=len(pruned_universe)/graph.number_of_nodes()
     start = time.time()
     objective_unpruned= DLA(        graph=graph,
-                                                                                 budget=budget,
-                                                                                 node_weights=node_weights,
-                                                                                 ground_set=None,
-                                                                                 )
+                                    budget=budget,
+                                    node_weights=node_weights,
+                                    ground_set=None,
+                                    )
 
     # objective_unpruned,queries_unpruned = run_sampling_multiple_times(        graph=graph,
     #                                                                              budget=budget,
@@ -72,10 +72,10 @@ def knapsack_quickfilter(dataset,budget,delta,cost_model):
 
     start = time.time()
     objective_pruned =   DLA(             graph=graph,
-                                                                                 budget=budget,
-                                                                                 node_weights=node_weights,
-                                                                                 ground_set=pruned_universe,
-                                                                                 )
+                                          budget=budget,
+                                          node_weights=node_weights,
+                                          ground_set=pruned_universe,
+                                          )
 
     # objective_pruned,queries_pruned =   run_sampling_multiple_times(             graph=graph,
     #                                                                              budget=budget,

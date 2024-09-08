@@ -194,7 +194,10 @@ def quickfilter_random(dataset, cost_model , max_budget, min_budget,delta ,eps,a
     
     plt.xlabel('Budgets', fontsize=fontsize )
     plt.ylabel('Ratios (%)', fontsize=fontsize)
-    plt.title(f' Dataset:{args.dataset}  cost_model: {cost_model} Eps:{eps} Delta:{delta} Max Budget:{max_budget} Min Budget: {min_budget}',fontsize=fontsize)
+    plt.title(f'Dataset: {args.dataset} cost_model: {cost_model} Sampled: Yes \n'
+          f'Eps: {eps} Delta: {delta} Max Budget: {max_budget} Min Budget: {min_budget}',
+          fontsize=fontsize-2)
+
     plt.legend()
 
     plt.savefig(os.path.join(save_folder,f'Quickfilter_{cost_model}.png'), bbox_inches='tight')

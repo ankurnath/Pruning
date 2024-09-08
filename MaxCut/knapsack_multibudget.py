@@ -217,7 +217,9 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
     
     plt.xlabel('Budgets', fontsize=fontsize )
     plt.ylabel('Ratios (%)', fontsize=fontsize)
-    plt.title(f' Dataset:{args.dataset} Eps:{eps} Delta:{delta} Max Budget:{max_budget} Min Budget: {min_budget}',fontsize=fontsize)
+    plt.title(f'Dataset: {args.dataset} cost_model: {cost_model} Sampled: No Eps: {eps} Delta: {delta} \n'
+          f'Max Budget: {max_budget} Min Budget: {min_budget}', fontsize=fontsize)
+
     plt.legend()
 
     plt.savefig(os.path.join(save_folder,f'Quickfilter_{cost_model}.png'), bbox_inches='tight')
