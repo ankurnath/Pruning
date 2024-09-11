@@ -188,7 +188,7 @@ if __name__ == "__main__":
     cost_model = args.cost_model
     node_weights = generate_node_weights(graph=graph,cost_model=cost_model)
 
-    numba_greedy(graph=graph,budget=args.budget,node_weights=node_weights)
+    sprint(knapsack_numba_greedy(graph=graph,budget=args.budget,node_weights=node_weights)[0])
     
 
 

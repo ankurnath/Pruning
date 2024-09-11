@@ -85,6 +85,9 @@ def load_from_pickle(file_path):
     """
     with open(file_path, 'rb') as file:
         loaded_data = pickle.load(file)
+
+    
+    
     print(f'Data has been loaded from {file_path}')
     return loaded_data
 

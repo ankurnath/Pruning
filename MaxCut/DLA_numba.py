@@ -155,7 +155,8 @@ def LA(adj_list,start,end,gains,node_weights,budget,mask):
     # print(obj_X)
     # print(obj_Y)
 
-    X_prime = np.zeros(N)
+    # X_prime = np.zeros(N)
+    X_prime=np.zeros(shape=(N,),dtype=np.float64)
     
     c_X = 0
 
@@ -171,7 +172,7 @@ def LA(adj_list,start,end,gains,node_weights,budget,mask):
     
     # print('c_X',c_X)
 
-    Y_prime = np.zeros(N)
+    Y_prime = np.zeros(shape=(N,),dtype=np.float64)
     
     c_Y = 0
 
@@ -185,19 +186,21 @@ def LA(adj_list,start,end,gains,node_weights,budget,mask):
         else:
             break
 
-    # print('c_Y',c_Y)
+    print('c_Y',c_Y)
 
     obj_X_prime = calculate_obj(adj_list=adj_list,start=start,end=end,solution=X_prime)
     obj_Y_prime = calculate_obj(adj_list=adj_list,start=start,end=end,solution=Y_prime)
 
+    # obj_X_prime = int(obj_X_prime)
+
     # Determine which prime list to return based on the conditions
     if obj_X_prime >= max(obj_Y_prime, max_gain):
-        return obj_X_prime
+        return (obj_X_prime,X_prime)
     elif obj_Y_prime >= max_gain:
-        return obj_Y_prime
+        return obj_Y_prime,Y_prime
     else:
         # return np.array([max_singleton])
-        return max_gain
+        return max_gain,np.array([max_singleton],dtype=np.float64)
     
 @njit
 def calculate_l_prime(nodes,size, node_weights, bound):
@@ -256,7 +259,7 @@ def get_max_obj(adj_list,start,end, nodes,size, node_weights,mask, budget, c_val
 
     # assert max_obj == calculate_obj(adj_list=adj_list,start=start,end=end,solution=solution)
     
-    return max_obj
+    return max_obj,solution
     
 @njit 
 def DLA_numba(adj_list,start,end,node_weights,budget,mask,eps=0.1):
@@ -269,7 +272,7 @@ def DLA_numba(adj_list,start,end,node_weights,budget,mask,eps=0.1):
     
     
     # tau = calculate_obj(adj_list=adj_list,start=start,end=end,solution=S_prime)
-    tau = LA(adj_list=adj_list,start=start,end=end,
+    tau,best_solution = LA(adj_list=adj_list,start=start,end=end,
                  gains=gains,node_weights=node_weights,budget=budget,mask=mask)
     # print(tau)
 
@@ -359,9 +362,19 @@ def DLA_numba(adj_list,start,end,node_weights,budget,mask,eps=0.1):
     for idx in range(size_Y):
         solution_Y[Y[idx]] =1
 
+   
     
+
+    S = max(tau,
+            calculate_obj(adj_list,start,end,solution_X),
+            calculate_obj(adj_list,start,end,solution_Y))
     
-    S = max(tau,calculate_obj(adj_list,start,end,solution_X),calculate_obj(adj_list,start,end,solution_Y))
+    if S == calculate_obj(adj_list,start,end,solution_X):
+        best_solution = solution_X.copy()
+    
+    elif S == calculate_obj(adj_list,start,end,solution_Y):
+        best_solution = solution_Y.copy()
+        
 
     
     for l in range(int(delta)):
@@ -374,13 +387,25 @@ def DLA_numba(adj_list,start,end,node_weights,budget,mask,eps=0.1):
         bound_size_Y,c_Y = calculate_l_prime(Y,size_Y, node_weights, bound)
         # print(bound_size_X,c_X)
         # print(bound_size_Y,c_Y)
-        S = max(S,get_max_obj(adj_list,start,end,X,bound_size_X, node_weights,mask, budget, c_X))
+
+        # Get max objectives for X and Y
+        obj_X,sol_X = get_max_obj(adj_list, start, end, X, bound_size_X, node_weights, mask, budget, c_X)
+        obj_Y,sol_Y = get_max_obj(adj_list, start, end, Y, bound_size_Y, node_weights, mask, budget, c_Y)
+
+        # Update the best objective and corresponding solution if a new maximum is found
+        if obj_X > S:
+            S = obj_X
+            best_solution = sol_X
+        if obj_Y > S:
+            S = obj_Y
+            best_solution = sol_Y
+        # S = max(S,get_max_obj(adj_list,start,end,X,bound_size_X, node_weights,mask, budget, c_X))
         
-        S = max(S,get_max_obj(adj_list,start,end, Y,bound_size_Y, node_weights,mask, budget, c_Y))
+        # S = max(S,get_max_obj(adj_list,start,end, Y,bound_size_Y, node_weights,mask, budget, c_Y))
         # print(S)
         
     # print('S',S)
-    return S
+    return S,best_solution
     
 
     
