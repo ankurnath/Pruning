@@ -2,29 +2,52 @@ from utils import *
 from greedy import greedy,gain_adjustment,get_gains
 from helper_functions import *
 
-def quickfilter(dataset,budget,delta):
+def quickfilter(dataset,budget,delta=0.1,eps=0.1):
 
   
     load_graph_file_path=f'../../data/snap_dataset/{dataset}.txt'
     graph = load_graph(load_graph_file_path)
     
     start = time.time()
-    gains=get_gains(graph,ground_set=None)
-    curr_obj=0
-    pruned_universe=[]
+    gains = get_gains(graph,ground_set=None)
+    curr_obj = 0
+    # pruned_universe=[] 
+    a = set()
+    # a_start = set() 
+    a_start = np.argmax(gains)
+    a_s = set()
+    
+
+    obj_a_s = 0
     uncovered=defaultdict(lambda: True)
+
+    N = graph.number_of_nodes()
     for node in tqdm(graph.nodes()):
 
         if gains[node]>=delta/budget*curr_obj:
             curr_obj+=gains[node]
-            pruned_universe.append(node)
+            # pruned_universe.append(node)
+            a.add(node)
             gain_adjustment(graph,gains,node,uncovered)
+
+
+        ### New addition
+        if curr_obj > N/eps*obj_a_s:
+            print('This happened')
+            # a = a.difference(a_s)
+            a.difference_update(a_s)
+            a_s = a.copy()
+
+            obj_a_s = calculate_obj(graph=graph,solution=a_s)
+            curr_obj = calculate_obj(graph=graph,solution=a)
             
     end= time.time()
 
     time_to_prune = end-start
 
     print('time elapsed to pruned',time_to_prune)
+    a.add(a_start)
+    pruned_universe = list(a)
     
     
     ##################################################################

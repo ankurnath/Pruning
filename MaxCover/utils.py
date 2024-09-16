@@ -72,6 +72,8 @@ def load_graph(file_path):
 
 
     graph.remove_edges_from(list(nx.selfloop_edges(graph)))
+
+    graph,_,_ = relabel_graph(graph=graph)
     return graph
 
 

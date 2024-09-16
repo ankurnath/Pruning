@@ -3,8 +3,8 @@ from greedy import gain_adjustment,get_gains
 from knapsack_greedy import knapsack_greedy
 from knapsack_numba_greedy import knapsack_numba_greedy
 # from IP_solver import gurobi_solver
-
-def knapsack_quickfilter(dataset,budget,delta,cost_model):
+from helper_functions import *
+def knapsack_quickfilter(dataset,budget,delta,cost_model,eps=0.1):
 
 
     load_graph_file_path=f'../../data/snap_dataset/{dataset}.txt'
@@ -15,25 +15,53 @@ def knapsack_quickfilter(dataset,budget,delta,cost_model):
     
     start = time.time()
     # for budget in budgets:
+    
     gains = get_gains(graph,ground_set=None)
     curr_obj = 0
+    a = set()
+    a_start = np.argmax(gains)
+    a_s = set()
 
-    pruned_universe=[]
+
+    obj_a_s = 0
     uncovered=defaultdict(lambda: True)
+    N = graph.number_of_nodes()
     for node in graph.nodes():
 
-        if gains[node]/node_weights[node] >= delta/budget*curr_obj:
-            curr_obj+=gains[node]
-            pruned_universe.append(node)
+        if node_weights[node]>budget:
+            continue
 
-            # gains adjustment
+        if gains[node]/node_weights[node]>=delta/budget*curr_obj:
+            curr_obj+=gains[node]
+            # pruned_universe.append(node)
+            a.add(node)
             gain_adjustment(graph,gains,node,uncovered)
+
+
+        ### New addition
+        if curr_obj > N/eps*obj_a_s:
+            # print('la la')
+            # a = a.difference(a_s)
+            a.difference_update(a_s)
+            a_s = a.copy()
+
+            obj_a_s = calculate_obj(graph=graph,solution=a_s)
+            curr_obj = calculate_obj(graph=graph,solution=a)
+
+        # if gains[node]/node_weights[node] >= delta/budget*curr_obj:
+        #     curr_obj+=gains[node]
+        #     pruned_universe.append(node)
+
+        #     # gains adjustment
+        #     gain_adjustment(graph,gains,node,uncovered)
     
     end= time.time()
 
     time_to_prune = end-start
 
     print('time elapsed to pruned',time_to_prune)
+    a.add(a_start)
+    pruned_universe = list(a)
 
 
         
@@ -105,9 +133,9 @@ def knapsack_quickfilter(dataset,budget,delta,cost_model):
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--dataset", type=str, default='DBLP', help="Name of the dataset to be used (default: 'Facebook')")
-    parser.add_argument("--budget", type=int,default=5, help="Budget")
+    parser.add_argument("--budget", type=int,default=100, help="Budget")
     parser.add_argument("--delta", type=float, default=0.1, help="Delta")
-    parser.add_argument("--cost_model",type= str, default= 'random', help = 'model of node weights')
+    parser.add_argument("--cost_model",type= str, default= 'degree', help = 'model of node weights')
     
 
 
