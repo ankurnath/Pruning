@@ -63,8 +63,8 @@ def knapsack_greedy(graph,ground_set , num_rr,budget ,node_weights):
 
     # print('Number of queries:',number_of_queries)
         
-    if calculate_spread(graph,solution)< calculate_spread(graph,solution=[max_singleton]) :
-        solution = [ max_singleton ]
+    # if calculate_spread(graph,solution)< calculate_spread(graph,solution=[max_singleton]) :
+    #     solution = [ max_singleton ]
 
     return solution,number_of_queries
 

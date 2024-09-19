@@ -1,0 +1,10 @@
+UCF101_subset/train/ApplyLipstick/v_ApplyLipstick_g01_c04.avi,ApplyLipstick
+UCF101_subset/train/ApplyLipstick/v_ApplyLipstick_g01_c02.avi,ApplyLipstick
+UCF101_subset/train/ApplyLipstick/v_ApplyLipstick_g03_c01.avi,ApplyLipstick
+UCF101_subset/train/ApplyLipstick/v_ApplyLipstick_g02_c01.avi,ApplyLipstick
+UCF101_subset/train/ApplyLipstick/v_ApplyLipstick_g02_c03.avi,ApplyLipstick
+UCF101_subset/train/ApplyEyeMakeup/v_ApplyEyeMakeup_g01_c03.avi,ApplyEyeMakeup
+UCF101_subset/train/ApplyEyeMakeup/v_ApplyEyeMakeup_g01_c05.avi,ApplyEyeMakeup
+UCF101_subset/train/ApplyEyeMakeup/v_ApplyEyeMakeup_g01_c01.avi,ApplyEyeMakeup
+UCF101_subset/train/ApplyEyeMakeup/v_ApplyEyeMakeup_g02_c01.avi,ApplyEyeMakeup
+UCF101_subset/train/ApplyEyeMakeup/v_ApplyEyeMakeup_g02_c03.avi,ApplyEyeMakeup

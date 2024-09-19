@@ -17,6 +17,7 @@ def knapsack_quickfilter(dataset,budget,delta,cost_model,num_rr):
     start = time.time()
     
     gains,node_rr_set,RR = get_gains(graph,num_rr)
+    print(len(RR))
     curr_obj = 0
 
     pruned_universe=[]
@@ -28,17 +29,14 @@ def knapsack_quickfilter(dataset,budget,delta,cost_model,num_rr):
             pruned_universe.append(node)
 
             # gains adjustment
-            gain_adjustment(gains=gains,node_rr_set=node_rr_set,RR=RR,selected_element=node,covered_rr_set=covered_rr_set)
+            gain_adjustment(gains=gains,node_rr_set=node_rr_set,
+                            RR=RR,selected_element=node,covered_rr_set=covered_rr_set)
     
     end= time.time()
 
     time_to_prune = end-start
 
-    print('time elapsed to pruned',time_to_prune)
-
-
-        
-    # subgraph = make_subgraph(graph,pruned_universe)
+    
     
 
 
@@ -46,6 +44,7 @@ def knapsack_quickfilter(dataset,budget,delta,cost_model,num_rr):
     ##################################################################
 
     Pg=len(pruned_universe)/graph.number_of_nodes()
+    print('Size of Pruned Ground Set, |Upruned|:', len(pruned_universe))
     start = time.time()
 
 
@@ -103,7 +102,7 @@ def knapsack_quickfilter(dataset,budget,delta,cost_model,num_rr):
     save_to_pickle(df,save_file_path)
     print(df)
 
-    ###################################################################################################
+    ##################################################################################################
       
 
 
@@ -115,7 +114,7 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", type=str, default='DBLP', help="Name of the dataset to be used (default: 'Facebook')")
     parser.add_argument("--budget", type=int,default=100, help="Budget")
     parser.add_argument("--delta", type=float, default=0.1, help="Delta")
-    parser.add_argument("--cost_model",type= str, default= 'random', help = 'model of node weights')
+    parser.add_argument("--cost_model",type= str, default= 'degree', help = 'model of node weights')
     parser.add_argument("--num_rr", type=int, default= 100000  , help="Number of RR sets")
     
 

@@ -1,4 +1,4 @@
-from sentence_transformers import SentenceTransformer, util
+# from sentence_transformers import SentenceTransformer, util 
 from datasets import load_dataset
 import numpy as np
 from transformers import AutoTokenizer,AutoModelForSequenceClassification
@@ -7,13 +7,25 @@ from argparse import ArgumentParser
 from transformers import TrainingArguments, Trainer
 from collections import defaultdict
 from transformers import DataCollatorWithPadding
-from datasets import load_metric
-import evaluate
+# from datasets import load_metric
+# import evaluate
 import pandas as pd
 import pickle
 import random
 from tqdm import tqdm
 import heapq
+
+def save_to_pickle(data, file_path):
+    """
+    Save data to a pickle file.
+
+    Parameters:
+    - data: The data to be saved.
+    - file_path: The path to the pickle file.
+    """
+    with open(file_path, 'wb') as file:
+        pickle.dump(data, file)
+    print(f'Data has been saved to {file_path}')
 
 def load_from_pickle(file_path):
     """

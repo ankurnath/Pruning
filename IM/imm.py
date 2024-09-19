@@ -112,7 +112,7 @@ def sampling(epsoid, l, node_num, seed_size, worker, graph_, model):
     '''
     _end = time.time()
     finish_worker(worker)
-    print('Number of RR sets:',len(R))
+    # print('Number of RR sets:',len(R))
     return R
 
 
