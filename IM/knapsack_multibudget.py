@@ -1,13 +1,7 @@
 from utils import *
-
-from greedy import gain_adjustment,get_gains
-
-
 import matplotlib.pyplot as plt
-from utils import *
 from greedy import gain_adjustment,get_gains,calculate_spread
 from helper_functions import *
-
 from knapsack_greedy import knapsack_greedy
 
 
@@ -30,7 +24,7 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
     gains_taus ={}
     covered_rr_set_taus = {}
     
-    m = int(np.floor (np.log(max_budget/min_budget)/np.log(1+eps)))
+    m = int(np.ceil (np.log(max_budget/min_budget)/np.log(1+eps)))
     print ('m =',m)
     curr_obj_taus = defaultdict(int)
     for i in range(m+1):
@@ -103,12 +97,12 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
     timetoprune_single = end - start
     
     
-    x = [(1+eps)**i * min_budget for i in range(m+1)] + [max_budget]
-    x.sort()
+    budgets = [(1+eps)**i * min_budget for i in range(m+1)] + [max_budget]
+    budgets.sort()
 
-    if x[-1]>max_budget:
-        x.pop()
-    print('Budgets',x)
+    if budgets[-1]>max_budget:
+        budgets.pop()
+    print('Budgets',budgets)
     # subgraph_multi = make_subgraph(graph,pruned_universe_multi)
     # subgraph_single = make_subgraph(graph,pruned_universe_single)
 
@@ -123,72 +117,44 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
     
 
 
-    for i in x[::-1]:
+    for budget in budgets[::-1]:
 
         print(i)
 
         start = time.time()
 
         
-        solution_multi_pruned,queries_multi_pruned =    knapsack_greedy (graph=graph,ground_set = pruned_universe_multi, 
+        solution_multi_pruned,queries_multi_pruned = knapsack_greedy     (graph=graph,
+                                                                          ground_set = pruned_universe_multi, 
                                                                           num_rr=num_rr,
-                                                                          budget = x, 
+                                                                          budget = budget, 
                                                                           node_weights = node_weights)
-        objective_multi_pruned = calculate_spread(graph=graph,solution = solution_multi_pruned)
-        
-
-
-
-        # objective_multi_pruned,queries_multi_pruned,solution_multi_pruned= gurobi_solver(        graph= subgraph_multi, 
-        #                                                                                          budget=i,
-        #                                                                                          node_weights=node_weights)
+        objective_multi_pruned = calculate_spread(graph=graph,
+                                                  solution = solution_multi_pruned)
         end = time.time()
 
         time_multi_pruned = end -start
 
         start = time.time()
 
-        solution_single_pruned,queries_single_pruned =    knapsack_greedy (graph=graph,
-                                                                           ground_set = pruned_universe_single, 
+        solution_single_pruned,queries_single_pruned =   knapsack_greedy (graph=graph,
+                                                                          ground_set = pruned_universe_single, 
                                                                           num_rr=num_rr,
-                                                                          budget = x, 
+                                                                          budget = budget, 
                                                                           node_weights = node_weights)
         objective_single_pruned = calculate_spread(graph=graph,solution = solution_single_pruned)
 
-        # objective_single_pruned,queries_single_pruned,solution_single_pruned = sample_greedy(     graph= graph, 
-        #                                                                                          budget=i,
-        #                                                                                          node_weights=node_weights,
-        #                                                                                          ground_set=pruned_universe_single)
-        # objective_single_pruned,queries_single_pruned,solution_single_pruned= gurobi_solver(graph = subgraph_single, 
-        #                                                                                          budget=i,
-        #                                                                                          node_weights=node_weights
-        #                                                                                          )
+       
         
         end = time.time()
         time_single_pruned = end -start
 
         start = time.time()
         solution_unpruned,queries_unpruned = knapsack_greedy (graph=graph,ground_set =None, 
-                                                              num_rr=num_rr,budget = x, 
+                                                              num_rr=num_rr,budget = budget, 
                                                               node_weights = node_weights)
         objective_unpruned = calculate_spread(graph=graph,solution=solution_unpruned )
 
-
-        # objective_unpruned,queries_unpruned =run_sampling_multiple_times(        graph=graph,
-        #                                                                          budget=i,
-        #                                                                          node_weights=node_weights,
-        #                                                                          ground_set=None,
-        #                                                                          num_iterations=10)
-
-
-
-        # objective_unpruned,queries_unpruned,solution_unpruned= sample_greedy(graph=graph,budget=i,
-        #                                                                          node_weights=node_weights)
-
-        
-        # objective_unpruned,queries_unpruned,solution_unpruned= gurobi_solver(graph=graph,budget=i,
-        #                                                                          node_weights=node_weights)
-        
         
         end = time.time()
 
@@ -240,12 +206,12 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
     save_to_pickle(df,save_file_path)
 
 
-    print(df[['Ratio Multi','Queries Multi (pruned)','Queries Multi(%)','Ratio Single','Queries Single (pruned)','Queries Single(%)']])
+    print(df[['Ratio Multi','Ratio Single']])
 
         
     fontsize = 20
-    plt.plot(x, df['Ratio Multi'], linestyle='--', marker='o', markersize=20, color='blue', markeredgecolor='black', alpha=0.7, label=f'Multi-Budget {Pg_multi:.2f}%')
-    plt.plot(x, df['Ratio Single'], linestyle='--', marker='*', markersize=20, color='red', markeredgecolor='black', alpha=0.7, label=f'Single-Budget {Pg_single:.2f}%')
+    plt.plot(budgets, df['Ratio Multi'], linestyle='--', marker='o', markersize=20, color='blue', markeredgecolor='black', alpha=0.7, label=f'Multi-Budget {Pg_multi:.2f}%')
+    plt.plot(budgets, df['Ratio Single'], linestyle='--', marker='*', markersize=20, color='red', markeredgecolor='black', alpha=0.7, label=f'Single-Budget {Pg_single:.2f}%')
     
     
     plt.xlabel('Budgets', fontsize=fontsize )
@@ -254,16 +220,16 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
     plt.legend()
 
     plt.savefig(os.path.join(save_folder,f'Quickfilter_{cost_model}.png'), bbox_inches='tight')
-    plt.show()
+    # plt.show()
 
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--dataset", type=str, default='Facebook', help="Name of the dataset to be used (default: 'Facebook')")
-    parser.add_argument("--cost_model",type=str,default='random',help='model of node weights')
+    parser.add_argument("--cost_model",type=str,default='degree',help='model of node weights')
     parser.add_argument('--max_budget', type = int ,default=100, help = 'Maximum Budget')
     parser.add_argument('--min_budget', type = int ,default=10, help = 'Minimum Budget')
 
-    parser.add_argument("--delta", type=float, default=0.1, help="Delta")
+    parser.add_argument("--delta", type=float, default=0.5, help="Delta")
     parser.add_argument("--eps",type =float,default=1,help="Epsilon")
     parser.add_argument("--num_rr", type=int, default= 100000  , help="Number of RR sets")
 

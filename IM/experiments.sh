@@ -32,3 +32,10 @@ python knapsack_quickfilter.py --dataset Slashdot
 # python Bilmes.py  --num_rr 1000000   --dataset Skitter  --budget 100 
 
 
+python knapsack_multibudget.py --dataset Facebook 
+python knapsack_multibudget.py --dataset Wiki
+python knapsack_multibudget.py --dataset Deezer
+python knapsack_multibudget.py --datatset Slashdot
+python knapsack_multibudget.py --datatset Twitter
+python knapsack_multibudget.py --datatset DBLP
+python knapsack_multibudget.py --datatset YouTube

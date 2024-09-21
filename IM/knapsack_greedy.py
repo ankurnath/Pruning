@@ -20,11 +20,19 @@ def knapsack_greedy(graph,ground_set , num_rr,budget ,node_weights):
 
     number_of_queries = len(gains)
 
+    # sprint(len(gains))
+
     # only taking element in ground set
     for element in gains:
+        # try:
         if node_weights[element]<= budget and gains[element] > max_singleton_gain:
             max_singleton = element
             max_singleton_gain = gains [element]
+        # except:
+        #     sprint(element)
+        #     sprint(node_weights[element])
+        #     sprint(gains[element])
+        #     raise ValueError
 
 
     constraint = 0

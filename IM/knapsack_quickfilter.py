@@ -44,11 +44,13 @@ def knapsack_quickfilter(dataset,budget,delta,cost_model,num_rr):
     ##################################################################
 
     Pg=len(pruned_universe)/graph.number_of_nodes()
-    print('Size of Pruned Ground Set, |Upruned|:', len(pruned_universe))
+    print('Pg:', Pg)
     start = time.time()
 
 
-    solution_unpruned,queries_unpruned = knapsack_greedy (graph=graph,ground_set =None, num_rr=num_rr,budget = budget, node_weights = node_weights)
+    solution_unpruned,queries_unpruned = knapsack_greedy (graph=graph,ground_set =None, num_rr=num_rr,budget = budget, 
+                                                          node_weights = node_weights)
+    print('Size of the unpruned solution',len(solution_unpruned)/graph.number_of_nodes())
     objective_unpruned = calculate_spread(graph=graph,solution=solution_unpruned )
 
     end = time.time()
@@ -63,6 +65,22 @@ def knapsack_quickfilter(dataset,budget,delta,cost_model,num_rr):
                                                       node_weights = node_weights)
     objective_pruned = calculate_spread(graph=graph,solution=solution_pruned )
 
+    num_repeat = 1
+
+    for _ in range(num_repeat):
+        sampled_nodes = random.sample(graph.nodes(),len(pruned_universe))
+
+        solution_random =[]
+        total = 0
+        for node in sampled_nodes:
+            if total+ node_weights[node]<=budget:
+                total += node_weights[node]
+                solution_random.append(node)
+
+
+        objective_pruned_random = calculate_spread(graph=graph,
+                                                solution = solution_random)
+    print('Objective (Randomly Pruned) Ratio',objective_pruned_random/objective_unpruned)
     
     end = time.time()
     time_pruned = round(end-start,4)
@@ -111,9 +129,9 @@ def knapsack_quickfilter(dataset,budget,delta,cost_model,num_rr):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--dataset", type=str, default='DBLP', help="Name of the dataset to be used (default: 'Facebook')")
+    parser.add_argument("--dataset", type=str, default='Facebook', help="Name of the dataset to be used (default: 'Facebook')")
     parser.add_argument("--budget", type=int,default=100, help="Budget")
-    parser.add_argument("--delta", type=float, default=0.1, help="Delta")
+    parser.add_argument("--delta", type=float, default=0.5, help="Delta")
     parser.add_argument("--cost_model",type= str, default= 'degree', help = 'model of node weights')
     parser.add_argument("--num_rr", type=int, default= 100000  , help="Number of RR sets")
     
