@@ -106,18 +106,14 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
 
         start = time.time()
 
-        objective_multi_pruned=DLA(graph=graph,
+        objective_multi_pruned,solution_multi_pruned=DLA(graph=graph,
                                     budget=i,
                                     node_weights=node_weights,
                                     ground_set=pruned_universe_multi,
                                     )
 
         
-        # objective_multi_pruned,queries_multi_pruned =run_sampling_multiple_times(graph=graph,
-        #                                                                          budget=i,
-        #                                                                          node_weights=node_weights,
-        #                                                                          ground_set=pruned_universe_multi,
-        #                                                                          num_iterations=5)
+        
         
         end = time.time()
 
@@ -125,17 +121,13 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
 
         start = time.time()
 
-        objective_single_pruned=DLA(graph=graph,
+        objective_single_pruned,solution_single_pruned=DLA(graph=graph,
                                     budget=i,
                                     node_weights=node_weights,
                                     ground_set=pruned_universe_single,
                                     )
 
-        # objective_single_pruned,queries_single_pruned =run_sampling_multiple_times(graph=graph,
-        #                                                                          budget=i,
-        #                                                                          node_weights=node_weights,
-        #                                                                          ground_set=pruned_universe_single,
-        #                                                                          num_iterations=5)
+        
 
         
         end = time.time()
@@ -143,18 +135,14 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
 
         start = time.time()
 
-        objective_unpruned= DLA(        graph=graph,
+        objective_unpruned,solution_unpruned= DLA(        graph=graph,
                                         budget=i,
                                         node_weights=node_weights,
                                         ground_set=None,
                                         )
 
 
-        # objective_unpruned,queries_unpruned =run_sampling_multiple_times(        graph=graph,
-        #                                                                          budget=i,
-        #                                                                          node_weights=node_weights,
-        #                                                                          ground_set=None,
-        #                                                                          num_iterations=5)
+        
 
         
         end = time.time()
@@ -232,7 +220,7 @@ if __name__ == "__main__":
     parser.add_argument('--max_budget', type = int ,default=100, help = 'Maximum Budget')
     parser.add_argument('--min_budget', type = int ,default=10, help = 'Minimum Budget')
 
-    parser.add_argument("--delta", type=float, default=0.1, help="Delta")
+    parser.add_argument("--delta", type=float, default=0.5, help="Delta")
     parser.add_argument("--eps",type =float,default=1,help="Epsilon")
 
     args = parser.parse_args()

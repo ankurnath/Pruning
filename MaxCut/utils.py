@@ -27,11 +27,11 @@ def generate_node_weights(graph,cost_model,seed = None):
 
     elif cost_model == 'degree':
         
-        alpha = 1/20
+        alpha = 1
         out_degrees = {node: graph.degree(node) for node in graph.nodes()}
         out_degree_max = np.max(list(out_degrees.values()))
         out_degree_min = np.min(list(out_degrees.values()))
-        node_weights = {node: (out_degrees[node] - out_degree_min + alpha) / (out_degree_max - out_degree_min) for node in graph.nodes()}
+        node_weights = {node: (out_degrees[node] - out_degree_min) / (out_degree_max - out_degree_min) + alpha  for node in graph.nodes()}
 
     else:
         raise NotImplementedError('Unknown model')

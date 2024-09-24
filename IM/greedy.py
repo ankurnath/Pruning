@@ -87,6 +87,9 @@ def gain_adjustment(gains,node_rr_set,RR,selected_element,covered_rr_set):
                 if rr_node in gains:
                     gains[rr_node]-=1
 
+    
+    assert gains[selected_element] == 0, 'gains adjustment error'
+
 
 
 

@@ -428,11 +428,11 @@ def DLA(graph,budget,node_weights,ground_set=None):
         mask = np.ones(N)
 
     # DLA_numba(adj_list,start,end,node_weights,budget,mask,eps=0.1)
-    objval =DLA_numba(adj_list=adj_list,start=start,end = end,
+    objval,solution = DLA_numba(adj_list=adj_list,start=start,end = end,
              node_weights=node_weights,
              mask=mask,budget=budget)
     
-    return objval
+    return objval,solution
     
 
 if __name__ == "__main__":

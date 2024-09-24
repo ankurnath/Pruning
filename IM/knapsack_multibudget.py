@@ -13,13 +13,15 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
     load_graph_file_path=f'../../data/snap_dataset/{dataset}.txt'
     graph = load_graph(load_graph_file_path)
     node_weights = generate_node_weights(graph=graph,cost_model=cost_model)
+    # node_weights = np.array(list(node_weights.values()))
 
 
     start = time.time()
 
     gains,node_rr_set,RR = get_gains(graph,num_rr)
-   
-    # df = defaultdict(list)
+
+
+    #..............................
     u_taus = {}
     gains_taus ={}
     covered_rr_set_taus = {}
@@ -30,7 +32,6 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
     for i in range(m+1):
         tau = (1+eps)**i * min_budget
         u_taus [i] =set([])
-        # gains_taus [i] = get_gains(graph,ground_set=None)
 
         gains_taus[i] = gains.copy()
         covered_rr_set_taus[i] = set ()
@@ -41,8 +42,7 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
             if gains_taus[i][node]/node_weights[node]>=(delta/tau)*curr_obj_taus[i]:
                 curr_obj_taus[i]+=gains_taus[i][node]
                 u_taus [i].add(node)
-                # gains adjustment
-                gain_adjustment(gains=gains,node_rr_set=node_rr_set,
+                gain_adjustment(gains=gains_taus[i],node_rr_set=node_rr_set,
                                 RR=RR,selected_element=node,covered_rr_set=covered_rr_set_taus[i])
             
 
@@ -71,7 +71,8 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
 
 
     start = time.time()
-    gains,_,_ = get_gains(graph,num_rr)
+    # gains,_,_ = get_gains(graph,num_rr)
+    gains_single = gains.copy()
     curr_obj=0
     pruned_universe_single=[]
     covered_rr_set = set ()
@@ -82,7 +83,7 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
             pruned_universe_single.append(node)
 
             # gains adjustment
-            gain_adjustment(gains=gains,node_rr_set=node_rr_set,
+            gain_adjustment(gains=gains_single,node_rr_set=node_rr_set,
                             RR=RR,selected_element=node,covered_rr_set=covered_rr_set)
     
             # gain_adjustment(graph,gains,node,uncovered)   
@@ -102,24 +103,16 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
 
     if budgets[-1]>max_budget:
         budgets.pop()
-    print('Budgets',budgets)
-    # subgraph_multi = make_subgraph(graph,pruned_universe_multi)
-    # subgraph_single = make_subgraph(graph,pruned_universe_single)
+    sprint('Budgets',budgets)
+
 
 
     df = defaultdict(list)
 
-    # queries_multi = []
-    # queries_single = []
 
+    for budget in budgets:
 
-
-    
-
-
-    for budget in budgets[::-1]:
-
-        print(i)
+        # print(i)
 
         start = time.time()
 
@@ -128,9 +121,18 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
                                                                           ground_set = pruned_universe_multi, 
                                                                           num_rr=num_rr,
                                                                           budget = budget, 
-                                                                          node_weights = node_weights)
+                                                                          node_weights = node_weights,
+                                                                          gains=gains.copy(),
+                                                                          node_rr_set=node_rr_set,
+                                                                          RR=RR)
+        
+        # sprint(solution_multi_pruned)
+        # raise ValueError('stop')
+        # sprint(objective_multi_pruned)
         objective_multi_pruned = calculate_spread(graph=graph,
                                                   solution = solution_multi_pruned)
+        
+        
         end = time.time()
 
         time_multi_pruned = end -start
@@ -141,7 +143,10 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
                                                                           ground_set = pruned_universe_single, 
                                                                           num_rr=num_rr,
                                                                           budget = budget, 
-                                                                          node_weights = node_weights)
+                                                                          node_weights = node_weights,
+                                                                          gains=gains.copy(),
+                                                                          node_rr_set=node_rr_set,
+                                                                          RR=RR)
         objective_single_pruned = calculate_spread(graph=graph,solution = solution_single_pruned)
 
        
@@ -152,7 +157,10 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
         start = time.time()
         solution_unpruned,queries_unpruned = knapsack_greedy (graph=graph,ground_set =None, 
                                                               num_rr=num_rr,budget = budget, 
-                                                              node_weights = node_weights)
+                                                              node_weights = node_weights,
+                                                              gains=gains.copy(),
+                                                              node_rr_set=node_rr_set,
+                                                              RR=RR)
         objective_unpruned = calculate_spread(graph=graph,solution=solution_unpruned )
 
         
@@ -229,7 +237,7 @@ if __name__ == "__main__":
     parser.add_argument('--max_budget', type = int ,default=100, help = 'Maximum Budget')
     parser.add_argument('--min_budget', type = int ,default=10, help = 'Minimum Budget')
 
-    parser.add_argument("--delta", type=float, default=0.5, help="Delta")
+    parser.add_argument("--delta", type=float, default=0.1, help="Delta")
     parser.add_argument("--eps",type =float,default=1,help="Epsilon")
     parser.add_argument("--num_rr", type=int, default= 100000  , help="Number of RR sets")
 
@@ -243,6 +251,12 @@ if __name__ == "__main__":
     delta = args.delta 
     eps = args.eps
     num_rr = args.num_rr
+
+    sprint(dataset)
+    sprint(cost_model)
+    sprint(max_budget)
+    sprint(min_budget)
+    sprint(delta)
 
     quickfilter_multi(dataset=dataset, cost_model=cost_model , 
                       max_budget=max_budget, 
