@@ -12,7 +12,7 @@ def SS(dataset,r,c,budget):
     
     file_path=f'../../data/snap_dataset/{args.dataset}.txt'
     graph = load_graph(file_path=file_path)
-
+    queries_to_prune = 0
 
     start = time.time()
     pruned_universe=set()
@@ -30,7 +30,7 @@ def SS(dataset,r,c,budget):
 
 
         universe_gain=calculate_obj(graph,universe) # f(V)
-
+        queries_to_prune += 1
         # for v in universe:
 
         universe_u_gain = {} # f(V U u)
@@ -41,8 +41,10 @@ def SS(dataset,r,c,budget):
         for u in tqdm(U):
             universe.add(u)
             universe_u_gain[u] = calculate_obj (graph ,universe)
+            queries_to_prune += 1
             universe.remove(u)
             u_gain[u] = calculate_obj (graph , [u])
+            queries_to_prune += 1
 
 
         lst = []
@@ -58,6 +60,7 @@ def SS(dataset,r,c,budget):
                 # universe_copy.append(u)
                 
                 local_gain = calculate_obj(graph,[u,v])-u_gain[u] # f(v U u) -f(u)
+                queries_to_prune += 1
                 # print(local_gain)
 
                 global_gain = universe_u_gain[u]-universe_gain
@@ -120,12 +123,22 @@ def SS(dataset,r,c,budget):
     os.makedirs(save_folder,exist_ok=True)
     save_file_path = os.path.join(save_folder,'SS')
 
-    df ={     'Dataset':dataset,'Budget':budget,'r':r,'c':c,'Objective Value(Unpruned)':objective_unpruned,
-              'Objective Value(Pruned)':objective_pruned ,'Ground Set': graph.number_of_nodes(),
-              'Ground set(Pruned)':len(pruned_universe), 'Queries(Unpruned)': queries_unpruned,'Time(Unpruned)':time_unpruned,
+    df ={     'Dataset':dataset,
+              'Budget':budget,
+              'r':r,
+              'c':c,
+              'QueriesToPrune': queries_to_prune,
+              'Objective Value(Unpruned)':objective_unpruned,
+              'Objective Value(Pruned)':objective_pruned ,
+              'Ground Set': graph.number_of_nodes(),
+              'Ground set(Pruned)':len(pruned_universe),
+              'Queries(Unpruned)': queries_unpruned,
+              'Time(Unpruned)':time_unpruned,
               'Time(Pruned)': time_pruned,
-              'Queries(Pruned)': queries_pruned, 'Pruned Ground set(%)': round(Pg,4)*100,
-              'Ratio(%)':round(ratio,4)*100, 'Queries(%)': round(queries_pruned/queries_unpruned,4)*100,
+              'Queries(Pruned)': queries_pruned, 
+              'Pruned Ground set(%)': round(Pg,4)*100,
+              'Ratio(%)':round(ratio,4)*100, 
+              'Queries(%)': round(queries_pruned/queries_unpruned,4)*100,
               'TimeRatio': time_pruned/time_unpruned,
               'TimeToPrune':time_to_prune
 

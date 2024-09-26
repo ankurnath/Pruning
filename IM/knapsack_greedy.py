@@ -3,8 +3,8 @@ from greedy import get_gains, gain_adjustment,calculate_spread
 from helper_functions import *
 
 
-def knapsack_greedy(graph,ground_set , num_rr,budget ,node_weights,
-                    gains=None,node_rr_set=None,RR=None):
+def knapsack_greedy(graph,ground_set , budget ,node_weights,
+                    gains=None,node_rr_set=None,RR=None,num_rr=None):
 
 
     if gains is None or node_rr_set is None or RR is None:

@@ -1,6 +1,6 @@
 from utils import *
 from greedy import gain_adjustment,get_gains
-from knapsack_greedy import knapsack_greedy
+
 from knapsack_numba_greedy import knapsack_numba_greedy
 # from IP_solver import gurobi_solver
 from helper_functions import *

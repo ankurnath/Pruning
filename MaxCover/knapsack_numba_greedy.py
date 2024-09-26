@@ -111,6 +111,7 @@ def knapsack_numba_greedy(graph:nx.Graph,budget:int,node_weights:dict,ground_set
     N = graph.number_of_nodes()
     
     gains = get_gains(adj_list=adj_list,start=start,end=end)
+    # sprint(np.max(gains))
     uncovered = np.ones(N)
     
     if ground_set is None:
@@ -119,6 +120,7 @@ def knapsack_numba_greedy(graph:nx.Graph,budget:int,node_weights:dict,ground_set
         mask = np.ones(N)
     else:
         ground_set_size = len(ground_set)
+        # sprint(ground_set_size)
         mask = np.zeros(N)
         for element in ground_set:
             mask[forward_mapping[element]] = 1
@@ -132,18 +134,21 @@ def knapsack_numba_greedy(graph:nx.Graph,budget:int,node_weights:dict,ground_set
     max_gain = 0
     max_node = None
 
-    # print()
+   
 
     # Iterate through each node
 
     number_of_queries = 0
-    for node in range(ground_set_size):
+    for node in range(N):
         # Check if the node is in the mask, within budget, and has a higher gain than the current max
         if mask[node] == 1 and node_weights[node] <= budget:
             number_of_queries += 1
-            if  gains[node] > max_gain:
+            if  gains[node] >= max_gain:
                 max_gain = gains[node]
                 max_node = node
+
+
+    # assert max_gain > 0, f'Maximum gain error {np.max(gains)}'
             
 
     solution = []
@@ -165,7 +170,7 @@ def knapsack_numba_greedy(graph:nx.Graph,budget:int,node_weights:dict,ground_set
 
     end_time = time.time()
 
-    print("Elapsed time:",round(end_time-start_time,4))
+    # print("Elapsed time:",round(end_time-start_time,4))
     
     if calculate_obj(graph,solution)>=calculate_obj(graph,[max_node]):
         return calculate_obj(graph,solution),number_of_queries,[reverse_mapping[node] for node in solution]

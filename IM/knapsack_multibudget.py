@@ -78,8 +78,8 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
     covered_rr_set = set ()
     for node in graph.nodes():
 
-        if gains[node]/node_weights[node]>=delta/max_budget*curr_obj:
-            curr_obj+=gains[node]
+        if gains_single [node]/node_weights[node]>=delta/max_budget*curr_obj:
+            curr_obj+=gains_single [node]
             pruned_universe_single.append(node)
 
             # gains adjustment
@@ -98,16 +98,20 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
     timetoprune_single = end - start
     
     
-    budgets = [(1+eps)**i * min_budget for i in range(m+1)] + [max_budget]
-    budgets.sort()
+    # budgets = [(1+eps)**i * min_budget for i in range(m+1)] + [max_budget]
+    # budgets.sort()
 
-    if budgets[-1]>max_budget:
-        budgets.pop()
-    sprint('Budgets',budgets)
+    # if budgets[-1]>max_budget:
+    #     budgets.pop()
+    # sprint('Budgets',budgets)
+    
 
 
 
     df = defaultdict(list)
+    step = 20
+    budgets = list(range(min_budget,max_budget,step)) +[max_budget]
+    sprint(budgets)
 
 
     for budget in budgets:
@@ -172,7 +176,7 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
         sprint(objective_unpruned)
         
         df['Dataset'].append(dataset)
-        df['Budget'].append(i)
+        df['Budget'].append(budget)
         df['Delta'].append(delta)
         df['Objective Value(Unpruned)'].append(objective_unpruned)
         df['Objective Value Multi(Pruned)'].append(objective_multi_pruned)
@@ -207,6 +211,7 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
 
 
     df = pd.DataFrame(df)
+    print(df)
 
     save_folder = f'data/{dataset}/knapsack_multi'
     os.makedirs(save_folder,exist_ok=True)
@@ -237,7 +242,7 @@ if __name__ == "__main__":
     parser.add_argument('--max_budget', type = int ,default=100, help = 'Maximum Budget')
     parser.add_argument('--min_budget', type = int ,default=10, help = 'Minimum Budget')
 
-    parser.add_argument("--delta", type=float, default=0.1, help="Delta")
+    parser.add_argument("--delta", type=float, default=0.5, help="Delta")
     parser.add_argument("--eps",type =float,default=1,help="Epsilon")
     parser.add_argument("--num_rr", type=int, default= 100000  , help="Number of RR sets")
 

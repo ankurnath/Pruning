@@ -80,6 +80,8 @@ if __name__ == "__main__":
 
     model.train()
 
+    best_loss = float('inf')  # Initialize the best training loss to infinity
+
     for epoch in tqdm(range(1,1000)):
 
         out = model(data.x, data.edge_index)  # Perform a single forward pass.
@@ -94,14 +96,21 @@ if __name__ == "__main__":
         loss.backward()  # Derive gradients.
         optimizer.step()  # Update parameters based on gradients.
         optimizer.zero_grad()  # Clear gradients.
-        
 
+        # Save the best model if training loss improves
+        if loss < best_loss:
+            best_loss = loss
+            torch.save(model.state_dict(), 'best_model.pth')  # Save the model's state dictionary
+            # print(f"Epoch {epoch}: Training loss improved to {best_loss:.4f}. Model saved.")
+        
+    model.load_state_dict(torch.load('best_model.pth'))
 
     model.eval()
 
 
     
     test_graph = load_graph(f'../../data/snap_dataset/{dataset}.txt')
+    
     test_data = from_networkx(test_graph)
     test_node_weights = generate_node_weights(graph=test_graph,cost_model=cost_model)
 
@@ -125,17 +134,12 @@ if __name__ == "__main__":
 
     print('time elapsed to pruned',time_to_prune)
 
-    graph = test_graph
+    
 
     ##################################################################
 
     Pg=len(pruned_universe)/test_graph.number_of_nodes()
-    start = time.time()
-    objective_unpruned,queries_unpruned,solution_unpruned= knapsack_numba_greedy(graph=test_graph,budget=args.budget,
-                                                                                 node_weights=test_node_weights)
-    end = time.time()
-    time_unpruned = round(end-start,4)
-    print('Elapsed time (unpruned):',round(time_unpruned,4))
+    print('Pg =',Pg)
 
     start = time.time()
     objective_pruned,queries_pruned,solution_pruned = knapsack_numba_greedy(graph=test_graph,budget=args.budget,
@@ -144,6 +148,17 @@ if __name__ == "__main__":
     end = time.time()
     time_pruned = round(end-start,4)
     print('Elapsed time (pruned):',time_pruned)
+
+
+    start = time.time()
+    objective_unpruned,queries_unpruned,solution_unpruned= knapsack_numba_greedy(graph=test_graph,
+                                                                                 budget=args.budget,
+                                                                                 node_weights=test_node_weights)
+    end = time.time()
+    time_unpruned = round(end-start,4)
+    print('Elapsed time (unpruned):',round(time_unpruned,4))
+
+    
     
     
     ratio = objective_pruned/objective_unpruned
