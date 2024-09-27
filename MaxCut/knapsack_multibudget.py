@@ -34,8 +34,11 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
         uncovered_taus[i] = defaultdict(lambda: True)
         
     for node in graph.nodes():
+        
         for i in range(m+1):
             tau = (1+eps)**i * min_budget
+            if node_weights[node] >= tau:
+                continue
             if gains_taus[i][node]/node_weights[node]>=(delta/tau)*curr_obj_taus[i]:
                 curr_obj_taus[i]+=gains_taus[i][node]
                 u_taus [i].add(node)
@@ -73,6 +76,8 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
     pruned_universe_single=[]
     uncovered=defaultdict(lambda: True)
     for node in graph.nodes():
+        if node_weights[node] >= max_budget:
+            continue
 
         if gains[node]/node_weights[node]>=delta/max_budget*curr_obj:
             curr_obj+=gains[node]
@@ -140,6 +145,9 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
                                         node_weights=node_weights,
                                         ground_set=None,
                                         )
+        
+
+
 
 
         
@@ -148,6 +156,25 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
         end = time.time()
 
         time_unpruned = end- start
+
+        ## TOP-K
+        gains = get_gains(graph,ground_set=None)
+        density_gain = {node: gains[node]/node_weights[node] for node in gains}
+        pruned_universe_multi_top_k = [key for key, _ in sorted(density_gain.items(), 
+                                key=lambda item: item[1], reverse=True)[:len(pruned_universe_multi)]]
+        
+        objective_multi_top_k,_= DLA(graph=graph,budget=i,
+                                                        node_weights=node_weights,
+                                                        ground_set=pruned_universe_multi_top_k)
+        
+        pruned_universe_single_top_k = [key for key, _ in sorted(density_gain.items(), 
+                                key=lambda item: item[1], reverse=True)[:len(pruned_universe_single)]]
+        
+        objective_single_top_k,_= DLA(graph=graph,budget=i,
+                                                        node_weights=node_weights,
+                                                        ground_set=pruned_universe_single_top_k )
+
+
         sprint(objective_multi_pruned)
         sprint(objective_single_pruned)
         sprint(objective_unpruned)
@@ -175,6 +202,10 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
         df['Ratio Multi'].append(round(objective_multi_pruned/objective_unpruned,4)*100)
         df['Ratio Single'].append(round(objective_single_pruned/objective_unpruned,4)*100)
 
+        ### TOP-K
+        df['Ratio Multi(TOP-K)'].append(round(objective_multi_top_k/objective_unpruned,4)*100)
+        df['Ratio Single(TOP-K)'].append(round(objective_single_top_k/objective_unpruned,4)*100)
+
         # df['Queries Multi(%)'].append(round(queries_multi_pruned/queries_unpruned,4)*100)
         # df['Queries Single(%)'].append(round(queries_single_pruned/queries_unpruned,4)*100)
 
@@ -195,13 +226,14 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
     save_to_pickle(df,save_file_path)
 
 
-    print(df[['Budget','Ratio Multi','Ratio Single','Objective Value(Unpruned)']])
+    print(df[['Ratio Multi','Ratio Multi(TOP-K)','Ratio Single','Ratio Single(TOP-K)']])
 
         
     fontsize = 20
     plt.plot(budgets, df['Ratio Multi'], linestyle='--', marker='o', markersize=20, color='blue', markeredgecolor='black', alpha=0.7, label=f'Multi-Budget {Pg_multi:.2f}%')
     plt.plot(budgets, df['Ratio Single'], linestyle='--', marker='*', markersize=20, color='red', markeredgecolor='black', alpha=0.7, label=f'Single-Budget {Pg_single:.2f}%')
-    
+    plt.plot(budgets, df['Ratio Multi(TOP-K)'], linestyle='--', marker='^', markersize=20, color='blue', markeredgecolor='black', alpha=0.7, label=f'Multi-Budget {Pg_multi:.2f}%')
+    plt.plot(budgets, df['Ratio Single(TOP-K)'], linestyle='--', marker='s', markersize=20, color='red', markeredgecolor='black', alpha=0.7, label=f'Single-Budget {Pg_single:.2f}%')
     
     plt.xlabel('Budgets', fontsize=fontsize )
     plt.ylabel('Ratios (%)', fontsize=fontsize)
@@ -216,7 +248,7 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,ar
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--dataset", type=str, default='Facebook', help="Name of the dataset to be used (default: 'Facebook')")
-    parser.add_argument("--cost_model",type=str,default='degree',help='model of node weights')
+    parser.add_argument("--cost_model",type=str,default='aistats',help='model of node weights')
     parser.add_argument('--max_budget', type = int ,default=100, help = 'Maximum Budget')
     parser.add_argument('--min_budget', type = int ,default=10, help = 'Minimum Budget')
 

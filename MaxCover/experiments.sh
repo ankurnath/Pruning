@@ -4,8 +4,8 @@
 # python top_K_knapsack.py --dataset Slashdot --budget 100
 # python top_K_knapsack.py --dataset Twitter --budget 100
 # python top_K_knapsack.py --dataset DBLP --budget 100
-python top_K_knapsack.py --dataset YouTube --budget 100
-python top_K_knapsack.py --dataset Skitter --budget 100
+# python top_K_knapsack.py --dataset YouTube --budget 100
+# python top_K_knapsack.py --dataset Skitter --budget 100
 
 # python Bilmes.py --dataset Facebook --budget 100
 # python Bilmes.py --dataset Wiki --budget 100

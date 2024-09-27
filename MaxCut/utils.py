@@ -32,7 +32,12 @@ def generate_node_weights(graph,cost_model,seed = None):
         out_degree_max = np.max(list(out_degrees.values()))
         out_degree_min = np.min(list(out_degrees.values()))
         node_weights = {node: (out_degrees[node] - out_degree_min) / (out_degree_max - out_degree_min) + alpha  for node in graph.nodes()}
+    elif cost_model == 'aistats':
 
+        alpha = 1/20
+        out_degrees = {node: (graph.degree(node) - alpha) / graph.number_of_nodes() for node in graph.nodes()}
+        out_degree_min = np.min(list(out_degrees.values()))
+        node_weights = {node: out_degrees[node] / out_degree_min for node in out_degrees}    
     else:
         raise NotImplementedError('Unknown model')
     

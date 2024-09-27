@@ -12,9 +12,9 @@ def top_k(dataset,budget,cost_model):
     node_weights = generate_node_weights(graph=graph,cost_model=cost_model)
 
 
-    size = load_from_pickle(f'data/{dataset}/knapsack_multi/Quickfilter_degree')['Ground set Single (Pruned)'].iloc[-1]
+    size = load_from_pickle(f'data/{dataset}/knapsack_multi/Quickfilter_aistats')['Ground set Single (Pruned)'].iloc[-1]
     
-    objective_unpruned = load_from_pickle(f'data/{dataset}/knapsack_multi/Quickfilter_degree')['Objective Value(Unpruned)'].iloc[-1]
+    objective_unpruned = load_from_pickle(f'data/{dataset}/knapsack_multi/Quickfilter_aistats')['Objective Value(Unpruned)'].iloc[-1]
     sprint(size)
 
     gains = get_gains(graph,ground_set=None)
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument( "--dataset", type=str, default='Facebook', help="Name of the dataset to be used (default: 'Facebook')" )
     parser.add_argument("--budget", type=int,default=100, help="Budget")
-    parser.add_argument("--cost_model",type= str, default= 'degree', help = 'model of node weights')
+    parser.add_argument("--cost_model",type= str, default= 'aistats', help = 'model of node weights')
   
     args = parser.parse_args()
 
