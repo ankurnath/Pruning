@@ -252,7 +252,7 @@ if __name__ == "__main__":
     parser.add_argument('--max_budget', type = int ,default=100, help = 'Maximum Budget')
     parser.add_argument('--min_budget', type = int ,default=10, help = 'Minimum Budget')
 
-    parser.add_argument("--delta", type=float, default=0.5, help="Delta")
+    parser.add_argument("--delta", type=float, default=0.1, help="Delta")
     parser.add_argument("--eps",type =float,default=1,help="Epsilon")
 
     args = parser.parse_args()

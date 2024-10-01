@@ -4,10 +4,20 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 # dataset = 'food101'
-# df = load_from_pickle(f'image_{dataset}')
 
+
+# dataset ='beans'
+
+# dataset = 'cifar100'
 dataset = 'UCF101'
-df = load_from_pickle(f'video_{dataset}')
+
+try:
+    df = load_from_pickle(f'image_{dataset}')
+except:
+    df = load_from_pickle(f'video_{dataset}')
+
+
+# df = load_from_pickle(f'video_{dataset}')
 
 
 plt.figure(dpi=300)
@@ -16,8 +26,18 @@ markersize = 15
 # Plotting the ratios with larger markers and improved styling
 sns.lineplot(data=df, x='Budget', y='Ratio_Obj(QS)', label=f'QS$(P_g={df.iloc[-1]["Pg(QS)"]:.2f}\%)$', linestyle='--', marker='o', 
              markersize=markersize, color='#f46666')
-# sns.lineplot(data=df, x='Budget', y='Ratio_Obj(SS)', label=f'SS$(P_g={df.iloc[-1]["Pg(SS)"]:.2f}\\%)$',linestyle='--' ,marker='^', 
-#              markersize=markersize, color='#37a1e2')
+
+try:
+    sns.lineplot(data=df, x='Budget', y='Ratio_Obj(SS)', label=f'SS$(P_g={df.iloc[-1]["Pg(SS)"]:.2f}\\%)$',linestyle='--' ,marker='^', 
+             markersize=markersize, color='#37a1e2')
+except:
+    pass
+
+try:
+    sns.lineplot(data=df, x='Budget', y='Ratio_Obj(top-k)', label=f'TOP-K$(P_g={df.iloc[-1]["Pg(QS)"]:.2f}\\%)$',linestyle='--' ,marker='^', 
+             markersize=markersize, color='#4d6b23')
+except:
+    pass
 sns.lineplot(data=df, x='Budget', y='Ratio_Obj(Random)', label=f'Random$(P_g={df.iloc[-1]["Pg(QS)"]:.2f}\%)$',linestyle='--', marker='D', 
              markersize=markersize, color='#f67f10')
 
@@ -44,7 +64,9 @@ plt.yticks(fontsize=fontsize )
 plt.grid(alpha=0.3, linestyle='--')
 plt.locator_params(nbins=6)
 # Legend
-plt.legend(fontsize=fontsize-10,frameon= False)
+# plt.legend(fontsize=fontsize-4,frameon= False,location='bottom left')
+plt.legend(fontsize=fontsize-4, frameon=False, loc='center left')
+
 sns.despine()
 
 # Show the plot

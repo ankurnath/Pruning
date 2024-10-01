@@ -125,6 +125,15 @@ def SS(dataset,r,c,budget):
     os.makedirs(save_folder,exist_ok=True)
     save_file_path = os.path.join(save_folder,'SS')
 
+    ### multi-budget 
+    performance_ratios = []
+    for budget in [10, 30, 50, 70, 90, 100]:
+        
+        unpruned_objective, unpruned_queries, unpruned_solution = greedy(graph, budget=budget)
+        pruned_objective, pruned_queries, pruned_solution = greedy(graph=graph, budget=budget, ground_set=pruned_universe)
+        
+        performance_ratios.append(round(pruned_objective / unpruned_objective,4)) 
+
     df ={     'Dataset':dataset,
               'Budget':budget,
               'r':r,
@@ -142,14 +151,16 @@ def SS(dataset,r,c,budget):
               'Ratio(%)':round(ratio,4)*100, 
               'Queries(%)': round(queries_pruned/queries_unpruned,4)*100,
               'TimeRatio': time_pruned/time_unpruned,
-              'TimeToPrune':time_to_prune
+              'TimeToPrune':time_to_prune,
+              'Multibudget':[performance_ratios]
 
               }
 
    
     df = pd.DataFrame(df,index=[0])
     save_to_pickle(df,save_file_path)
-    print(df)
+    # print(df)
+    print(df['Multibudget'])
 
     ###################################################################################################
 
@@ -166,7 +177,7 @@ if __name__ == "__main__":
     parser.add_argument( "--dataset", type=str, default='Facebook',required=True, help="Name of the dataset to be used (default: 'Facebook')" )
     parser.add_argument( "--r", type=float, default=8, help="r" )
     parser.add_argument( "--c", type=float, default=8, help="c" )
-    parser.add_argument("--budget", type=int,required=True,default=100, help="Budgets")
+    parser.add_argument("--budget", type=int,default=100, help="Budgets")
 
     args = parser.parse_args()
 

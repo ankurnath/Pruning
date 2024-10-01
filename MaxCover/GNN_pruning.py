@@ -139,6 +139,14 @@ if __name__ == "__main__":
     os.makedirs(save_folder,exist_ok=True)
     save_file_path = os.path.join(save_folder,'GNNpruner')
 
+    performance_ratios = []
+    for budget in [10, 30, 50, 70, 90, 100]:
+        
+        unpruned_objective, unpruned_queries, unpruned_solution = greedy(graph, budget=budget)
+        pruned_objective, pruned_queries, pruned_solution = greedy(graph=graph, budget=budget, ground_set=pruned_universe)
+        
+        performance_ratios.append(round(pruned_objective / unpruned_objective,4)) 
+
     df ={      'Dataset':dataset,'Budget':budget,'Objective Value(Unpruned)':objective_unpruned,
               'Objective Value(Pruned)':objective_pruned ,'Ground Set': graph.number_of_nodes(),
               'Ground set(Pruned)':len(pruned_universe), 'Queries(Unpruned)': queries_unpruned,'Time(Unpruned)':time_unpruned,
@@ -146,14 +154,17 @@ if __name__ == "__main__":
               'Queries(Pruned)': queries_pruned, 'Pruned Ground set(%)': round(Pg,4)*100,
               'Ratio(%)':round(ratio,4)*100, 'Queries(%)': round(queries_pruned/queries_unpruned,4)*100,
               'TimeRatio': time_pruned/time_unpruned,
-              'TimeToPrune':time_to_prune
+              'TimeToPrune':time_to_prune,
+              'Multibudget':[performance_ratios]
+
 
               }
 
    
     df = pd.DataFrame(df,index=[0])
     save_to_pickle(df,save_file_path)
-    print(df)
+    # print(df)
+    print(df['Multibudget'])
 
 
 

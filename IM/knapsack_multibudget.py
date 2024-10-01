@@ -39,6 +39,9 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
     for node in graph.nodes():
         for i in range(m+1):
             tau = (1+eps)**i * min_budget
+            if node_weights[node] >= tau:
+                continue
+
             if gains_taus[i][node]/node_weights[node]>=(delta/tau)*curr_obj_taus[i]:
                 curr_obj_taus[i]+=gains_taus[i][node]
                 u_taus [i].add(node)
@@ -77,6 +80,8 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
     pruned_universe_single=[]
     covered_rr_set = set ()
     for node in graph.nodes():
+        if node_weights[node] >= max_budget:
+            continue
 
         if gains_single [node]/node_weights[node]>=delta/max_budget*curr_obj:
             curr_obj+=gains_single [node]
@@ -121,7 +126,7 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
         start = time.time()
 
         
-        solution_multi_pruned,queries_multi_pruned = knapsack_greedy     (graph=graph,
+        objective_multi_pruned,solution_multi_pruned,queries_multi_pruned = knapsack_greedy     (graph=graph,
                                                                           ground_set = pruned_universe_multi, 
                                                                           num_rr=num_rr,
                                                                           budget = budget, 
@@ -133,8 +138,7 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
         # sprint(solution_multi_pruned)
         # raise ValueError('stop')
         # sprint(objective_multi_pruned)
-        objective_multi_pruned = calculate_spread(graph=graph,
-                                                  solution = solution_multi_pruned)
+        # objective_multi_pruned = calculate_spread(graph=graph,solution = solution_multi_pruned)
         
         
         end = time.time()
@@ -143,7 +147,7 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
 
         start = time.time()
 
-        solution_single_pruned,queries_single_pruned =   knapsack_greedy (graph=graph,
+        objective_single_pruned,solution_single_pruned,queries_single_pruned =   knapsack_greedy (graph=graph,
                                                                           ground_set = pruned_universe_single, 
                                                                           num_rr=num_rr,
                                                                           budget = budget, 
@@ -151,7 +155,7 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
                                                                           gains=gains.copy(),
                                                                           node_rr_set=node_rr_set,
                                                                           RR=RR)
-        objective_single_pruned = calculate_spread(graph=graph,solution = solution_single_pruned)
+        # objective_single_pruned = calculate_spread(graph=graph,solution = solution_single_pruned)
 
        
         
@@ -159,13 +163,13 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
         time_single_pruned = end -start
 
         start = time.time()
-        solution_unpruned,queries_unpruned = knapsack_greedy (graph=graph,ground_set =None, 
+        objective_unpruned,solution_unpruned,queries_unpruned = knapsack_greedy (graph=graph,ground_set =None, 
                                                               num_rr=num_rr,budget = budget, 
                                                               node_weights = node_weights,
                                                               gains=gains.copy(),
                                                               node_rr_set=node_rr_set,
                                                               RR=RR)
-        objective_unpruned = calculate_spread(graph=graph,solution=solution_unpruned )
+        # objective_unpruned = calculate_spread(graph=graph,solution=solution_unpruned )
 
         
         end = time.time()
@@ -174,6 +178,36 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
         sprint(objective_multi_pruned)
         sprint(objective_single_pruned)
         sprint(objective_unpruned)
+
+        ### TOP-K
+        # gains = get_gains(graph,ground_set=None)
+        density_gain = {node: gains[node]/node_weights[node] for node in gains}
+        pruned_universe_multi_top_k = [key for key, _ in sorted(density_gain.items(), 
+                                key=lambda item: item[1], reverse=True)] [:len(pruned_universe_multi)]
+        
+        sprint(len(pruned_universe_multi_top_k))
+        objective_multi_top_k,solution_multi_top_k,_ = knapsack_greedy(graph=graph,budget=i, 
+                                                    node_weights=node_weights, 
+                                                    ground_set=pruned_universe_multi_top_k,
+                                                    num_rr=num_rr,
+                                                    gains=gains.copy(),
+                                                    node_rr_set=node_rr_set,
+                                                    RR=RR)
+        
+        
+        # objective_multi_top_k = calculate_spread(graph=graph,solution=solution_multi_top_k)
+        pruned_universe_single_top_k = [key for key, _ in sorted(density_gain.items(), 
+                                key=lambda item: item[1], reverse=True)] [:len(pruned_universe_single)]
+        sprint(len(pruned_universe_single_top_k))
+        
+        objective_single_top_k,solution_single_top_k,_ = knapsack_greedy(graph=graph,budget=i, 
+                                                    node_weights=node_weights, 
+                                                    ground_set=pruned_universe_single_top_k,
+                                                    num_rr=num_rr,
+                                                    gains=gains.copy(),
+                                                    node_rr_set=node_rr_set,
+                                                    RR=RR)
+        # objective_single_top_k = calculate_spread(graph=graph,solution=solution_single_top_k)
         
         df['Dataset'].append(dataset)
         df['Budget'].append(budget)
@@ -197,6 +231,9 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
 
         df['Ratio Multi'].append(round(objective_multi_pruned/objective_unpruned,4)*100)
         df['Ratio Single'].append(round(objective_single_pruned/objective_unpruned,4)*100)
+        ### TOP-K
+        df['Ratio Multi(TOP-K)'].append(round(objective_multi_top_k/objective_unpruned,4)*100)
+        df['Ratio Single(TOP-K)'].append(round(objective_single_top_k/objective_unpruned,4)*100)
 
         df['Queries Multi(%)'].append(round(queries_multi_pruned/queries_unpruned,4)*100)
         df['Queries Single(%)'].append(round(queries_single_pruned/queries_unpruned,4)*100)
@@ -211,7 +248,7 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
 
 
     df = pd.DataFrame(df)
-    print(df)
+    # print(df)
 
     save_folder = f'data/{dataset}/knapsack_multi'
     os.makedirs(save_folder,exist_ok=True)
@@ -219,13 +256,14 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
     save_to_pickle(df,save_file_path)
 
 
-    print(df[['Ratio Multi','Ratio Single']])
+    print(df[['Ratio Multi','Ratio Multi(TOP-K)','Ratio Single','Ratio Single(TOP-K)']])
 
         
     fontsize = 20
     plt.plot(budgets, df['Ratio Multi'], linestyle='--', marker='o', markersize=20, color='blue', markeredgecolor='black', alpha=0.7, label=f'Multi-Budget {Pg_multi:.2f}%')
     plt.plot(budgets, df['Ratio Single'], linestyle='--', marker='*', markersize=20, color='red', markeredgecolor='black', alpha=0.7, label=f'Single-Budget {Pg_single:.2f}%')
-    
+    plt.plot(budgets, df['Ratio Multi(TOP-K)'], linestyle='--', marker='^', markersize=20, color='blue', markeredgecolor='black', alpha=0.7, label=f'Multi-Budget {Pg_multi:.2f}%')
+    plt.plot(budgets, df['Ratio Single(TOP-K)'], linestyle='--', marker='s', markersize=20, color='red', markeredgecolor='black', alpha=0.7, label=f'Single-Budget {Pg_single:.2f}%')
     
     plt.xlabel('Budgets', fontsize=fontsize )
     plt.ylabel('Ratios (%)', fontsize=fontsize)
@@ -238,12 +276,12 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eps,nu
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--dataset", type=str, default='Facebook', help="Name of the dataset to be used (default: 'Facebook')")
-    parser.add_argument("--cost_model",type=str,default='degree',help='model of node weights')
+    parser.add_argument("--cost_model",type=str,default='aistats',help='model of node weights')
     parser.add_argument('--max_budget', type = int ,default=100, help = 'Maximum Budget')
     parser.add_argument('--min_budget', type = int ,default=10, help = 'Minimum Budget')
 
     parser.add_argument("--delta", type=float, default=0.5, help="Delta")
-    parser.add_argument("--eps",type =float,default=1,help="Epsilon")
+    parser.add_argument("--eps",type =float,default=1.5,help="Epsilon")
     parser.add_argument("--num_rr", type=int, default= 100000  , help="Number of RR sets")
 
     args = parser.parse_args()

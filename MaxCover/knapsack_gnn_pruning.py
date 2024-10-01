@@ -15,7 +15,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument( "--dataset", type=str, default='Facebook', help="Name of the dataset to be used (default: 'Facebook')" )
     parser.add_argument( "--budget", type= int , default= 100, help="Budget" )
-    parser.add_argument("--cost_model",type= str, default= 'degree', help = 'model of node weights')
+    parser.add_argument("--cost_model",type= str, default= 'aistats', help = 'model of node weights')
     args = parser.parse_args()
 
 
@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
     print(model)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=5e-4)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
     criterion = torch.nn.CrossEntropyLoss()
 
     model.train()
@@ -103,7 +103,7 @@ if __name__ == "__main__":
             torch.save(model.state_dict(), 'best_model.pth')  # Save the model's state dictionary
             # print(f"Epoch {epoch}: Training loss improved to {best_loss:.4f}. Model saved.")
         
-    model.load_state_dict(torch.load('best_model.pth'))
+    model.load_state_dict(torch.load('best_model.pth',weights_only=True))
 
     model.eval()
 
@@ -175,7 +175,7 @@ if __name__ == "__main__":
 
     save_folder = f'data/{dataset}/Knapsack_GNN'
     os.makedirs(save_folder,exist_ok=True)
-    save_file_path = os.path.join(save_folder,'GNNpruner')
+    save_file_path = os.path.join(save_folder,f'GNNpruner_{cost_model}')
 
     df ={      'Dataset':dataset,'Budget':budget,'Objective Value(Unpruned)':objective_unpruned,
               'Objective Value(Pruned)':objective_pruned ,'Ground Set': test_graph.number_of_nodes(),

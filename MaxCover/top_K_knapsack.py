@@ -19,15 +19,30 @@ def top_k(dataset,budget,cost_model):
 
     gains = get_gains(graph,ground_set=None)
 
+    max_weight_node=max(node_weights, key=node_weights.get)
+
+    sprint(node_weights[max_weight_node])
+
     density_gain = {node: gains[node]/node_weights[node] for node in gains}
+    
+    # max_density_gain_node=max(density_gain, key=density_gain.get)
+    # sprint(density_gain[max_density_gain_node])
+    # density_gain = {'a': 5, 'b': 3, 'c': 8, 'd': 1}
+
+    # sorted_density_gain = sorted(density_gain.items(), key=lambda item: item[1], reverse=True)
+    # sprint(sorted_density_gain)
 
 
     # Assuming `density_gain` is a dictionary where keys are nodes and values are the density gains
     # Sort the dictionary by values (density gains) in descending order and select the top 100 elements
     # Get the top `size` keys based on their density gain values
-    pruned_universe = [key for key, _ in sorted(density_gain.items(), key=lambda item: item[1], reverse=True)[:size]]
+    pruned_universe = [key for key, item in sorted(density_gain.items(), key=lambda item: item[1], reverse=True) if node_weights[key] <= budget][:size]
 
-    # top_k_elements = dict(sorted(density_gain.items(), key=lambda item: item[1], reverse=True)[:size])
+    # sprint(sorted(density_gain.items(), key=lambda item: item[1], reverse=True)[:10])
+    # pruned_universe = [key for key, item in sorted(density_gain.items(), key=lambda item: item[1], reverse=True)][:size]
+    # print([node_weights[node] for node in pruned_universe])
+    # print([density_gain[node] for node in pruned_universe])
+    # # top_k_elements = dict(sorted(density_gain.items(), key=lambda item: item[1], reverse=True)[:size])
     Pg=len(pruned_universe)/graph.number_of_nodes()
     # start = time.time()
     # objective_unpruned,queries_unpruned,solution_unpruned= knapsack_numba_greedy(graph=graph,budget=budget,
