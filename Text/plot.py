@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 
 # dataset ='beans'
 
-# dataset = 'cifar100'
-dataset = 'UCF101'
+dataset = 'cifar100'
+# dataset = 'UCF101'
 
 try:
     df = load_from_pickle(f'image_{dataset}')
@@ -22,7 +22,7 @@ except:
 
 plt.figure(dpi=300)
 
-markersize = 15
+markersize = 25
 # Plotting the ratios with larger markers and improved styling
 sns.lineplot(data=df, x='Budget', y='Ratio_Obj(QS)', label=f'QS$(P_g={df.iloc[-1]["Pg(QS)"]:.2f}\%)$', linestyle='--', marker='o', 
              markersize=markersize, color='#f46666')
@@ -55,7 +55,7 @@ fontsize = 30
 plt.title(f'{dataset.upper()}',fontsize=fontsize)
 
 plt.xlabel('Budget',fontsize=fontsize)
-plt.ylabel('Ratio',fontsize=fontsize)
+plt.ylabel('Approx. Ratio,$P_r$',fontsize=fontsize)
 
 plt.xticks(fontsize=fontsize )
 plt.yticks(fontsize=fontsize )

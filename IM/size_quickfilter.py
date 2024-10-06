@@ -10,26 +10,9 @@ from imm import *
 
 from greedy import *
 
-
-
-
-
-# def QS(dataset,budget,num_rr,delta,seed):
-def quickfilter(dataset,budget,delta,num_rr,seed,eps=0.1):
-
-    
-    load_graph_file_path=f'../../data/snap_dataset/{dataset}.txt'
-
-    graph = load_graph(load_graph_file_path)
-
-
-    
-
-    # sprint(calculate_spread(graph=graph,solution=sorted([graph.degree(node) for node in graph.nodes()])[::-1][:20]))
+def qs(graph,gains,node_rr_set,RR,budget,delta,eps):
 
     start = time.time()
-    # gains = get_gains(graph,ground_set=None)
-    gains,node_rr_set,RR = get_gains(graph,num_rr)
     curr_obj = 0
     queries_to_prune = 0
     # pruned_universe=[] 
@@ -63,17 +46,41 @@ def quickfilter(dataset,budget,delta,num_rr,seed,eps=0.1):
             a_s = a.copy()
 
             obj_a_s = calculate_spread(graph=graph,solution=a_s)
-            curr_obj = calculate_spread(graph=graph,solution=a)
-            queries_to_prune +=2
+            curr_obj = obj_a_s
+            queries_to_prune +=1
             
-    end= time.time()
+    
 
-    time_to_prune = end-start
-
-    print('time elapsed to pruned',time_to_prune)
+    
     a.add(a_start)
     pruned_universe = list(a)
+    end= time.time()
+    time_to_prune = end-start
+    return pruned_universe,queries_to_prune,time_to_prune
+
+
+
+# def QS(dataset,budget,num_rr,delta,seed):
+def quickfilter(dataset,budget,delta,num_rr,seed,eps=0.1):
+
     
+    load_graph_file_path=f'../../data/snap_dataset/{dataset}.txt'
+
+    graph = load_graph(load_graph_file_path)
+
+    N = graph.number_of_nodes()
+    
+
+    # sprint(calculate_spread(graph=graph,solution=sorted([graph.degree(node) for node in graph.nodes()])[::-1][:20]))
+
+    
+    # gains = get_gains(graph,ground_set=None)
+    gains,node_rr_set,RR = get_gains(graph,num_rr)
+    pruned_universe,queries_to_prune,time_to_prune = qs(graph=graph,gains=gains.copy(),node_rr_set=node_rr_set,
+                                                        RR=RR,budget=budget,delta=delta,eps=eps)
+    
+
+    print('time elapsed to pruned',time_to_prune)
     
 
 
@@ -172,6 +179,7 @@ if __name__ == "__main__":
     budget = args.budget
     num_rr = args.num_rr
     seed = args.seed
+    eps = args.eps
 
     sprint(dataset)
     sprint(budget)
@@ -184,7 +192,7 @@ if __name__ == "__main__":
 
     quickfilter(dataset=dataset,budget=budget,
                 num_rr=num_rr,delta = delta,
-                seed=seed)
+                seed=seed,eps=eps)
 
 
 
