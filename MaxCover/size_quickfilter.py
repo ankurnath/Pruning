@@ -1,6 +1,7 @@
 from utils import *
 from greedy import greedy,gain_adjustment,get_gains
 from helper_functions import *
+import random
 
 
 
@@ -61,52 +62,7 @@ def quickfilter(dataset,budget,delta=0.1,eps=0.1):
 
     pruned_universe,queries_to_prune,time_to_prune = qs(graph=graph,budget=budget,delta=delta,eps=eps)
     
-    # start = time.time()
-    # gains = get_gains(graph,ground_set=None)
-    # curr_obj = 0
-    # queries_to_prune = 0
-    # # pruned_universe=[] 
-    # a = set()
-    # # a_start = set() 
-    # a_start = max(gains, key=gains.get)
-    # sprint(a_start)
-    # a_s = set()
-    
 
-    # obj_a_s = 0
-    # uncovered=defaultdict(lambda: True)
-
-    # N = graph.number_of_nodes()
-    # for node in tqdm(graph.nodes()):
-    #     queries_to_prune += 1
-    #     if gains[node]>= delta/budget*curr_obj:
-    #         curr_obj+=gains[node]
-    #         # pruned_universe.append(node)
-    #         a.add(node)
-    #         gain_adjustment(graph,gains,node,uncovered)
-
-
-    #     ### New addition
-    #     if curr_obj > N/eps*obj_a_s:
-    #         # print('This happened')
-            
-    #         # a = a.difference(a_s)
-    #         a.difference_update(a_s)
-    #         a_s = a.copy()
-
-    #         obj_a_s = calculate_obj(graph=graph,solution=a_s)
-    #         curr_obj = calculate_obj(graph=graph,solution=a)
-    #         queries_to_prune +=2
-            
-    # end= time.time()
-
-    # time_to_prune = end-start
-
-    # print('time elapsed to pruned',time_to_prune)
-    # a.add(a_start)
-    # pruned_universe = list(a)
-    
-    
     ##################################################################
 
     Pg=len(pruned_universe)/graph.number_of_nodes()
@@ -144,13 +100,13 @@ def quickfilter(dataset,budget,delta=0.1,eps=0.1):
 
 
     ### multi-budget 
-    performance_ratios = []
-    for budget in [10, 30, 50, 70, 90, 100]:
+    # performance_ratios = []
+    # for budget in [10, 30, 50, 70, 90, 100]:
         
-        unpruned_objective, unpruned_queries, unpruned_solution = greedy(graph, budget=budget)
-        pruned_objective, pruned_queries, pruned_solution = greedy(graph=graph, budget=budget, ground_set=pruned_universe)
+    #     unpruned_objective, unpruned_queries, unpruned_solution = greedy(graph, budget=budget)
+    #     pruned_objective, pruned_queries, pruned_solution = greedy(graph=graph, budget=budget, ground_set=pruned_universe)
         
-        performance_ratios.append(round(pruned_objective / unpruned_objective,4)) 
+    #     performance_ratios.append(round(pruned_objective / unpruned_objective,4)) 
 
         
 

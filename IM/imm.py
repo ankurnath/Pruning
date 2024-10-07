@@ -13,7 +13,9 @@ from collections import defaultdict
 
 from utils import *
 
-NUM_PROCESSORS = mp.cpu_count()
+# NUM_PROCESSORS = mp.cpu_count()
+
+NUM_PROCESSORS = 40
 
 class Worker(mp.Process):
     def __init__(self, inQ, outQ, model, graph_):
