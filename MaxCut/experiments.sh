@@ -1,21 +1,21 @@
-# python size_quickfilter.py --dataset Facebook --budget 100 --delta 0.1
-# python size_quickfilter.py --dataset Wiki --budget 100 --delta 0.1
-# python size_quickfilter.py --dataset Deezer --budget 100 --delta 0.1
-# python size_quickfilter.py --dataset Slashdot --budget 100 --delta 0.1
-# python size_quickfilter.py --dataset Twitter --budget 100 --delta 0.1
-# python size_quickfilter.py --dataset DBLP --budget 100 --delta 0.1
-# python size_quickfilter.py --dataset YouTube --budget 100 --delta 0.1
-# python size_quickfilter.py --dataset Skitter --budget 100 --delta 0.1
+python size_quickfilter.py --dataset Facebook 
+python size_quickfilter.py --dataset Wiki 
+python size_quickfilter.py --dataset Deezer 
+python size_quickfilter.py --dataset Slashdot 
+python size_quickfilter.py --dataset Twitter 
+python size_quickfilter.py --dataset DBLP 
+python size_quickfilter.py --dataset YouTube 
+# python size_quickfilter.py --dataset Skitter 
 
 
-python knapsack_multibudget.py --dataset Facebook  --cost_model aistats 
-python knapsack_multibudget.py --dataset Wiki  --cost_model aistats 
-python knapsack_multibudget.py --dataset Deezer  --cost_model aistats 
-python knapsack_multibudget.py --dataset Slashdot  --cost_model aistats 
-python knapsack_multibudget.py --dataset Twitter  --cost_model aistats 
-python knapsack_multibudget.py --dataset DBLP  --cost_model aistats 
-python knapsack_multibudget.py --dataset YouTube  --cost_model aistats 
-python knapsack_multibudget.py --dataset Skitter  --cost_model aistats 
+# python knapsack_multibudget.py --dataset Facebook  --cost_model aistats 
+# python knapsack_multibudget.py --dataset Wiki  --cost_model aistats 
+# python knapsack_multibudget.py --dataset Deezer  --cost_model aistats 
+# python knapsack_multibudget.py --dataset Slashdot  --cost_model aistats 
+# python knapsack_multibudget.py --dataset Twitter  --cost_model aistats 
+# python knapsack_multibudget.py --dataset DBLP  --cost_model aistats 
+# python knapsack_multibudget.py --dataset YouTube  --cost_model aistats 
+# python knapsack_multibudget.py --dataset Skitter  --cost_model aistats 
 
 
 # python knapsack_gnn_pruning.py --dataset Facebook  --cost_model degree

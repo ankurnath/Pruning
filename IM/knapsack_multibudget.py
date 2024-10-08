@@ -91,45 +91,7 @@ def quickfilter_multi(dataset,cost_model,max_budget, min_budget,delta ,eps,eta,n
         pruned_universe_multi +=pruned_universe
 
     pruned_universe_multi = set (pruned_universe_multi)
-    # #..............................
-    # u_taus = {}
-    # gains_taus ={}
-    # covered_rr_set_taus = {}
     
-    # m = int(np.ceil (np.log(max_budget/min_budget)/np.log(1+eps)))
-    # print ('m =',m)
-    # curr_obj_taus = defaultdict(int)
-    # for i in range(m+1):
-    #     tau = (1+eps)**i * min_budget
-    #     u_taus [i] =set([])
-
-    #     gains_taus[i] = gains.copy()
-    #     covered_rr_set_taus[i] = set ()
-        
-    # for node in graph.nodes():
-    #     for i in range(m+1):
-    #         tau = (1+eps)**i * min_budget
-    #         if node_weights[node] >= tau:
-    #             continue
-
-    #         if gains_taus[i][node]/node_weights[node]>=(delta/tau)*curr_obj_taus[i]:
-    #             curr_obj_taus[i]+=gains_taus[i][node]
-    #             u_taus [i].add(node)
-    #             gain_adjustment(gains=gains_taus[i],node_rr_set=node_rr_set,
-    #                             RR=RR,selected_element=node,covered_rr_set=covered_rr_set_taus[i])
-            
-
-    
-    # for key in u_taus:
-    #     print(f'key:{key} tau:{int((1+eps)**key * min_budget)} size:{len(u_taus[key])}')
-
-
-    # u = u_taus [0]
-
-    # for i in range(1,m+1):
-    #     u = u.union(u_taus[i])
-
-    # pruned_universe_multi = list(u)
 
     end = time.time()
 
@@ -370,7 +332,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--delta", type=float, default=0.1, help="Delta")
     parser.add_argument("--eps",type =float,default=0.1,help="Epsilon")
-    parser.add_argument("--eta",type =float,default=0.2,help="Eta")
+    parser.add_argument("--eta",type =float,default=0.5,help="Eta")
     parser.add_argument("--num_rr", type=int, default= 100000  , help="Number of RR sets")
 
     args = parser.parse_args()

@@ -18,6 +18,8 @@ def load_from_pickle(file_path):
         loaded_data = pickle.load(file)
     # print(f'Data has been loaded from {file_path}')
     return loaded_data
+import os
+from collections import defaultdict
 for problem in [
                 'MaxCover',
                 'MaxCut',
@@ -79,7 +81,7 @@ for problem in [
                 plt.legend(frameon = False,fontsize = fontsize)
                 plt.title(df_['Dataset'].iloc[0],fontsize = fontsize+4)
                 plt.xlabel('Budgets', fontsize=fontsize )
-                plt.ylabel('Ratio (%)', fontsize=fontsize)
+                plt.ylabel('Value Frac., $P_r$ (%)', fontsize=fontsize)
                 plt.xticks(fontsize=fontsize )
                 plt.yticks(fontsize=fontsize )
                 plt.locator_params(nbins=6)

@@ -14,7 +14,7 @@ def qs(graph,budget,delta,eps):
     a = set()
     # a_start = set() 
     a_start = max(gains, key=gains.get)
-    sprint(a_start)
+    # sprint(a_start)
     a_s = set()
     
 
@@ -54,20 +54,40 @@ def qs(graph,budget,delta,eps):
 
     # pass
 
-def quickfilter(dataset,budget,delta=0.1,eps=0.1):
+def quickfilter(dataset,max_budget,min_budget,delta,eps,eta):
 
   
     load_graph_file_path=f'../../data/snap_dataset/{dataset}.txt'
     graph = load_graph(load_graph_file_path)
 
-    pruned_universe,queries_to_prune,time_to_prune = qs(graph=graph,budget=budget,delta=delta,eps=eps)
+    pruned_universe = []
+    queries_to_prune = 0
+    time_to_prune = 0
+
+    high = int(np.log(min_budget/max_budget)/np.log(1-eta) +1 )
+    low = int(np.log(max_budget/max_budget)/np.log(1-eta))
+
+    for i in range(low,high+1):
+        tau = max_budget*(1-eta)**i
+
+        temp_pruned_universe,temp_queries_to_prune,temp_time_to_prune = qs(graph=graph,
+                                                                           budget=tau,
+                                                                           delta=delta,
+                                                                           eps=eps)
+        
+        pruned_universe += temp_pruned_universe
+        queries_to_prune +=temp_queries_to_prune
+        time_to_prune +=temp_time_to_prune 
+
+    # sprint(len(pruned_universe))
+    pruned_universe = set(pruned_universe)
     
 
     ##################################################################
 
     Pg=len(pruned_universe)/graph.number_of_nodes()
     start = time.time()
-    objective_unpruned,queries_unpruned,solution_unpruned= greedy(graph,budget)
+    objective_unpruned,queries_unpruned,solution_unpruned= greedy(graph,max_budget)
     # assert len(solution_unpruned) <= budget, 'Solution from  ground set exceeds the budget'
     # assert objective_unpruned == calculate_obj(graph=graph,solution=solution_unpruned)
     
@@ -76,7 +96,7 @@ def quickfilter(dataset,budget,delta=0.1,eps=0.1):
     print('Elapsed time (unpruned):',round(time_unpruned,4))
 
     start = time.time()
-    objective_pruned,queries_pruned,solution_pruned = greedy(graph=graph,budget=budget,ground_set=pruned_universe)
+    objective_pruned,queries_pruned,solution_pruned = greedy(graph=graph,budget=max_budget,ground_set=pruned_universe)
     # assert len(solution_pruned) <= budget, 'Solution from pruned ground set exceeds the budget'
     # assert objective_pruned == calculate_obj(graph=graph,solution=solution_pruned)
     end = time.time()
@@ -86,7 +106,7 @@ def quickfilter(dataset,budget,delta=0.1,eps=0.1):
 
 
     print('Performance of QuickFilter')
-    print('Size Constraint,k:',budget)
+    print('Size Constraint,k:',max_budget)
     print('Size of Ground Set,|U|:',graph.number_of_nodes())
     print('Size of Pruned Ground Set, |Upruned|:', len(pruned_universe))
     print('Pg(%):', round(Pg,4)*100)
@@ -112,8 +132,12 @@ def quickfilter(dataset,budget,delta=0.1,eps=0.1):
 
 
 
-    df ={     'Dataset':dataset,'Budget':budget,
+    df ={     'Dataset':dataset,
+              'Max Budget': max_budget,
+              'Min Budget': min_budget,
               'Delta':delta,
+              'eps':eps,
+              'eta':eta,
               'QueriesToPrune': queries_to_prune,
               'Objective Value(Unpruned)':objective_unpruned,
               'Objective Value(Pruned)':objective_pruned ,
@@ -127,13 +151,13 @@ def quickfilter(dataset,budget,delta=0.1,eps=0.1):
               'Queries(%)': round(queries_pruned/queries_unpruned,4)*100,
               'TimeRatio': time_pruned/time_unpruned,
               'TimeToPrune':time_to_prune,
-              'Multibudget':[performance_ratios] 
+            #   'Multibudget':[performance_ratios] 
               }
 
    
     df = pd.DataFrame(df,index=[0])
     save_to_pickle(df,save_file_path)
-    print(df['Multibudget'])
+    # print(df['Multibudget'])
 
     ###################################################################################################
 
@@ -143,21 +167,38 @@ def quickfilter(dataset,budget,delta=0.1,eps=0.1):
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--dataset", type=str, default='Facebook', help="Name of the dataset to be used (default: 'Facebook')")
-    parser.add_argument("--budget", type=int,default=100, help="Budgets")
+    parser.add_argument('--max_budget', type = int ,default=100, help = 'Maximum Budget')
+    parser.add_argument('--min_budget', type = int ,default=10, help = 'Minimum Budget')
+    
+    
     parser.add_argument("--delta", type=float, default=0.1, help="Delta")
     parser.add_argument("--eps", type=float, default=0.1, help="eps")
+    parser.add_argument("--eta",type =float,default=0.5,help="Eta")
+
+
+    
     
 
     args = parser.parse_args()
 
     dataset = args.dataset
-    budget = args.budget
-    delta = args.delta
-
-
+    max_budget = args.max_budget
+    min_budget = args.min_budget
+    delta = args.delta 
+    eps = args.eps
+    eta = args.eta
 
     sprint(dataset)
-    sprint(budget)
+    sprint(max_budget)
+    sprint(min_budget)
     sprint(delta)
+    sprint(eps)
+    sprint(eta)
 
-    quickfilter(dataset=dataset,budget=budget,delta=delta)
+    # quickfilter(dataset=dataset,budget=budget,delta=delta)
+    quickfilter(dataset=dataset,
+                max_budget=max_budget,
+                min_budget=min_budget,
+                delta=delta,
+                eps=eps,
+                eta=eta)
