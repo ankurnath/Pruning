@@ -81,7 +81,7 @@ for problem in [
                 plt.legend(frameon = False,fontsize = fontsize)
                 plt.title(df_['Dataset'].iloc[0],fontsize = fontsize+4)
                 plt.xlabel('Budgets', fontsize=fontsize )
-                plt.ylabel('Value Frac., $P_r$ (%)', fontsize=fontsize)
+                plt.ylabel('Pruning Approx. Ratio, $P_r$', fontsize=fontsize)
                 plt.xticks(fontsize=fontsize )
                 plt.yticks(fontsize=fontsize )
                 plt.locator_params(nbins=6)

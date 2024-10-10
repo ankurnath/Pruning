@@ -5,7 +5,7 @@ python size_quickfilter.py --dataset Slashdot
 python size_quickfilter.py --dataset Twitter 
 python size_quickfilter.py --dataset DBLP 
 python size_quickfilter.py --dataset YouTube 
-# python size_quickfilter.py --dataset Skitter 
+python size_quickfilter.py --dataset Skitter 
 
 
 # python knapsack_multibudget.py --dataset Facebook  --cost_model aistats 

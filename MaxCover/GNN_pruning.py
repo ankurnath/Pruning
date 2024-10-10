@@ -60,6 +60,9 @@ if __name__ == "__main__":
             return x
 
     model = GCN(hidden_channels=16)
+    device = 'cuda'
+    model.to(device=device)
+    data.to(device=device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=5e-4)
     criterion = torch.nn.CrossEntropyLoss()
@@ -93,6 +96,7 @@ if __name__ == "__main__":
     test_data.x =torch.rand(size=(test_graph.number_of_nodes(),1))
 
     start = time.time()
+    test_data = test_data.to(device)
     out = model(test_data.x, test_data.edge_index)
     pred = out.argmax(dim=1).cpu().numpy()  # Use the class with highest probability.
     indices = np.where(pred == 1)[0]

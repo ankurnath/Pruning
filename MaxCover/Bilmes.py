@@ -11,6 +11,7 @@ def SS(dataset,r,c,budget):
 
     
     file_path=f'../../data/snap_dataset/{args.dataset}.txt'
+    
     graph = load_graph(file_path=file_path)
     queries_to_prune = 0
 

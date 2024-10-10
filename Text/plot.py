@@ -31,6 +31,7 @@ for dataset in ['food101','beans','cifar100','UCF101']:
         pass
 
     try:
+        
         sns.lineplot(data=df, x='Budget', y='Ratio_Obj(top-k)', label=f'TOP-K$(P_g={100-df.iloc[-1]["Pg(QS)"]:.2f}\\%)$',linestyle='--' ,marker='^', 
                 markersize=markersize, color='#4d6b23')
     except:
@@ -52,7 +53,7 @@ for dataset in ['food101','beans','cifar100','UCF101']:
     plt.title(f'{dataset.upper()}',fontsize=fontsize)
 
     plt.xlabel('Budget',fontsize=fontsize)
-    plt.ylabel('Value Frac., $P_r$',fontsize=fontsize)
+    plt.ylabel('Pruning Approx. Ratio, $P_r$',fontsize=fontsize-8)
 
     plt.xticks(fontsize=fontsize )
     plt.yticks(fontsize=fontsize )

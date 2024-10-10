@@ -23,9 +23,9 @@ def load_from_pickle(file_path):
 # matric = 'TimeToPrune'
 matric = 'QueriesToPrune'
 for problem in [
-                # 'MaxCover',
+                'MaxCover',
                 # 'MaxCut',
-                'IM'
+                # 'IM'
               ]:
     root_folder=os.path.join(problem,'data')
     # datasets=['Facebook','DBLP','Skitter','YouTube']
@@ -62,7 +62,7 @@ for problem in [
     # df['Queries'] = df['Queries'].round(4)
 
     dataset_order = ['Facebook', 'Wiki','Deezer','Slashdot','Twitter','DBLP','YouTube',
-                    #  'Skitter'
+                     'Skitter'
                      ]
     # Convert the dataset column to a categorical type with the specified order
     df['dataset'] = pd.Categorical(df['dataset'], categories=dataset_order, ordered=True)
@@ -111,7 +111,7 @@ for problem in [
 
     # Set the labels and title
     plt.xlabel('')
-    plt.ylabel('Quries (SS/QP)', fontsize=20)
+    plt.ylabel('Queries (SS/QP)', fontsize=20)
     plt.xticks(rotation=65, fontsize=20)
     plt.yticks(fontsize=20)
     # Turn off y-axis ticks and labels
