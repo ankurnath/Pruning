@@ -16,7 +16,7 @@ def qs(graph,node_weights,budget,delta,eps):
     a = set()
     # a_start = set() 
     a_start = max(gains, key=gains.get)
-    # sprint(a_start)
+    sprint(a_start)
     a_s = set()
     
 
@@ -51,7 +51,7 @@ def qs(graph,node_weights,budget,delta,eps):
 
     time_to_prune = end-start
 
-    # print('time elapsed to pruned',time_to_prune)
+    print('time elapsed to pruned',time_to_prune)
     a.add(a_start)
     pruned_universe = list(a)
     return pruned_universe,queries_to_prune,time_to_prune
@@ -67,23 +67,16 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eta,ep
 
 
     start = time.time()
-
-    # m = int(np.floor (np.log(max_budget/min_budget)/np.log(1+eta)+1))
-
-    pruned_universe_multi =[]
-
+    pruned_universe_multi = []
     high = int(np.log(min_budget/max_budget)/np.log(1-eta) +1 )
     low = int(np.log(max_budget/max_budget)/np.log(1-eta))
-    # for i in range(m+1):
-    # i=0
-    # while True:
     for i in range(low,high+1):
-        # tau = (1+eta)**i * min_budget
-        
         tau = max_budget*(1-eta)**i
-        sprint(tau)
+
         pruned_universe,queries_to_prune,time_to_prune = qs(graph=graph,budget=tau,node_weights=node_weights,delta=delta,eps=eps)
         pruned_universe_multi +=pruned_universe
+    pruned_universe_multi = list(set(pruned_universe_multi))
+    # # df = defaultdict(list)
     # u_taus = {}
 
     # u_taus_prime = {}
@@ -136,7 +129,7 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eta,ep
 
     # pruned_universe_multi = list(u)
 
-    pruned_universe_multi = set(pruned_universe_multi)
+    
     end = time.time()
 
     timetoprune_multi = end-start
@@ -181,10 +174,6 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eta,ep
     step = 20
     budgets = list(range(min_budget,max_budget,step)) +[max_budget]
     sprint(budgets)
-
-    save_folder = f'data/{dataset}/knapsack_multi'
-    os.makedirs(save_folder,exist_ok=True)
-    save_file_path = os.path.join(save_folder,f'Quickfilter_{cost_model}')
     
     for i in budgets:
 
@@ -205,16 +194,7 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eta,ep
         time_single_pruned = end -start
 
         start = time.time()
-
-        try:
-            previous_df = load_from_pickle(save_file_path)
-
-            objective_unpruned = previous_df[previous_df['Budget']==i]['Objective Value(Unpruned)'].iloc[0]
-            queries_unpruned = previous_df[previous_df['Budget']==i]['Queries (Unpruned)'].iloc[0]
-            print('Loaded all data from previous run')
-        except:
-
-            objective_unpruned,queries_unpruned,solution_unpruned= knapsack_numba_greedy(graph=graph,budget=i,
+        objective_unpruned,queries_unpruned,solution_unpruned= knapsack_numba_greedy(graph=graph,budget=i,
                                                                                  node_weights=node_weights)
         
         
@@ -248,8 +228,6 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eta,ep
         df['Dataset'].append(dataset)
         df['Budget'].append(i)
         df['Delta'].append(delta)
-        df['Eps'].append(eps)
-        df['Eta'].append(eta)
         df['Objective Value(Unpruned)'].append(objective_unpruned)
         df['Objective Value Multi(Pruned)'].append(objective_multi_pruned)
         df['Objective Value Single(Pruned)'].append(objective_single_pruned)
@@ -288,7 +266,9 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eta,ep
 
     df = pd.DataFrame(df)
 
-    
+    save_folder = f'data/{dataset}/knapsack_multi'
+    os.makedirs(save_folder,exist_ok=True)
+    save_file_path = os.path.join(save_folder,f'Quickfilter_{cost_model}')
     save_to_pickle(df,save_file_path)
 
 
@@ -303,7 +283,7 @@ def quickfilter_multi(dataset, cost_model , max_budget, min_budget,delta ,eta,ep
     
     plt.xlabel('Budgets', fontsize=fontsize )
     plt.ylabel('Ratios (%)', fontsize=fontsize)
-    plt.title(f' Dataset:{args.dataset} Cost model:{args.cost_model} Delta:{delta} eps:{eps} eta:{eta}\n Max Budget:{max_budget} Min Budget: {min_budget}',fontsize=10)
+    plt.title(f' Dataset:{args.dataset} Cost model:{args.cost_model} eta:{eta} Delta:{delta} Max Budget:{max_budget} Min Budget: {min_budget}',fontsize=10)
     plt.legend()
 
     plt.savefig(os.path.join(save_folder,f'Quickfilter_{cost_model}.png'), bbox_inches='tight')

@@ -108,7 +108,8 @@ for problem in [
         value = ratio_value*pruned_value
 
         print('{',end='')
-        print(f'{value:.4f}',end='')
+        # print(f'{value:.4f}',end='')
+        print(f'{str(value)[:5]}',end='')
         print('}',end='')
 
         
@@ -127,8 +128,8 @@ for problem in [
                 ratio_value =  gcomb[problem][idx][1]/100
                 pruned_value = gcomb[problem][idx][2]/100
 
-                print(f'& {ratio_value:.4f}' ,end ='')
-                print(f'& {pruned_value:.4f}' ,end ='')
+                print(f'& {str(ratio_value)[:5]}' ,end ='')
+                print(f'& {str(pruned_value)[:5]}' ,end ='')
 
                 # log_value = np.log(gcomb[problem][idx][1] / (100 - gcomb[problem][idx][2]))
                 
@@ -140,8 +141,8 @@ for problem in [
             elif algorithm == 'Lense':
                 ratio_value = lense[problem][idx][1]/100
                 pruned_value = lense[problem][idx][2]/100
-                print(f'& {ratio_value:.4f}' ,end ='')
-                print(f'& {pruned_value:.4f}' ,end ='')
+                print(f'& {str(ratio_value)[:5]}' ,end ='')
+                print(f'& {str(pruned_value)[:5]}' ,end ='')
                 f(ratio_value,pruned_value,algorithm)
 
                 # log_value = np.log(lense[problem][idx][1] / (100 - lense[problem][idx][2]))
@@ -158,8 +159,10 @@ for problem in [
                     pruned_value = (100-df_['Pruned Ground set(%)'].iloc[0])/100
 
                     # Fixed code
-                    print(f"& {ratio_value:.4f}", end='')
-                    print(f"& {pruned_value:.4f}", end='')
+                    print(f'& {str(ratio_value)[:5]}' ,end ='')
+                    print(f'& {str(pruned_value)[:5]}' ,end ='')
+                    # print(f"& {ratio_value:.4f}", end='')
+                    # print(f"& {pruned_value:.4f}", end='')
                     f(ratio_value,pruned_value,algorithm)
                     # # For the third line, breaking it down for clarity
                     # ratio_value = df_['Ratio(%)'].iloc[0]
@@ -175,16 +178,20 @@ for problem in [
 
                         ratio_value = 98.13/100
                         pruned_value = 99.99/100
-                        print(f"& {ratio_value:.4f}", end='')
-                        print(f"& {pruned_value:.4f}", end='')
+                        print(f'& {str(ratio_value)[:5]}' ,end ='')
+                        print(f'& {str(pruned_value)[:5]}' ,end ='')
+                        # print(f"& {ratio_value:.4f}", end='')
+                        # print(f"& {pruned_value:.4f}", end='')
                         # log_value = np.log(ratio_value /(100-pruned_value) )
                         f(ratio_value,pruned_value,algorithm)
 
                     elif algorithm == 'SS':
                         ratio_value = 100.32/100
                         pruned_value = 99.91/100
-                        print(f"& {ratio_value:.4f}", end='')
-                        print(f"& {pruned_value:.4f}", end='')
+                        # print(f"& {ratio_value:.4f}", end='')
+                        # print(f"& {pruned_value:.4f}", end='')
+                        print(f'& {str(ratio_value)[:5]}' ,end ='')
+                        print(f'& {str(pruned_value)[:5]}' ,end ='')
                         f(ratio_value,pruned_value,algorithm)
                         # log_value = np.log(ratio_value /(100-pruned_value) )
                         # log_value = np.log(ratio_value*pruned_value) 
@@ -194,8 +201,10 @@ for problem in [
                     elif algorithm == 'GNNpruner':
                         ratio_value = 100.23/100
                         pruned_value = 98.89/100
-                        print(f"& {ratio_value:.4f}", end='')
-                        print(f"& {pruned_value:.4f}", end='')
+                        print(f'& {str(ratio_value)[:5]}' ,end ='')
+                        print(f'& {str(pruned_value)[:5]}' ,end ='')
+                        # print(f"& {ratio_value:.4f}", end='')
+                        # print(f"& {pruned_value:.4f}", end='')
                         f(ratio_value,pruned_value,algorithm)
                         # log_value = np.log(ratio_value /(100-pruned_value) )
                         # log_value = np.log(ratio_value*pruned_value) 

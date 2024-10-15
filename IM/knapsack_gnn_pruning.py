@@ -30,28 +30,28 @@ if __name__ == "__main__":
     cost_model = args.cost_model
 
 
-    graph=load_from_pickle(f'../../data/train/{dataset}')
-    graph,_,_ =relabel_graph(graph=graph)
-    node_weights = generate_node_weights(graph=graph,cost_model=cost_model)
-    gains,node_rr_set,RR = get_gains(graph,num_rr)
-    data= from_networkx(graph)
+    train_graph=load_from_pickle(f'../../data/train/{dataset}')
+    train_graph,_,_ =relabel_graph(graph=train_graph)
+    node_weights = generate_node_weights(graph=train_graph,cost_model=cost_model)
+    train_gains,train_node_rr_set,train_RR = get_gains(train_graph,num_rr)
+    train_data= from_networkx(train_graph)
 
 
     
     
-    _,solution,_ = knapsack_greedy (graph=graph,ground_set =None, 
+    _,solution,_ = knapsack_greedy (graph=train_graph,ground_set =None, 
                                                               num_rr=num_rr,budget = budget, 
                                                               node_weights = node_weights,
-                                                              gains=gains.copy(),
-                                                              node_rr_set=node_rr_set,
-                                                              RR=RR)
+                                                              gains=train_gains.copy(),
+                                                              node_rr_set=train_node_rr_set,
+                                                              RR=train_RR)
 
     # _,solution= DLA(graph=graph,budget=args.budget,node_weights=node_weights) 
 
 
-    mapping = dict(zip(graph.nodes(), range(graph.number_of_nodes())))
+    mapping = dict(zip(train_graph.nodes(), range(train_graph.number_of_nodes())))
     train_mask = torch.tensor([mapping[node] for node in solution], dtype=torch.long)
-    y=torch.zeros(graph.number_of_nodes(),dtype=torch.long)
+    y=torch.zeros(train_graph.number_of_nodes(),dtype=torch.long)
 
 
     for node in solution:
@@ -59,14 +59,15 @@ if __name__ == "__main__":
 
 
 
-    data.y=y
+    train_data.y=y
     num_features=3
 
     # x=[graph.degree(node) for node in graph.nodes()] 
-    x = [[node_weights[node] for node in graph.nodes()],[graph.degree(node) for node in graph.nodes()],
-         [graph.degree(node)/node_weights[node] for node in graph.nodes()]]
+    x = [[node_weights[node] for node in train_graph.nodes()],[train_graph.degree(node) 
+                                                               for node in train_graph.nodes()],
+         [train_graph.degree(node)/node_weights[node] for node in train_graph.nodes()]]
     # data.x = torch.rand(size=(graph.number_of_nodes(),1))
-    data.x = torch.FloatTensor(x).permute(1,0)
+    train_data.x = torch.FloatTensor(x).permute(1,0)
 
     # torch.FloatTensor
 
@@ -90,6 +91,9 @@ if __name__ == "__main__":
             return x
 
     model = GCN(hidden_channels=16)
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    model.to(device=device)
+    train_data.to(device=device)
 
     print(model)
 
@@ -102,7 +106,7 @@ if __name__ == "__main__":
 
     for epoch in tqdm(range(1,1000)):
 
-        out = model(data.x, data.edge_index)  # Perform a single forward pass.
+        out = model(train_data.x, train_data.edge_index)  # Perform a single forward pass.
 
         # mask=torch.cat([train_mask,torch.randint(graph.number_of_nodes())],axis=0)
         mask = torch.cat([train_mask, torch.randint(0, train_mask.size(0), (train_mask.size(0),))], dim=0)
@@ -110,7 +114,7 @@ if __name__ == "__main__":
         # print('Mask size',mask.shape)
 
         # print(torch.sum(data.y[mask]))
-        loss = criterion(out[mask], data.y[mask])  # Compute the loss solely based on the training nodes.
+        loss = criterion(out[mask], train_data.y[mask])  # Compute the loss solely based on the training nodes.
         loss.backward()  # Derive gradients.
         optimizer.step()  # Update parameters based on gradients.
         optimizer.zero_grad()  # Clear gradients.
@@ -139,6 +143,7 @@ if __name__ == "__main__":
     test_data.x = torch.FloatTensor(x).permute(1,0)
 
     start = time.time()
+    test_data.to(device)
     out = model(test_data.x, test_data.edge_index)
     pred = out.argmax(dim=1).cpu().numpy()  # Use the class with highest probability.
     indices = np.where(pred == 1)[0]
@@ -151,31 +156,35 @@ if __name__ == "__main__":
 
     print('time elapsed to pruned',time_to_prune)
 
-    graph = test_graph
+    
 
     ##################################################################
-
+    
+    test_gains,test_node_rr_set,test_RR = get_gains(test_graph,num_rr)
+    
     Pg=len(pruned_universe)/test_graph.number_of_nodes()
     start = time.time()
-    objective_unpruned,solution_unpruned,_ = knapsack_greedy (graph=graph,ground_set =None, 
-                                                              num_rr=num_rr,budget = budget, 
-                                                              node_weights = node_weights,
-                                                              gains=gains.copy(),
-                                                              node_rr_set=node_rr_set,
-                                                              RR=RR)
+    objective_unpruned,solution_unpruned,_ = knapsack_greedy (graph=test_graph,
+                                                              ground_set =None, 
+                                                              num_rr=num_rr,
+                                                              budget = budget, 
+                                                              node_weights = test_node_weights,
+                                                              gains=test_gains.copy(),
+                                                              node_rr_set=test_node_rr_set,
+                                                              RR=test_RR)
     end = time.time()
     time_unpruned = round(end-start,4)
     print('Elapsed time (unpruned):',round(time_unpruned,4))
 
     start = time.time()
-    objective_pruned,solution_pruned,_ = knapsack_greedy (graph=graph,
+    objective_pruned,solution_pruned,_ = knapsack_greedy (graph=test_graph,
                                                             ground_set = pruned_universe, 
                                                             num_rr=num_rr,
                                                             budget = budget, 
-                                                            node_weights = node_weights,
-                                                            gains=gains.copy(),
-                                                            node_rr_set=node_rr_set,
-                                                            RR=RR)
+                                                            node_weights = test_node_weights,
+                                                            gains=test_gains.copy(),
+                                                              node_rr_set=test_node_rr_set,
+                                                              RR=test_RR)
     end = time.time()
     time_pruned = round(end-start,4)
     print('Elapsed time (pruned):',time_pruned)
