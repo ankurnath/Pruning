@@ -74,7 +74,7 @@ def knapsack_numba_greedy(gains,node_weights,budget,node_rr_set_start_index, nod
     for idx in range(N):
 
         if idx%10000:
-            print('*',end='')
+            print('*')
 
         selected_element = select_element(gains,node_weights,mask)
 
