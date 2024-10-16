@@ -71,7 +71,10 @@ def knapsack_numba_greedy(gains,node_weights,budget,node_rr_set_start_index, nod
     solution = np.zeros(N)
     objective_value = 0 
     constraint = 0 
-    for _ in range(N):
+    for idx in range(N):
+
+        if idx%10000:
+            print('*',end='')
 
         selected_element = select_element(gains,node_weights,mask)
 
@@ -86,6 +89,7 @@ def knapsack_numba_greedy(gains,node_weights,budget,node_rr_set_start_index, nod
                      RR_flat, rr_start_index, rr_end_index,gains,selected_element,covered_rr_set)
             
 
+    print()
     return objective_value,solution
             
 
