@@ -10,7 +10,7 @@ from collections import defaultdict
 # from knapsack_numba_greedy import knapsack_numba_greedy
 # from DLA_numba import DLA
 
-from knapsack_greedy import knapsack_greedy
+from knapsack_numba_greedy import knapsack_greedy
 from greedy import get_gains
 
 import pandas as pd

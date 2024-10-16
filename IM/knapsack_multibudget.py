@@ -1,8 +1,11 @@
 from utils import *
 import matplotlib.pyplot as plt
 from greedy import gain_adjustment,get_gains,calculate_spread
+
+# from greedy import gain_adjustment,get_gains,calculate_spread
 from helper_functions import *
-from knapsack_greedy import knapsack_greedy
+# from knapsack_greedy import knapsack_greedy
+from knapsack_numba_greedy import knapsack_greedy
 
 np.random.seed(0)
 random.seed(0)
@@ -165,7 +168,7 @@ def quickfilter_multi(dataset,cost_model,max_budget, min_budget,delta ,eps,eta,n
         start = time.time()
 
         
-        objective_multi_pruned,solution_multi_pruned,queries_multi_pruned = knapsack_greedy     (graph=graph,
+        objective_multi_pruned,solution_multi_pruned,queries_multi_pruned = knapsack_greedy (graph=graph,
                                                                           ground_set = pruned_universe_multi, 
                                                                           num_rr=num_rr,
                                                                           budget = budget, 

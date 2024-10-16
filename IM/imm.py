@@ -217,12 +217,12 @@ def get_graph(network):
     """
     
     weight = 0.01    
-    print(f'Default weight = {weight}')
+    print(f'Creating with graph default weight = {weight}')
     
     graph_ = Graph()
     # node_num = network.number_of_nodes()
 
-    for u, v in network.edges():
+    for u, v in tqdm(network.edges()):
 
         
         # weight = network[u][v]['weight']
